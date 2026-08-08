@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("UniqPac_ERP")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b228494d74748dd22ff7579c94b3f9bcb5b1d1b7")]
 [assembly: System.Reflection.AssemblyProductAttribute("UniqPac_ERP")]
 [assembly: System.Reflection.AssemblyTitleAttribute("UniqPac_ERP")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

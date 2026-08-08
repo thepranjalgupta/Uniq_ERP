@@ -59,9 +59,12 @@
                                         <a asp-action="Print" asp-route-id="@item.Id" class="btn btn-sm btn-light border text-secondary" target="_blank" title="Print">
                                             <i class="ph ph-printer"></i>
                                         </a>
-                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-light border text-primary" title="Edit">
-                                            <i class="ph ph-pencil-simple"></i>
-                                        </a>
+                                        @if (item.ApprovalStatus != "Approved")
+                                        {
+                                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-light border text-primary" title="Edit">
+                                                <i class="ph ph-pencil-simple"></i>
+                                            </a>
+                                        }
                                         <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-light border text-info" title="Details">
                                             <i class="ph ph-eye"></i>
                                         </a>

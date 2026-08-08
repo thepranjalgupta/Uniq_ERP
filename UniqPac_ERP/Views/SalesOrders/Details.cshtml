@@ -191,7 +191,10 @@
         </div>
 
         <div class="d-flex gap-2 border-top pt-4">
-            <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-primary px-4">Edit Order</a>
+            @if (Model.ApprovalStatus != "Approved")
+            {
+                <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-primary px-4">Edit Order</a>
+            }
             <a asp-action="Index" class="btn btn-light border px-4">Back to List</a>
         </div>
     </div>
