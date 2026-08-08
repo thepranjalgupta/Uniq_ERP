@@ -1,0 +1,241 @@
+@model UniqPac_ERP.Models.GoodsReceiptNote
+
+@{
+    ViewData["Title"] = "New GRN";
+}
+
+<div class="container-fluid px-4 py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="h3 mb-0 text-gray-800">New GRN</h2>
+            <p class="text-muted mb-0">Create a new Goods Receipt Note</p>
+        </div>
+        <a asp-action="Index" class="btn btn-outline-secondary shadow-sm">
+            <i class="bi bi-arrow-left me-1"></i> Back to List
+        </a>
+    </div>
+
+    <form asp-action="Create" id="grnForm">
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+        
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-body">
+                <div class="row g-4">
+                    <div class="col-md-3">
+                        <label asp-for="GRNNumber" class="form-label fw-bold"></label>
+                        <input asp-for="GRNNumber" class="form-control bg-light" readonly />
+                        <span asp-validation-for="GRNNumber" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-3">
+                        <label asp-for="GRNDate" class="form-label fw-bold"></label>
+                        <input asp-for="GRNDate" class="form-control" type="date" />
+                        <span asp-validation-for="GRNDate" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-3">
+                        <label asp-for="PurchaseOrderId" class="form-label fw-bold"></label>
+                        <select asp-for="PurchaseOrderId" class="form-select" asp-items="ViewBag.PurchaseOrderId" id="PurchaseOrderId">
+                            <option value="">-- Select PO (Optional) --</option>
+                        </select>
+                        <span asp-validation-for="PurchaseOrderId" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-3">
+                        <label asp-for="VendorId" class="form-label fw-bold"></label>
+                        <select asp-for="VendorId" class="form-select" asp-items="ViewBag.VendorId" id="VendorId" required>
+                            <option value="">-- Select Vendor --</option>
+                        </select>
+                        <span asp-validation-for="VendorId" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-3">
+                        <label asp-for="ChallanNumber" class="form-label fw-bold"></label>
+                        <input asp-for="ChallanNumber" class="form-control" />
+                        <span asp-validation-for="ChallanNumber" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-3">
+                        <label asp-for="ChallanDate" class="form-label fw-bold"></label>
+                        <input asp-for="ChallanDate" class="form-control" type="date" />
+                        <span asp-validation-for="ChallanDate" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-3">
+                        <label asp-for="VehicleNumber" class="form-label fw-bold"></label>
+                        <input asp-for="VehicleNumber" class="form-control" />
+                        <span asp-validation-for="VehicleNumber" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-3">
+                        <label asp-for="Status" class="form-label fw-bold"></label>
+                        <select asp-for="Status" class="form-select">
+                            <option value="Pending">Pending</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Cancelled">Cancelled</option>
+                        </select>
+                        <span asp-validation-for="Status" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h5 class="mb-3 text-gray-800">Received Items <span class="text-danger">*</span></h5>
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-bordered mb-0" id="itemsTable">
+                        <thead class="bg-light">
+                            <tr>
+                                <th>Item Name</th>
+                                <th style="width: 12%;">Expected Qty</th>
+                                <th style="width: 12%;">Received Qty</th>
+                                <th style="width: 12%;">Accepted Qty</th>
+                                <th style="width: 12%;">Rejected Qty</th>
+                                <th style="width: 20%;">Remarks</th>
+                                <th style="width: 5%;"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.GoodsReceiptNoteItems != null && Model.GoodsReceiptNoteItems.Count > 0)
+                            {
+                                for (int i = 0; i < Model.GoodsReceiptNoteItems.Count; i++)
+                                {
+                                    <tr>
+                                        <td>
+                                            <select asp-for="GoodsReceiptNoteItems[i].ItemId" class="form-select item-id-select" asp-items="ViewBag.ItemId" required>
+                                                <option value="">-- Select Item --</option>
+                                            </select>
+                                            <input type="hidden" asp-for="GoodsReceiptNoteItems[i].ItemName" />
+                                            <span asp-validation-for="GoodsReceiptNoteItems[i].ItemId" class="text-danger d-block mt-1 small"></span>
+                                        </td>
+                                        <td>
+                                            <input asp-for="GoodsReceiptNoteItems[i].ExpectedQuantity" class="form-control expected-qty" type="number" step="0.01" />
+                                        </td>
+                                        <td>
+                                            <input asp-for="GoodsReceiptNoteItems[i].ReceivedQuantity" class="form-control received-qty calc-trigger" type="number" step="0.01" required />
+                                        </td>
+                                        <td>
+                                            <input asp-for="GoodsReceiptNoteItems[i].AcceptedQuantity" class="form-control accepted-qty calc-trigger" type="number" step="0.01" required />
+                                        </td>
+                                        <td>
+                                            <input asp-for="GoodsReceiptNoteItems[i].RejectedQuantity" class="form-control rejected-qty bg-light" type="number" step="0.01" readonly />
+                                        </td>
+                                        <td>
+                                            <input asp-for="GoodsReceiptNoteItems[i].Remarks" class="form-control" />
+                                        </td>
+                                        <td class="text-center align-middle">
+                                            <button type="button" class="btn btn-outline-danger btn-sm remove-item" tabindex="-1">
+                                                <i class="bi bi-x-lg"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <div class="p-3 border-top bg-light">
+                    <button type="button" class="btn btn-outline-primary btn-sm bg-white" id="btnAddItem">
+                        <i class="bi bi-plus-lg"></i> Add Item
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mb-4">
+            <label asp-for="Remarks" class="form-label fw-bold">General Remarks</label>
+            <textarea asp-for="Remarks" class="form-control" rows="3"></textarea>
+            <span asp-validation-for="Remarks" class="text-danger"></span>
+        </div>
+
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary px-4 shadow-sm">Create Goods Receipt Note</button>
+            <a asp-action="Index" class="btn btn-light border shadow-sm">Cancel</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        $(document).ready(function () {
+            let itemIndex = $('#itemsTable tbody tr').length;
+
+            function calculateRejection(row) {
+                const received = parseFloat(row.find('.received-qty').val()) || 0;
+                const accepted = parseFloat(row.find('.accepted-qty').val()) || 0;
+                let rejected = received - accepted;
+                if(rejected < 0) rejected = 0;
+                row.find('.rejected-qty').val(rejected.toFixed(2));
+            }
+
+            $('#btnAddItem').click(function () {
+                var newRow = `
+                    <tr>
+                        <td>
+                            <select name="GoodsReceiptNoteItems[${itemIndex}].ItemId" class="form-select item-id-select" required>
+                                <option value="">-- Select Item --</option>
+                                @foreach(var item in (SelectList)ViewBag.ItemId)
+                                {
+                                    <option value="@item.Value">@item.Text</option>
+                                }
+                            </select>
+                            <input type="hidden" name="GoodsReceiptNoteItems[${itemIndex}].ItemName" value="Item" />
+                        </td>
+                        <td>
+                            <input name="GoodsReceiptNoteItems[${itemIndex}].ExpectedQuantity" class="form-control expected-qty" type="number" step="0.01" value="0.00" />
+                        </td>
+                        <td>
+                            <input name="GoodsReceiptNoteItems[${itemIndex}].ReceivedQuantity" class="form-control received-qty calc-trigger" type="number" step="0.01" value="0.00" required />
+                        </td>
+                        <td>
+                            <input name="GoodsReceiptNoteItems[${itemIndex}].AcceptedQuantity" class="form-control accepted-qty calc-trigger" type="number" step="0.01" value="0.00" required />
+                        </td>
+                        <td>
+                            <input name="GoodsReceiptNoteItems[${itemIndex}].RejectedQuantity" class="form-control rejected-qty bg-light" type="number" step="0.01" value="0.00" readonly />
+                        </td>
+                        <td>
+                            <input name="GoodsReceiptNoteItems[${itemIndex}].Remarks" class="form-control" />
+                        </td>
+                        <td class="text-center align-middle">
+                            <button type="button" class="btn btn-outline-danger btn-sm remove-item" tabindex="-1">
+                                <i class="bi bi-x-lg"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+                $('#itemsTable tbody').append(newRow);
+                itemIndex++;
+            });
+
+            $(document).on('click', '.remove-item', function () {
+                $(this).closest('tr').remove();
+                
+                // Re-index remaining rows
+                $('#itemsTable tbody tr').each(function(index) {
+                    $(this).find('input').each(function() {
+                        var name = $(this).attr('name');
+                        if (name) {
+                            var newName = name.replace(/\[\d+\]/, '[' + index + ']');
+                            $(this).attr('name', newName);
+                        }
+                    });
+                });
+                itemIndex = $('#itemsTable tbody tr').length;
+            });
+            
+            $(document).on('input', '.calc-trigger', function() {
+                calculateRejection($(this).closest('tr'));
+            });
+
+            $(document).on('change', '.item-id-select', function() {
+                var selectedText = $(this).find("option:selected").text();
+                $(this).closest('td').find('input[type="hidden"]').val(selectedText);
+            });
+
+            $('#PurchaseOrderId').change(function() {
+                var poId = $(this).val();
+                if(poId) {
+                    if(confirm("Do you want to reload items from this PO? This will overwrite the current items.")) {
+                        window.location.href = '@Url.Action("Create")?purchaseOrderId=' + poId;
+                    }
+                }
+            });
+        });
+    </script>
+}

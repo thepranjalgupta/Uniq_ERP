@@ -1,0 +1,89 @@
+@model IEnumerable<UniqPac_ERP.Models.GoodsReceiptNote>
+
+@{
+    ViewData["Title"] = "Goods Receipt Notes";
+}
+
+<div class="container-fluid px-4 py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="h3 mb-0 text-gray-800">Goods Receipt Notes (GRN)</h2>
+            <p class="text-muted mb-0">Manage and track received goods</p>
+        </div>
+        <a asp-action="Create" class="btn btn-primary shadow-sm">
+            <i class="bi bi-plus-lg me-1"></i> New GRN
+        </a>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="ps-4">@Html.DisplayNameFor(model => model.GRNNumber)</th>
+                            <th>@Html.DisplayNameFor(model => model.GRNDate)</th>
+                            <th>@Html.DisplayNameFor(model => model.Vendor)</th>
+                            <th>@Html.DisplayNameFor(model => model.PurchaseOrder)</th>
+                            <th>@Html.DisplayNameFor(model => model.Status)</th>
+                            <th>Approval Status</th>
+                            <th class="text-end pe-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model) {
+                            <tr>
+                                <td class="ps-4 fw-medium">@Html.DisplayFor(modelItem => item.GRNNumber)</td>
+                                <td>@item.GRNDate.ToString("dd-MM-yyyy")</td>
+                                <td>@Html.DisplayFor(modelItem => item.Vendor!.Name)</td>
+                                <td>@(item.PurchaseOrder != null ? item.PurchaseOrder.PONumber : "-")</td>
+                                <td>
+                                    @if(item.Status == "Completed")
+                                    {
+                                        <span class="badge bg-success bg-opacity-10 text-success px-3 rounded-pill">Completed</span>
+                                    }
+                                    else if(item.Status == "Cancelled")
+                                    {
+                                        <span class="badge bg-danger bg-opacity-10 text-danger px-3 rounded-pill">Cancelled</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning bg-opacity-10 text-warning px-3 rounded-pill">Pending</span>
+                                    }
+                                </td>
+                                <td>
+                                    <span class="badge @(item.ApprovalStatus == "Approved" ? "bg-success" : item.ApprovalStatus == "Rejected" ? "bg-danger" : item.ApprovalStatus == "Manager Approved" ? "bg-info" : "bg-warning text-dark") px-2 py-1 rounded-pill">@item.ApprovalStatus</span>
+                                </td>
+                                <td class="text-end pe-4">
+                                    <div class="btn-group">
+                                        <a asp-action="Print" asp-route-id="@item.Id" class="btn btn-sm btn-light border text-secondary" target="_blank" title="Print">
+                                            <i class="ph ph-printer"></i>
+                                        </a>
+                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-light border text-primary" title="Edit">
+                                            <i class="ph ph-pencil-simple"></i>
+                                        </a>
+                                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-light border text-info" title="Details">
+                                            <i class="ph ph-eye"></i>
+                                        </a>
+                                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-light border text-danger" title="Delete">
+                                            <i class="ph ph-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                        @if (!Model.Any())
+                        {
+                            <tr>
+                                <td colspan="6" class="text-center py-5 text-muted">
+                                    <i class="ph ph-tray fs-1 d-block mb-2"></i>
+                                    No Goods Receipt Notes found
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

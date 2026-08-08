@@ -1,0 +1,108 @@
+@model UniqPac_ERP.Models.Dispatch
+
+@{
+    ViewData["Title"] = "Dispatch Details";
+}
+
+<div class="container-fluid px-4 py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="h3 mb-0 text-gray-800">Dispatch Details</h2>
+            <p class="text-muted mb-0">Delivery Note @Model.DispatchNumber</p>
+        </div>
+        <div>
+            <a asp-action="Print" asp-route-id="@Model.Id" class="btn btn-outline-primary shadow-sm me-2" target="_blank">
+                <i class="bi bi-printer me-1"></i> Print DN
+            </a>
+            <a asp-action="Index" class="btn btn-outline-secondary shadow-sm">
+                <i class="bi bi-arrow-left me-1"></i> Back to List
+            </a>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+            <div class="row g-4">
+                <div class="col-md-3">
+                    <label class="form-label fw-bold text-muted mb-1">DN Number</label>
+                    <div>@Model.DispatchNumber</div>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold text-muted mb-1">Dispatch Date</label>
+                    <div>@Model.DispatchDate.ToString("dd MMM yyyy")</div>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold text-muted mb-1">Sales Order</label>
+                    <div>
+                        <span class="badge bg-secondary">@Model.SalesOrder?.OrderNo</span>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold text-muted mb-1">Customer</label>
+                    <div>@Model.Customer?.Name</div>
+                </div>
+                
+                <div class="col-12"><hr class="my-2" /></div>
+
+                <div class="col-md-3">
+                    <label class="form-label fw-bold text-muted mb-1">Mode of Transport</label>
+                    <div>@(string.IsNullOrEmpty(Model.TransportMode) ? "-" : Model.TransportMode)</div>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold text-muted mb-1">Transporter Name</label>
+                    <div>@(string.IsNullOrEmpty(Model.TransporterName) ? "-" : Model.TransporterName)</div>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold text-muted mb-1">LR Number</label>
+                    <div>@(string.IsNullOrEmpty(Model.LRNumber) ? "-" : Model.LRNumber)</div>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold text-muted mb-1">Vehicle Number</label>
+                    <div>@(string.IsNullOrEmpty(Model.VehicleNumber) ? "-" : Model.VehicleNumber)</div>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold text-muted mb-1">Driver Name</label>
+                    <div>@(string.IsNullOrEmpty(Model.DriverName) ? "-" : Model.DriverName)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h5 class="mb-3 text-gray-800">Dispatch Items</h5>
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-bordered mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th style="width: 5%;" class="text-center">S.No</th>
+                            <th>Item / Job Name</th>
+                            <th style="width: 15%;" class="text-end">Ordered Qty</th>
+                            <th style="width: 15%;" class="text-end">Dispatch Qty</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{ int sn = 1; }
+                        @foreach (var item in Model.DispatchItems)
+                        {
+                            <tr>
+                                <td class="text-center">@(sn++)</td>
+                                <td>@item.ItemName</td>
+                                <td class="text-end">@item.OrderedQuantity</td>
+                                <td class="text-end fw-bold">@item.DispatchedQuantity</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    @if (!string.IsNullOrEmpty(Model.Remarks))
+    {
+        <div class="mb-4">
+            <label class="form-label fw-bold text-muted mb-1">General Remarks</label>
+            <div class="p-3 bg-light border rounded">@Model.Remarks</div>
+        </div>
+    }
+</div>

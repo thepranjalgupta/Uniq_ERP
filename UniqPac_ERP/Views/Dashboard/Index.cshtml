@@ -1,0 +1,108 @@
+@model dynamic
+
+<div class="row g-4 mb-4">
+    <!-- Stat Card 1 -->
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="glass-card">
+            <div class="stat-card">
+                <div class="stat-icon bg-primary bg-opacity-10 text-primary">
+                    <i class="ph-bold ph-users"></i>
+                </div>
+                <div class="stat-info">
+                    <h5>Total Customers</h5>
+                    <h2>@Model.TotalCustomers</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Stat Card 2 -->
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="glass-card">
+            <div class="stat-card">
+                <div class="stat-icon bg-success bg-opacity-10 text-success">
+                    <i class="ph-bold ph-briefcase"></i>
+                </div>
+                <div class="stat-info">
+                    <h5>Total Jobs</h5>
+                    <h2>@Model.TotalJobs</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Stat Card 3 -->
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="glass-card">
+            <div class="stat-card">
+                <div class="stat-icon bg-warning bg-opacity-10 text-warning">
+                    <i class="ph-bold ph-lightning"></i>
+                </div>
+                <div class="stat-info">
+                    <h5>Active Jobs</h5>
+                    <h2>@Model.ActiveJobs</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Stat Card 4 -->
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="glass-card">
+            <div class="stat-card">
+                <div class="stat-icon bg-info bg-opacity-10 text-info">
+                    <i class="ph-bold ph-storefront"></i>
+                </div>
+                <div class="stat-info">
+                    <h5>Total Vendors</h5>
+                    <h2>@Model.TotalVendors</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-12 col-lg-8">
+        <div class="glass-card h-100">
+            <h5 class="fw-bold mb-4">Recent Activity (Mock)</h5>
+            <div class="d-flex align-items-center mb-3">
+                <div class="bg-primary rounded-circle p-2 me-3 text-white">
+                    <i class="ph-bold ph-check"></i>
+                </div>
+                <div>
+                    <p class="mb-0 fw-medium">Order #1004 Dispatched</p>
+                    <small class="text-muted">2 hours ago</small>
+                </div>
+            </div>
+            <div class="d-flex align-items-center mb-3">
+                <div class="bg-warning rounded-circle p-2 me-3 text-white">
+                    <i class="ph-bold ph-clock"></i>
+                </div>
+                <div>
+                    <p class="mb-0 fw-medium">Payment pending from ACME Corp</p>
+                    <small class="text-muted">5 hours ago</small>
+                </div>
+            </div>
+            <div class="d-flex align-items-center mb-3">
+                <div class="bg-success rounded-circle p-2 me-3 text-white">
+                    <i class="ph-bold ph-plus"></i>
+                </div>
+                <div>
+                    <p class="mb-0 fw-medium">New job 'Box Lamination' added</p>
+                    <small class="text-muted">1 day ago</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-lg-4">
+        <div class="glass-card h-100">
+            <h5 class="fw-bold mb-4">Quick Actions</h5>
+            <div class="d-grid gap-2">
+                <a href="/CustomerJobs/Create" class="btn btn-primary text-start"><i class="ph-bold ph-plus me-2"></i> New Job</a>
+                <a href="/Customers/Create" class="btn btn-outline-secondary text-start"><i class="ph-bold ph-user-plus me-2"></i> Add Customer</a>
+                <a href="/Vendors/Create" class="btn btn-outline-secondary text-start"><i class="ph-bold ph-storefront me-2"></i> Add Vendor</a>
+            </div>
+        </div>
+    </div>
+</div>

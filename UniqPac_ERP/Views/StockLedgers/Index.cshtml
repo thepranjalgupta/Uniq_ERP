@@ -1,0 +1,94 @@
+@model IEnumerable<UniqPac_ERP.Models.Item>
+@using Microsoft.AspNetCore.Authorization
+@using UniqPac_ERP.Constants
+@inject IAuthorizationService AuthorizationService
+
+@{
+    ViewData["Title"] = "Stock Balance";
+}
+
+<div class="container-fluid px-4 py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="h3 mb-0 text-gray-800">Stock Balance</h2>
+            <p class="text-muted mb-0">View real-time inventory levels</p>
+        </div>
+        
+        @if ((await AuthorizationService.AuthorizeAsync(User, Permissions.StockLedgers.Create)).Succeeded)
+        {
+            <a asp-action="Create" class="btn btn-primary shadow-sm">
+                <i class="bi bi-plus-lg me-1"></i> Stock Adjustment
+            </a>
+        }
+    </div>
+
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+            <form asp-action="Index" method="get" class="row g-3 align-items-center">
+                <div class="col-auto">
+                    <label class="col-form-label fw-bold text-muted">Filter by Category:</label>
+                </div>
+                <div class="col-auto">
+                    <select name="categoryId" class="form-select" asp-items="ViewBag.CategoryId" onchange="this.form.submit()">
+                        <option value="">All Categories</option>
+                    </select>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="px-4 py-3">Item Code</th>
+                            <th class="py-3">Item Name</th>
+                            <th class="py-3">Category</th>
+                            <th class="py-3">UOM</th>
+                            <th class="py-3 text-end px-4">Current Stock</th>
+                            <th class="py-3 text-center">Status</th>
+                            <th class="py-3 text-end px-4">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="px-4 fw-medium">@item.ItemCode</td>
+                                <td>@item.ItemName</td>
+                                <td><span class="badge bg-secondary">@item.ItemCategory?.CategoryName</span></td>
+                                <td>@item.UOM?.UomCode</td>
+                                <td class="text-end px-4 fw-bold fs-5 @(item.CurrentStock < 0 ? "text-danger" : (item.CurrentStock == 0 ? "text-warning" : "text-success"))">
+                                    @item.CurrentStock
+                                </td>
+                                <td class="text-center">
+                                    @if(item.CurrentStock < 0) { <span class="badge bg-danger">Negative</span> }
+                                    else if(item.CurrentStock == 0) { <span class="badge bg-warning text-dark">Out of Stock</span> }
+                                    else if(item.CurrentStock <= (item.ReorderQty ?? 10)) { <span class="badge bg-warning">Low Stock</span> }
+                                    else { <span class="badge bg-success">In Stock</span> }
+                                </td>
+                                <td class="text-end px-4">
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info" title="View Ledger">
+                                        <i class="bi bi-journal-text me-1"></i> Ledger
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                        
+                        @if (!Model.Any())
+                        {
+                            <tr>
+                                <td colspan="7" class="text-center py-5 text-muted">
+                                    <i class="bi bi-box-seam fs-2 d-block mb-2"></i>
+                                    No items found.
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

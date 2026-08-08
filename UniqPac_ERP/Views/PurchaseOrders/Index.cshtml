@@ -1,0 +1,80 @@
+@model IEnumerable<UniqPac_ERP.Models.PurchaseOrder>
+@using Microsoft.AspNetCore.Authorization
+@inject IAuthorizationService AuthorizationService
+
+@{
+    var type = ViewBag.POType as string ?? "Material";
+    ViewData["Title"] = $"{type} Purchase Orders";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="fw-bold text-dark mb-0">@ViewData["Title"]</h3>
+    @if ((await AuthorizationService.AuthorizeAsync(User, "Permissions.PurchaseOrders.Create")).Succeeded)
+    {
+        <a asp-action="Create" asp-route-type="@type" class="btn btn-primary fw-semibold shadow-sm">
+            <i class="ph ph-plus me-1"></i> New @type PO
+        </a>
+    }
+</div>
+
+<div class="card shadow-sm border-0 rounded-4">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4 fw-semibold text-secondary">PO No</th>
+                        <th class="fw-semibold text-secondary">Date</th>
+                        <th class="fw-semibold text-secondary">Vendor</th>
+                        <th class="text-end fw-semibold text-secondary">Total (₹)</th>
+                        <th class="fw-semibold text-secondary text-center">Status</th>
+                        <th class="fw-semibold text-secondary text-center">Approval</th>
+                        <th class="text-end pe-4 fw-semibold text-secondary">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model) {
+                        <tr>
+                            <td class="ps-4 fw-medium text-primary">@item.PONumber</td>
+                            <td>@item.PODate.ToShortDateString()</td>
+                            <td>@item.Vendor.Name</td>
+                            <td class="text-end fw-semibold">@item.TotalAmount.ToString("N2")</td>
+                            <td class="text-center">
+                                @if(item.Status == "Completed"){
+                                    <span class="badge bg-success bg-opacity-10 text-success px-2 py-1 rounded-pill">@item.Status</span>
+                                } else if(item.Status == "Pending") {
+                                    <span class="badge bg-warning bg-opacity-10 text-warning px-2 py-1 rounded-pill">@item.Status</span>
+                                } else {
+                                    <span class="badge bg-info bg-opacity-10 text-info px-2 py-1 rounded-pill">@item.Status</span>
+                                }
+                            </td>
+                            <td class="text-center">
+                                <span class="badge @(item.ApprovalStatus == "Approved" ? "bg-success" : item.ApprovalStatus == "Rejected" ? "bg-danger" : item.ApprovalStatus == "Manager Approved" ? "bg-info" : "bg-warning text-dark") px-2 py-1 rounded-pill">@item.ApprovalStatus</span>
+                            </td>
+                            <td class="text-end pe-4">
+                                <a asp-action="Print" asp-route-id="@item.Id" target="_blank" class="btn btn-sm btn-light border me-1" title="Print PO">
+                                    <i class="ph ph-printer"></i>
+                                </a>
+                                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-light border me-1" title="View Details">
+                                    <i class="ph ph-eye"></i>
+                                </a>
+                                @if (item.ApprovalStatus != "Approved" && (await AuthorizationService.AuthorizeAsync(User, "Permissions.PurchaseOrders.Edit")).Succeeded)
+                                {
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-light border me-1" title="Edit">
+                                        <i class="ph ph-pencil-simple"></i>
+                                    </a>
+                                }
+                                @if ((await AuthorizationService.AuthorizeAsync(User, "Permissions.PurchaseOrders.Delete")).Succeeded)
+                                {
+                                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-light border text-danger" title="Delete">
+                                        <i class="ph ph-trash"></i>
+                                    </a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

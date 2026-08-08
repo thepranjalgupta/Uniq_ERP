@@ -1,0 +1,132 @@
+@model UniqPac_ERP.Models.CustomerJob
+
+@{
+    ViewData["Title"] = "Customer Job Details";
+}
+
+<div class="card shadow-sm border-0 rounded-4" style="max-width: 900px; margin: 0 auto;">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center p-3 border-0" style="border-top-left-radius: inherit; border-top-right-radius: inherit;">
+        <h4 class="mb-0 fw-bold">Job Details: @Model.JobName</h4>
+        <span class="badge bg-light text-primary fs-6">
+            @if(string.IsNullOrEmpty(Model.JobCode)) { <text>NO CODE</text> } else { @Model.JobCode }
+        </span>
+    </div>
+
+    <div class="card-body p-4 p-md-5">
+        <div class="row mb-5 border-bottom pb-4">
+            <div class="col-sm-6 mb-3 mb-sm-0">
+                <h6 class="text-muted fw-bold text-uppercase mb-1" style="letter-spacing: 1px; font-size: 0.75rem;">Customer</h6>
+                <div class="fs-5 fw-semibold text-dark">@Model.Customer?.Name</div>
+            </div>
+        </div>
+
+        <h5 class="fw-bold mb-4 border-bottom pb-2">General Specifications</h5>
+        <div class="row g-4 mb-5">
+            <div class="col-sm-4">
+                <div class="text-muted small fw-bold mb-1">Substrate</div>
+                <div class="fw-medium">@Model.Substrate</div>
+            </div>
+            <div class="col-sm-4">
+                <div class="text-muted small fw-bold mb-1">Surface or Reverse</div>
+                <div class="fw-medium">@Model.SurfaceOrReverse</div>
+            </div>
+            <div class="col-sm-4">
+                <div class="text-muted small fw-bold mb-1">Dimensions</div>
+                <div class="fw-medium">@Model.Width x @Model.Length mm</div>
+            </div>
+            <div class="col-sm-4">
+                <div class="text-muted small fw-bold mb-1">Thickness</div>
+                <div class="fw-medium">@Model.Thickness</div>
+            </div>
+            <div class="col-sm-4">
+                <div class="text-muted small fw-bold mb-1">Color Count</div>
+                <div class="fw-medium">@Model.ColorCount</div>
+            </div>
+            <div class="col-sm-4">
+                <div class="text-muted small fw-bold mb-1">Finish</div>
+                <div class="fw-medium">@Model.Finish</div>
+            </div>
+            <div class="col-sm-4">
+                <div class="text-muted small fw-bold mb-1">Packing Type</div>
+                <div class="fw-medium">@Model.PackingType</div>
+            </div>
+        </div>
+
+        <h5 class="fw-bold mb-4 border-bottom pb-2">PDF & Advanced Details</h5>
+        <div class="row g-4 mb-5 bg-light p-3 rounded mx-0">
+            @if (!string.IsNullOrEmpty(Model.ArtworkImagePath))
+            {
+                <div class="col-12 mb-3 text-center">
+                    <img src="@Model.ArtworkImagePath" alt="Artwork" class="img-fluid border rounded shadow-sm" style="max-height: 250px;" />
+                </div>
+            }
+            <div class="col-sm-4">
+                <div class="text-muted small fw-bold mb-1">Job Code</div>
+                <div class="fw-medium">@Model.JobCode</div>
+            </div>
+            <div class="col-sm-4">
+                <div class="text-muted small fw-bold mb-1">Specs</div>
+                <div class="fw-medium">@Model.Specs</div>
+            </div>
+
+            <div class="col-sm-4">
+                <div class="text-muted small fw-bold mb-1">Cylinder Status</div>
+                <div class="fw-medium">@Model.CylinderStatus</div>
+            </div>
+            <div class="col-sm-4">
+                <div class="text-muted small fw-bold mb-1">Cylinder Charges</div>
+                <div class="fw-medium">@Model.CylinderCharges</div>
+            </div>
+            <div class="col-sm-4">
+                <div class="text-muted small fw-bold mb-1">Roll Weight</div>
+                <div class="fw-medium">@Model.RollWeight</div>
+            </div>
+            <div class="col-sm-4">
+                <div class="text-muted small fw-bold mb-1">Direction</div>
+                <div class="fw-medium">@Model.Direction</div>
+            </div>
+            <div class="col-sm-4">
+                <div class="text-muted small fw-bold mb-1">Shade Match</div>
+                <div class="fw-medium">@Model.ShadeMatch</div>
+            </div>
+            <div class="col-sm-4">
+                <div class="text-muted small fw-bold mb-1">Sample Required</div>
+                <div class="fw-medium">@Model.SampleRequired</div>
+            </div>
+        </div>
+
+        @if(!string.IsNullOrEmpty(Model.Description) || !string.IsNullOrEmpty(Model.SpecialInstructions))
+        {
+            <h5 class="fw-bold mb-4 border-bottom pb-2">Instructions</h5>
+            <div class="row g-4 mb-5">
+                @if(!string.IsNullOrEmpty(Model.Description))
+                {
+                    <div class="col-12">
+                        <div class="text-muted small fw-bold mb-1">Description</div>
+                        <div class="fw-medium">@Model.Description</div>
+                    </div>
+                }
+                @if(!string.IsNullOrEmpty(Model.SpecialInstructions))
+                {
+                    <div class="col-12">
+                        <div class="text-muted small fw-bold mb-1">Special Instructions</div>
+                        <div class="bg-light p-3 rounded fw-medium">@Model.SpecialInstructions</div>
+                    </div>
+                }
+            </div>
+        }
+
+        <div class="text-muted small mt-5 pt-3 border-top text-center">
+            Created on @Model.CreatedAt.ToString("dd MMM yyyy, HH:mm") by @Model.CreatedBy
+            @if(Model.UpdatedAt.HasValue)
+            {
+                <br/> <text>Last updated on @Model.UpdatedAt.Value.ToString("dd MMM yyyy, HH:mm") by @Model.UpdatedBy</text>
+            }
+        </div>
+
+        <div class="d-flex justify-content-center gap-3 mt-4 pt-4 border-top">
+            <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-primary px-5 fw-bold rounded-pill shadow-sm">Edit Job</a>
+            <a asp-action="Index" class="btn btn-light px-5 fw-bold rounded-pill border shadow-sm">Back to List</a>
+        </div>
+    </div>
+</div>

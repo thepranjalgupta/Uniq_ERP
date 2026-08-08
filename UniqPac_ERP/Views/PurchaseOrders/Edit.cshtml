@@ -1,0 +1,446 @@
+@model UniqPac_ERP.Models.PurchaseOrder
+@using System.Text.Json
+
+@{
+    ViewData["Title"] = Model.POType == "Cylinder" ? "Edit Cylinder PO" : "Edit Material PO";
+    var itemsJson = JsonSerializer.Serialize(ViewBag.Items);
+    var jobsJson = System.Text.Json.JsonSerializer.Serialize(ViewBag.CustomerJobs as object ?? new object[0]);
+}
+
+<div class="card shadow border-0 rounded-4" style="max-width: 1200px; margin: 0 auto;">
+    <div class="card-header bg-primary text-white p-3 border-0" style="border-top-left-radius: inherit; border-top-right-radius: inherit;">
+        <h4 class="mb-0 fw-bold">@(Model.POType == "Cylinder" ? "Edit Cylinder Purchase Order" : "Edit Material Purchase Order")</h4>
+    </div>
+    <div class="card-body p-4 p-md-5">
+        <form asp-action="Edit" id="poForm">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-4"></div>
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="POType" />
+            
+            <div class="row mb-3">
+                <div class="col-md-3">
+                    <label asp-for="PONumber" class="form-label fw-bold">PO Number <span class="text-danger">*</span></label>
+                    <input asp-for="PONumber" class="form-control" required />
+                    <span asp-validation-for="PONumber" class="text-danger"></span>
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="PODate" class="form-label fw-bold">Date <span class="text-danger">*</span></label>
+                    <input asp-for="PODate" class="form-control" type="date" required />
+                    <span asp-validation-for="PODate" class="text-danger"></span>
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="VendorId" class="form-label fw-bold">Consignee To (Vendor) <span class="text-danger">*</span></label>
+                    <select asp-for="VendorId" class="form-select" asp-items="ViewBag.VendorId" required>
+                        <option value="">-- Select Vendor --</option>
+                    </select>
+                    <span asp-validation-for="VendorId" class="text-danger"></span>
+                </div>
+                <div class="col-md-2">
+                    <label asp-for="Status" class="form-label fw-bold">Status</label>
+                    <select asp-for="Status" class="form-select">
+                        <option value="Pending">Pending</option>
+                        <option value="Approved">Approved</option>
+                        <option value="Completed">Completed</option>
+                        <option value="Cancelled">Cancelled</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <label asp-for="ShippingAddress" class="form-label fw-bold">Shipping To <span class="text-danger">*</span></label>
+                    <textarea asp-for="ShippingAddress" class="form-control" rows="3" required></textarea>
+                    <span asp-validation-for="ShippingAddress" class="text-danger"></span>
+                </div>
+            </div>
+
+            <!-- Line Items Section -->
+            <h5 class="fw-bold mb-3 text-dark">Order Items <span class="text-danger">*</span></h5>
+            
+            <div class="table-responsive mb-3 border rounded">
+                <table class="table table-bordered align-middle mb-0" id="itemsTable">
+                    <thead class="bg-light">
+                        <tr>
+                            <th style="min-width: 250px;">Select Job</th>
+                            @if (Model.POType == "Cylinder")
+                            {
+                                <th style="min-width: 180px;">Job Size</th>
+                                <th style="min-width: 150px;">Cylinder Size</th>
+                                <th style="min-width: 120px;">No. of Cyl</th>
+                            }
+                            else
+                            {
+                                <th style="min-width: 150px;">Pouch / Roll Type</th>
+                                <th style="min-width: 120px;">Quantity</th>
+                            }
+                            <th style="min-width: 150px;">Price (₹)</th>
+                            <th style="min-width: 150px;">Line Total</th>
+                            <th style="width: 60px;"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="itemsBody">
+                        @if (Model.PurchaseOrderItems == null || !Model.PurchaseOrderItems.Any())
+                        {
+                            <tr id="emptyItemsRow">
+                                <td colspan="@(Model.POType == "Cylinder" ? 7 : 6)" class="text-muted py-3 text-center">No items added yet.</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            int i = 0;
+                            foreach (var item in Model.PurchaseOrderItems)
+                            {
+                                <tr class="item-row">
+                                    <td>
+                                        <select name="PurchaseOrderItems[@i].ProductJobName" class="form-select form-select-sm job-select edit-existing-job" required>
+                                            <option value="@item.ProductJobName" selected>@item.ProductJobName</option>
+                                        </select>
+                                        <div class="job-autofill-details mt-2 p-2 bg-light border rounded small text-muted" style="display:none;"></div>
+                                    </td>
+                                    @if (Model.POType == "Cylinder")
+                                    {
+                                        <td>
+                                            <input type="text" name="PurchaseOrderItems[@i].JobSize" class="form-control form-control-sm" placeholder="Job Size" value="@item.JobSize" />
+                                        </td>
+                                        <td>
+                                            <input type="text" name="PurchaseOrderItems[@i].CylinderSize" class="form-control form-control-sm" placeholder="Cylinder Size" value="@item.CylinderSize" />
+                                        </td>
+                                        <td>
+                                            <input type="number" name="PurchaseOrderItems[@i].NumberOfCylinders" class="form-control form-control-sm qty-input calc-trigger" required min="1" value="@item.NumberOfCylinders" />
+                                            <input type="hidden" name="PurchaseOrderItems[@i].Quantity" value="1" class="hidden-qty" />
+                                        </td>
+                                    }
+                                    else
+                                    {
+                                        <td>
+                                            <input type="text" name="PurchaseOrderItems[@i].PouchRollType" class="form-control form-control-sm" placeholder="Type" value="@item.PouchRollType" />
+                                        </td>
+                                        <td>
+                                            <input type="number" name="PurchaseOrderItems[@i].Quantity" class="form-control form-control-sm qty-input calc-trigger" required min="1" value="@item.Quantity" />
+                                        </td>
+                                    }
+                                    <td>
+                                        <input type="number" step="0.01" name="PurchaseOrderItems[@i].Price" class="form-control form-control-sm rate-input calc-trigger" required min="0.01" value="@item.Price" />
+                                    </td>
+                                    <td class="bg-light">
+                                        <input type="text" class="form-control-plaintext form-control-sm row-total-display fw-bold" readonly value="@item.TotalAmount.ToString("F2")" />
+                                        <input type="hidden" name="PurchaseOrderItems[@i].TotalAmount" class="row-total-input" value="@item.TotalAmount" />
+                                    </td>
+                                    <td class="text-center bg-light">
+                                        <button type="button" class="btn btn-sm btn-light text-danger border-0 remove-row">
+                                            <i class="ph ph-x fw-bold"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                i++;
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-4">
+                <button type="button" class="btn btn-sm btn-outline-primary bg-white" id="addRowBtn">
+                    <i class="ph ph-plus"></i> Add Item
+                </button>
+                <div class="fw-bold fs-5">
+                    Total: <span id="grandTotalDisplay">₹@Model.TotalAmount.ToString("F2")</span>
+                    <input type="hidden" asp-for="TotalAmount" id="grandTotal" />
+                </div>
+            </div>
+
+            <h5 class="fw-bold mb-3 text-dark">Additional Specifications (Shown at bottom of PO)</h5>
+            <div class="row mb-3 bg-light p-3 border rounded mx-0">
+                <div class="col-md-3 mb-3">
+                    <label asp-for="SurfaceOrReverse" class="form-label fw-bold"></label>
+                    <input asp-for="SurfaceOrReverse" class="form-control" />
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label asp-for="Structure" class="form-label fw-bold"></label>
+                    <input asp-for="Structure" class="form-control" />
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label asp-for="ProductPacked" class="form-label fw-bold"></label>
+                    <input asp-for="ProductPacked" class="form-control" />
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label asp-for="PetSize" class="form-label fw-bold"></label>
+                    <input asp-for="PetSize" class="form-control" />
+                </div>
+                
+                @if (Model.POType == "Cylinder")
+                {
+                    <div class="col-md-3 mb-3">
+                        <label asp-for="CoilSize" class="form-label fw-bold"></label>
+                        <input asp-for="CoilSize" class="form-control" />
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label asp-for="RepeatSize" class="form-label fw-bold"></label>
+                        <input asp-for="RepeatSize" class="form-control" />
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label asp-for="DispatchSchedule" class="form-label fw-bold"></label>
+                        <input asp-for="DispatchSchedule" class="form-control" />
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label asp-for="BoreId" class="form-label fw-bold"></label>
+                        <input asp-for="BoreId" class="form-control" placeholder="e.g. BORE ID 88 MM, DEGREE 13, KEYCUT 10*8+10" />
+                    </div>
+                }
+                else
+                {
+                    <div class="col-md-3 mb-3">
+                        <label asp-for="CoilSizeRepeatSize" class="form-label fw-bold"></label>
+                        <input asp-for="CoilSizeRepeatSize" class="form-control" />
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label asp-for="CylinderSize" class="form-label fw-bold"></label>
+                        <input asp-for="CylinderSize" class="form-control" />
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label asp-for="UnwindDirection" class="form-label fw-bold"></label>
+                        <input asp-for="UnwindDirection" class="form-control" />
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label asp-for="RollWeight" class="form-label fw-bold"></label>
+                        <input asp-for="RollWeight" class="form-control" />
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label asp-for="PackingType" class="form-label fw-bold"></label>
+                        <input asp-for="PackingType" class="form-control" />
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label asp-for="DispatchSchedule" class="form-label fw-bold"></label>
+                        <input asp-for="DispatchSchedule" class="form-control" />
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label asp-for="ColorReference" class="form-label fw-bold"></label>
+                        <input asp-for="ColorReference" class="form-control" />
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label asp-for="WindowMaker" class="form-label fw-bold"></label>
+                        <input asp-for="WindowMaker" class="form-control" />
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label asp-for="CylinderMaker" class="form-label fw-bold"></label>
+                        <input asp-for="CylinderMaker" class="form-control" />
+                    </div>
+                }
+                <div class="col-md-12 mb-3">
+                    <label asp-for="Remarks" class="form-label fw-bold"></label>
+                    <input asp-for="Remarks" class="form-control" />
+                </div>
+            </div>
+
+            <div class="d-flex gap-2 pt-2">
+                <button type="submit" class="btn btn-primary px-4 fw-semibold">Save Changes</button>
+                <a asp-action="Index" asp-route-type="@Model.POType" class="btn btn-light border fw-semibold">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        var rowIdx = @(Model.PurchaseOrderItems?.Count ?? 0);
+        var jobsList = [];
+        try { jobsList = @Html.Raw(jobsJson); } catch(e) { console.error(e); }
+
+        $(document).ready(function () {
+            
+            // Populate existing job selects with all jobs and trigger auto-fill display
+            $('.edit-existing-job').each(function() {
+                var sel = $(this);
+                var currentVal = sel.val();
+                var jobOptions = '<option value="">-- Select Job --</option>';
+                $.each(jobsList, function(i, j) {
+                    var id = j.id !== undefined ? j.id : j.Id;
+                    var name = j.jobName !== undefined ? j.jobName : j.JobName;
+                    var code = j.jobCode !== undefined ? j.jobCode : j.JobCode;
+                    var selected = (name === currentVal || String(id) === currentVal) ? 'selected' : '';
+                    jobOptions += `<option value="${name}" data-id="${id}" ${selected}>${name} (${code || ''})</option>`;
+                });
+                sel.html(jobOptions);
+                bindJobSelect(sel);
+            });
+            $('#addRowBtn').click(function () {
+                $('#emptyItemsRow').remove();
+                addRow();
+            });
+
+            $('#itemsTable').on('click', '.remove-row', function () {
+                $(this).closest('tr').remove();
+                reindexRows();
+                calculateGrandTotal();
+                if($('#itemsBody tr.item-row').length === 0) {
+                    $('#itemsBody').html('<tr id="emptyItemsRow"><td colspan="6" class="text-muted py-3 text-center">No items added yet.</td></tr>');
+                }
+            });
+
+            $('#itemsTable').on('input', '.calc-trigger', function () {
+                var row = $(this).closest('tr');
+                var qty = parseFloat(row.find('.qty-input').val()) || 0;
+                var rate = parseFloat(row.find('.rate-input').val()) || 0;
+                var total = qty * rate;
+                row.find('.row-total-display').val(total.toFixed(2));
+                row.find('.row-total-input').val(total);
+                row.find('.hidden-qty').val(qty);
+                calculateGrandTotal();
+            });
+        });
+
+        function addRow() {
+            var isCylinder = '@Model.POType' === 'Cylinder';
+            var jobOptions = '<option value="">-- Select Job --</option>';
+            $.each(jobsList, function(i, j) {
+                var id = j.id !== undefined ? j.id : j.Id;
+                var name = j.jobName !== undefined ? j.jobName : j.JobName;
+                var code = j.jobCode !== undefined ? j.jobCode : j.JobCode;
+                jobOptions += `<option value="${name}" data-id="${id}">${name} (${code || ''})</option>`;
+            });
+            var tr = `
+                <tr class="item-row">
+                    <td>
+                        <select name="PurchaseOrderItems[${rowIdx}].ProductJobName" class="form-select form-select-sm job-select" required>
+                            ${jobOptions}
+                        </select>
+                        <div class="job-autofill-details mt-2 p-2 bg-light border rounded small text-muted" style="display:none;"></div>
+                    </td>
+                    ${isCylinder ? `
+                        <td>
+                            <input type="text" name="PurchaseOrderItems[${rowIdx}].JobSize" class="form-control form-control-sm" placeholder="Job Size" />
+                        </td>
+                        <td>
+                            <input type="text" name="PurchaseOrderItems[${rowIdx}].CylinderSize" class="form-control form-control-sm" placeholder="Cylinder Size" />
+                        </td>
+                        <td>
+                            <input type="number" name="PurchaseOrderItems[${rowIdx}].NumberOfCylinders" class="form-control form-control-sm qty-input calc-trigger" required min="1" value="1" />
+                            <input type="hidden" name="PurchaseOrderItems[${rowIdx}].Quantity" value="1" class="hidden-qty" />
+                        </td>
+                    ` : `
+                        <td>
+                            <input type="text" name="PurchaseOrderItems[${rowIdx}].PouchRollType" class="form-control form-control-sm" placeholder="Type" />
+                        </td>
+                        <td>
+                            <input type="number" name="PurchaseOrderItems[${rowIdx}].Quantity" class="form-control form-control-sm qty-input calc-trigger" required min="1" value="1" />
+                        </td>
+                    `}
+                    <td>
+                        <input type="number" step="0.01" name="PurchaseOrderItems[${rowIdx}].Price" class="form-control form-control-sm rate-input calc-trigger" required min="0.01" value="0.00" />
+                    </td>
+                    <td class="bg-light">
+                        <input type="text" class="form-control-plaintext form-control-sm row-total-display fw-bold" readonly value="0.00" />
+                        <input type="hidden" name="PurchaseOrderItems[${rowIdx}].TotalAmount" class="row-total-input" value="0" />
+                    </td>
+                    <td class="text-center bg-light">
+                        <button type="button" class="btn btn-sm btn-light text-danger border-0 remove-row">
+                            <i class="ph ph-x fw-bold"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+            $('#itemsBody').append(tr);
+            rowIdx++;
+            reindexRows();
+
+            // Bind job select change for auto-fill
+            bindJobSelect($('#itemsBody tr.item-row').last().find('.job-select'));
+        }
+
+        function bindJobSelect(sel) {
+            sel.on('change', function() {
+                var row = $(this).closest('tr.item-row');
+                var jobId = $(this).find('option:selected').data('id');
+                var detailsDiv = row.find('.job-autofill-details');
+
+                if (!jobId) { detailsDiv.hide().html(''); return; }
+
+                $.getJSON('@Url.Action("GetJobDetailsForPO", "PurchaseOrders")', { jobId: jobId }, function(data) {
+                    if (!data) return;
+                    var html = '';
+                    var job = data.job;
+                    var cyl = data.cylinder;
+
+                    if (job) {
+                        if (job.surfaceOrReverse)   html += `<strong>Surface/Reverse:</strong> ${job.surfaceOrReverse} &nbsp;`;
+                        if (job.jobSize)     html += `<strong>Job Size:</strong> ${job.jobSize} &nbsp;`;
+                        if (job.packingType) html += `<strong>Packing:</strong> ${job.packingType} &nbsp;`;
+                        // Per-row fills
+                        row.find('input[name$=".PouchRollType"]').val(job.packingType || '');
+                        row.find('input[name$=".JobSize"]').val(job.jobSize || '');
+                        // Page-level Additional Specs from job
+                        if (job.packingType) $('#PackingType').val(job.packingType);
+                        if (job.surfaceOrReverse)   $('#SurfaceOrReverse').val(job.surfaceOrReverse);
+                        if (job.structure)   $('#Structure').val(job.structure);
+                        if (job.direction)   $('#UnwindDirection').val(job.direction);
+                        if (job.rollWeight)  $('#RollWeight').val(job.rollWeight);
+                        if (job.colorCount)  $('#ColorReference').val(job.colorCount);
+                    }
+
+                    if (cyl) {
+                        html += '<br/>';
+                        if (cyl.cylinderName)  html += `<strong>Cyl:</strong> ${cyl.cylinderName} &nbsp;`;
+                        if (cyl.cylinderSize)  html += `<strong>Cyl Size:</strong> ${cyl.cylinderSize} &nbsp;`;
+                        if (cyl.noOfCylinders) html += `<strong>No. of Cyl:</strong> ${cyl.noOfCylinders} &nbsp;`;
+                        if (cyl.coilSize)      html += `<strong>Coil:</strong> ${cyl.coilSize} &nbsp;`;
+                        if (cyl.repeatSize)    html += `<strong>Repeat:</strong> ${cyl.repeatSize} &nbsp;`;
+                        if (cyl.boreId)        html += `<strong>Bore ID:</strong> ${cyl.boreId} &nbsp;`;
+                        // Per-row cylinder fills
+                        row.find('input[name$=".CylinderSize"]').val(cyl.cylinderSize || '');
+                        row.find('input[name$=".NumberOfCylinders"]').val(cyl.noOfCylinders || 1);
+                        if (job) row.find('input[name$=".JobSize"]').val(job.jobSize || '');
+                        // Page-level Additional Specs from cylinder
+                        if (cyl.structure)     $('#Structure').val(cyl.structure);
+                        if (cyl.productPacked) $('#ProductPacked').val(cyl.productPacked);
+                        if (cyl.petSize)       $('#PetSize').val(cyl.petSize);
+                        if (cyl.cylinderSize)  $('#CylinderSize').val(cyl.cylinderSize);
+                        if (cyl.coilSize && cyl.repeatSize) {
+                            $('#CoilSizeRepeatSize').val(cyl.coilSize + ' / ' + cyl.repeatSize);
+                            $('#CoilSize').val(cyl.coilSize);
+                            $('#RepeatSize').val(cyl.repeatSize);
+                        }
+                        if (cyl.boreId) {
+                            var boreStr = 'BORE ID ' + cyl.boreId;
+                            if (cyl.degree) boreStr += ', DEGREE ' + cyl.degree;
+                            if (cyl.keycut) boreStr += ', KEYCUT ' + cyl.keycut;
+                            $('#BoreId').val(boreStr);
+                        }
+                    }
+
+                    detailsDiv.html(html)[html ? 'show' : 'hide']();
+                });
+            });
+        }
+
+        function reindexRows() {
+            var isCylinder = '@Model.POType' === 'Cylinder';
+            $('#itemsBody tr.item-row').each(function (index) {
+                $(this).find('select[name$=".ProductJobName"]').attr('name', `PurchaseOrderItems[${index}].ProductJobName`);
+                
+                if (isCylinder) {
+                    $(this).find('input[name$=".JobSize"]').attr('name', `PurchaseOrderItems[${index}].JobSize`);
+                    $(this).find('input[name$=".CylinderSize"]').attr('name', `PurchaseOrderItems[${index}].CylinderSize`);
+                    $(this).find('input[name$=".NumberOfCylinders"]').attr('name', `PurchaseOrderItems[${index}].NumberOfCylinders`);
+                    $(this).find('input.hidden-qty').attr('name', `PurchaseOrderItems[${index}].Quantity`);
+                } else {
+                    $(this).find('input[name$=".PouchRollType"]').attr('name', `PurchaseOrderItems[${index}].PouchRollType`);
+                    $(this).find('input.qty-input').attr('name', `PurchaseOrderItems[${index}].Quantity`);
+                }
+                
+                $(this).find('input.rate-input').attr('name', `PurchaseOrderItems[${index}].Price`);
+                $(this).find('input.row-total-input').attr('name', `PurchaseOrderItems[${index}].TotalAmount`);
+            });
+            rowIdx = $('#itemsBody tr.item-row').length;
+        }
+
+        function calculateGrandTotal() {
+            var grandTotal = 0;
+            $('.row-total-input').each(function() {
+                grandTotal += parseFloat($(this).val()) || 0;
+            });
+            $('#grandTotalDisplay').text('₹' + grandTotal.toFixed(2));
+            $('#grandTotal').val(grandTotal.toFixed(2));
+        }
+    </script>
+}

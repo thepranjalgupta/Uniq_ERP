@@ -1,0 +1,220 @@
+@model UniqPac_ERP.Models.CustomerJob
+
+@{
+    ViewData["Title"] = "Add Customer Job";
+}
+
+<div class="card shadow-sm" style="max-width: 800px; margin: 0 auto;">
+    <div class="card-header bg-primary text-white" style="border-radius: calc(var(--radius-lg) - 1px) calc(var(--radius-lg) - 1px) 0 0;">
+        <h4 class="mb-0 text-white fw-bold">Add Customer Job</h4>
+    </div>
+    <div class="card-body p-4">
+        <form asp-action="Create" id="createJobForm" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+            
+            <div class="row mb-4">
+                <div class="col-12">
+                    <label asp-for="CustomerId" class="form-label fw-bold">Customer <span class="text-danger">*</span></label>
+                    <select asp-for="CustomerId" class="form-select" asp-items="ViewBag.CustomerId">
+                        <option value="">-- Select Customer --</option>
+                    </select>
+                    <span asp-validation-for="CustomerId" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-12">
+                    <label asp-for="JobName" class="form-label fw-bold">Job Title <span class="text-danger">*</span></label>
+                    <input asp-for="JobName" class="form-control" placeholder="e.g. Laminate Pouch Job" />
+                    <span asp-validation-for="JobName" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <label asp-for="Substrate" class="form-label fw-bold">Substrate</label>
+                    <input asp-for="Substrate" class="form-control" placeholder="e.g. BOPP, PET" />
+                    <span asp-validation-for="Substrate" class="text-danger"></span>
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="SurfaceOrReverse" class="form-label fw-bold">Surface or Reverse</label>
+                    <input asp-for="SurfaceOrReverse" class="form-control" placeholder="e.g. Surface, Reverse" />
+                    <span asp-validation-for="SurfaceOrReverse" class="text-danger"></span>
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="Width" class="form-label fw-bold"></label>
+                    <input asp-for="Width" class="form-control" type="number" step="0.01" placeholder="0.00" />
+                    <span asp-validation-for="Width" class="text-danger"></span>
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="Length" class="form-label fw-bold"></label>
+                    <input asp-for="Length" class="form-control" type="number" step="0.01" placeholder="0.00" />
+                    <span asp-validation-for="Length" class="text-danger"></span>
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="Thickness" class="form-label fw-bold"></label>
+                    <input asp-for="Thickness" class="form-control" type="number" step="0.01" placeholder="0.00" />
+                    <span asp-validation-for="Thickness" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <label asp-for="ColorCount" class="form-label fw-bold"></label>
+                    <input asp-for="ColorCount" class="form-control" type="number" placeholder="0" />
+                    <span asp-validation-for="ColorCount" class="text-danger"></span>
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="Finish" class="form-label fw-bold"></label>
+                    <input asp-for="Finish" class="form-control" placeholder="e.g. Gloss, Matte" />
+                    <span asp-validation-for="Finish" class="text-danger"></span>
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="PackingType" class="form-label fw-bold"></label>
+                    <input asp-for="PackingType" class="form-control" placeholder="e.g. Box, Bundle" />
+                    <span asp-validation-for="PackingType" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-12">
+                    <label asp-for="SpecialInstructions" class="form-label fw-bold"></label>
+                    <textarea asp-for="SpecialInstructions" class="form-control" rows="4" placeholder="Enter any specific instructions or requirements..."></textarea>
+                    <span asp-validation-for="SpecialInstructions" class="text-danger"></span>
+                </div>
+            </div>
+
+            <!-- PDF Specific Fields -->
+            <h5 class="fw-bold mb-3 text-dark border-bottom pb-2">Additional details</h5>
+            <div class="row mb-4 bg-light p-3 rounded mx-0">
+                <div class="col-md-12 mb-3">
+                    <label class="form-label fw-bold">Artwork Image</label>
+                    <input type="file" name="ArtworkImage" class="form-control" accept="image/*" />
+                    <small class="text-muted">Upload the artwork image for this job (JPEG, PNG, etc).</small>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label asp-for="JobCode" class="form-label fw-bold"></label>
+                    <input asp-for="JobCode" class="form-control form-control-sm" />
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label asp-for="Specs" class="form-label fw-bold"></label>
+                    <input asp-for="Specs" class="form-control form-control-sm" />
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label asp-for="CylinderStatus" class="form-label fw-bold"></label>
+                    <input asp-for="CylinderStatus" class="form-control form-control-sm" placeholder="e.g. NEW" />
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label asp-for="CylinderCharges" class="form-label fw-bold"></label>
+                    <input asp-for="CylinderCharges" class="form-control form-control-sm" placeholder="e.g. PAID" />
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label asp-for="RollWeight" class="form-label fw-bold"></label>
+                    <input asp-for="RollWeight" class="form-control form-control-sm" placeholder="e.g. 22-25 kg" />
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label asp-for="Direction" class="form-label fw-bold"></label>
+                    <input asp-for="Direction" class="form-control form-control-sm" placeholder="e.g. READABLE" />
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label asp-for="ShadeMatch" class="form-label fw-bold"></label>
+                    <input asp-for="ShadeMatch" class="form-control form-control-sm" />
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label asp-for="SampleRequired" class="form-label fw-bold"></label>
+                    <input asp-for="SampleRequired" class="form-control form-control-sm" placeholder="e.g. NO" />
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-12">
+                    <button type="button" class="btn btn-primary px-4" id="saveJobBtn">Save Job</button>
+                    <a asp-action="Index" class="btn btn-light px-4 ms-2 border">Cancel</a>
+                </div>
+            </div>
+
+            <!-- Item Details Modal -->
+            <div class="modal fade" id="itemDetailsModal" tabindex="-1" aria-labelledby="itemDetailsModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header bg-primary text-white">
+                            <h5 class="modal-title fw-bold" id="itemDetailsModalLabel">Item Details Required</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="alert alert-info">
+                                <i class="ph ph-info me-2"></i> An item will be automatically created using the Job Name. Please provide the remaining required item details.
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <label class="form-label fw-bold">Category <span class="text-danger">*</span></label>
+                                    <select name="ItemCategoryId" class="form-select" asp-items="ViewBag.ItemCategoryId" required>
+                                        <option value="">-- Select Category --</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-bold">Unit of Measure <span class="text-danger">*</span></label>
+                                    <select name="UomId" class="form-select" asp-items="ViewBag.UomId" required>
+                                        <option value="">-- Select UOM --</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-bold">Item Type <span class="text-danger">*</span></label>
+                                    <select name="ItemTypeId" class="form-select" asp-items="ViewBag.ItemTypeId" required>
+                                        <option value="">-- Select Type --</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <label class="form-label fw-bold">Min Stock Level</label>
+                                    <input type="number" name="MinStockLevel" class="form-control" placeholder="0" />
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-bold">Reorder Qty</label>
+                                    <input type="number" name="ReorderQty" class="form-control" placeholder="0" />
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-bold">Standard Cost (₹)</label>
+                                    <input type="number" step="0.01" name="StandardCost" class="form-control" placeholder="0.00" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer bg-light">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary fw-bold">Confirm & Create</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        $(document).ready(function () {
+            $('#saveJobBtn').click(function () {
+                var modalRequiredFields = $('#itemDetailsModal').find('[required]');
+                modalRequiredFields.prop('required', false);
+
+                var form = $('#createJobForm');
+                
+                // HTML5 validation check
+                if (form[0].checkValidity() === false) {
+                    form[0].reportValidity();
+                    modalRequiredFields.prop('required', true);
+                    return;
+                }
+                
+                modalRequiredFields.prop('required', true);
+
+                // Show modal
+                var itemModal = new bootstrap.Modal(document.getElementById('itemDetailsModal'));
+                itemModal.show();
+            });
+        });
+    </script>
+}

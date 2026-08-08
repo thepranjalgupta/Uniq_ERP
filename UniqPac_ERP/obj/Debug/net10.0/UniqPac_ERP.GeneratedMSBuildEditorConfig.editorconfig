@@ -1,0 +1,423 @@
+is_global = true
+build_property.TargetFramework = net10.0
+build_property.TargetFramework = net10.0
+build_property.TargetPlatformMinVersion = 
+build_property.TargetPlatformMinVersion = 
+build_property.UsingMicrosoftNETSdkWeb = true
+build_property.UsingMicrosoftNETSdkWeb = true
+build_property.ProjectTypeGuids = 
+build_property.ProjectTypeGuids = 
+build_property.InvariantGlobalization = 
+build_property.InvariantGlobalization = 
+build_property.PlatformNeutralAssembly = 
+build_property.PlatformNeutralAssembly = 
+build_property.EnforceExtendedAnalyzerRules = 
+build_property.EnforceExtendedAnalyzerRules = 
+build_property._SupportedPlatformList = Linux,macOS,Windows
+build_property._SupportedPlatformList = Linux,macOS,Windows
+build_property.TargetFrameworkIdentifier = .NETCoreApp
+build_property.TargetFrameworkVersion = v10.0
+build_property.RootNamespace = UniqPac_ERP
+build_property.RootNamespace = UniqPac_ERP
+build_property.ProjectDir = /Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/
+build_property.EnableComHosting = 
+build_property.EnableGeneratedComInterfaceComImportInterop = 
+build_property.RazorLangVersion = 9.0
+build_property.SupportLocalizedComponentNames = 
+build_property.GenerateRazorMetadataSourceChecksumAttributes = 
+build_property.MSBuildProjectDirectory = /Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP
+build_property._RazorSourceGeneratorDebug = 
+build_property.EffectiveAnalysisLevelStyle = 10.0
+build_property.EnableCodeStyleSeverity = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Areas/Identity/Pages/Account/AccessDenied.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXMvSWRlbnRpdHkvUGFnZXMvQWNjb3VudC9BY2Nlc3NEZW5pZWQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Areas/Identity/Pages/Account/Login.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXMvSWRlbnRpdHkvUGFnZXMvQWNjb3VudC9Mb2dpbi5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Areas/Identity/Pages/Account/Logout.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXMvSWRlbnRpdHkvUGFnZXMvQWNjb3VudC9Mb2dvdXQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Areas/Identity/Pages/Account/Register.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXMvSWRlbnRpdHkvUGFnZXMvQWNjb3VudC9SZWdpc3Rlci5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Areas/Identity/Pages/Account/_ViewImports.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXMvSWRlbnRpdHkvUGFnZXMvQWNjb3VudC9fVmlld0ltcG9ydHMuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Areas/Identity/Pages/_ValidationScriptsPartial.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXMvSWRlbnRpdHkvUGFnZXMvX1ZhbGlkYXRpb25TY3JpcHRzUGFydGlhbC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Areas/Identity/Pages/_ViewImports.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXMvSWRlbnRpdHkvUGFnZXMvX1ZpZXdJbXBvcnRzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Areas/Identity/Pages/_ViewStart.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXMvSWRlbnRpdHkvUGFnZXMvX1ZpZXdTdGFydC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/CustomerJobs/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ3VzdG9tZXJKb2JzL0NyZWF0ZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/CustomerJobs/Delete.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ3VzdG9tZXJKb2JzL0RlbGV0ZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/CustomerJobs/Details.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ3VzdG9tZXJKb2JzL0RldGFpbHMuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/CustomerJobs/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ3VzdG9tZXJKb2JzL0VkaXQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/CustomerJobs/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ3VzdG9tZXJKb2JzL0luZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/Customers/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ3VzdG9tZXJzL0NyZWF0ZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/Customers/Delete.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ3VzdG9tZXJzL0RlbGV0ZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/Customers/Details.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ3VzdG9tZXJzL0RldGFpbHMuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/Customers/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ3VzdG9tZXJzL0VkaXQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/Customers/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ3VzdG9tZXJzL0luZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/Cylinders/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ3lsaW5kZXJzL0NyZWF0ZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/Cylinders/Details.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ3lsaW5kZXJzL0RldGFpbHMuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/Cylinders/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ3lsaW5kZXJzL0VkaXQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/Cylinders/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ3lsaW5kZXJzL0luZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/Dashboard/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGFzaGJvYXJkL0luZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/Dispatches/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGlzcGF0Y2hlcy9DcmVhdGUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/Dispatches/Delete.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGlzcGF0Y2hlcy9EZWxldGUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/Dispatches/Details.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGlzcGF0Y2hlcy9EZXRhaWxzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/Dispatches/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGlzcGF0Y2hlcy9FZGl0LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/Dispatches/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGlzcGF0Y2hlcy9JbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/Dispatches/Print.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGlzcGF0Y2hlcy9QcmludC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/GoodsReceiptNotes/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvR29vZHNSZWNlaXB0Tm90ZXMvQ3JlYXRlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/GoodsReceiptNotes/Delete.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvR29vZHNSZWNlaXB0Tm90ZXMvRGVsZXRlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/GoodsReceiptNotes/Details.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvR29vZHNSZWNlaXB0Tm90ZXMvRGV0YWlscy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/GoodsReceiptNotes/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvR29vZHNSZWNlaXB0Tm90ZXMvRWRpdC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/GoodsReceiptNotes/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvR29vZHNSZWNlaXB0Tm90ZXMvSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/GoodsReceiptNotes/Print.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvR29vZHNSZWNlaXB0Tm90ZXMvUHJpbnQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/Home/AccessDenied.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSG9tZS9BY2Nlc3NEZW5pZWQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/Home/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSG9tZS9JbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/Home/Privacy.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSG9tZS9Qcml2YWN5LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/ItemCategories/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSXRlbUNhdGVnb3JpZXMvQ3JlYXRlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/ItemCategories/Delete.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSXRlbUNhdGVnb3JpZXMvRGVsZXRlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/ItemCategories/Details.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSXRlbUNhdGVnb3JpZXMvRGV0YWlscy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/ItemCategories/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSXRlbUNhdGVnb3JpZXMvRWRpdC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/ItemCategories/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSXRlbUNhdGVnb3JpZXMvSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/Items/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSXRlbXMvQ3JlYXRlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/Items/Delete.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSXRlbXMvRGVsZXRlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/Items/Details.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSXRlbXMvRGV0YWlscy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/Items/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSXRlbXMvRWRpdC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/Items/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSXRlbXMvSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/ItemTypes/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSXRlbVR5cGVzL0NyZWF0ZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/ItemTypes/Delete.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSXRlbVR5cGVzL0RlbGV0ZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/ItemTypes/Details.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSXRlbVR5cGVzL0RldGFpbHMuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/ItemTypes/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSXRlbVR5cGVzL0VkaXQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/ItemTypes/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSXRlbVR5cGVzL0luZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/PurchaseOrders/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUHVyY2hhc2VPcmRlcnMvQ3JlYXRlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/PurchaseOrders/Delete.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUHVyY2hhc2VPcmRlcnMvRGVsZXRlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/PurchaseOrders/Details.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUHVyY2hhc2VPcmRlcnMvRGV0YWlscy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/PurchaseOrders/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUHVyY2hhc2VPcmRlcnMvRWRpdC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/PurchaseOrders/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUHVyY2hhc2VPcmRlcnMvSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/PurchaseOrders/Print.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUHVyY2hhc2VPcmRlcnMvUHJpbnQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/Quotations/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUXVvdGF0aW9ucy9DcmVhdGUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/Quotations/Delete.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUXVvdGF0aW9ucy9EZWxldGUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/Quotations/Details.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUXVvdGF0aW9ucy9EZXRhaWxzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/Quotations/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUXVvdGF0aW9ucy9FZGl0LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/Quotations/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUXVvdGF0aW9ucy9JbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/Roles/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUm9sZXMvSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/Roles/ManagePermissions.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUm9sZXMvTWFuYWdlUGVybWlzc2lvbnMuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/SalesOrders/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2FsZXNPcmRlcnMvQ3JlYXRlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/SalesOrders/Delete.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2FsZXNPcmRlcnMvRGVsZXRlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/SalesOrders/Details.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2FsZXNPcmRlcnMvRGV0YWlscy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/SalesOrders/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2FsZXNPcmRlcnMvRWRpdC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/SalesOrders/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2FsZXNPcmRlcnMvSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/Shared/Error.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL0Vycm9yLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/Shared/_LoginPartial.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL19Mb2dpblBhcnRpYWwuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/Shared/_ValidationScriptsPartial.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL19WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/StockLedgers/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU3RvY2tMZWRnZXJzL0NyZWF0ZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/StockLedgers/Details.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU3RvY2tMZWRnZXJzL0RldGFpbHMuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/StockLedgers/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU3RvY2tMZWRnZXJzL0luZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/UOMs/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvVU9Ncy9DcmVhdGUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/UOMs/Delete.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvVU9Ncy9EZWxldGUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/UOMs/Details.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvVU9Ncy9EZXRhaWxzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/UOMs/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvVU9Ncy9FZGl0LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/UOMs/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvVU9Ncy9JbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/Users/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvVXNlcnMvQ3JlYXRlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/Users/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvVXNlcnMvRWRpdC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/Users/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvVXNlcnMvSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/VendorCategories/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvVmVuZG9yQ2F0ZWdvcmllcy9DcmVhdGUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/VendorCategories/Delete.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvVmVuZG9yQ2F0ZWdvcmllcy9EZWxldGUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/VendorCategories/Details.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvVmVuZG9yQ2F0ZWdvcmllcy9EZXRhaWxzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/VendorCategories/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvVmVuZG9yQ2F0ZWdvcmllcy9FZGl0LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/VendorCategories/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvVmVuZG9yQ2F0ZWdvcmllcy9JbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/Vendors/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvVmVuZG9ycy9DcmVhdGUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/Vendors/Delete.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvVmVuZG9ycy9EZWxldGUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/Vendors/Details.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvVmVuZG9ycy9EZXRhaWxzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/Vendors/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvVmVuZG9ycy9FZGl0LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/Vendors/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvVmVuZG9ycy9JbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/_ViewImports.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvX1ZpZXdJbXBvcnRzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/_ViewStart.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvX1ZpZXdTdGFydC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/Shared/_Layout.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL19MYXlvdXQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = b-2f1eacaj90

@@ -1,0 +1,73 @@
+@model UniqPac_ERP.Models.CylinderMaster
+
+@{
+    ViewData["Title"] = "Cylinder Master Details";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="fw-bold text-dark mb-0">Cylinder Master Details</h3>
+    <a asp-action="Index" class="btn btn-light border shadow-sm">
+        <i class="ph ph-arrow-left me-1"></i> Back to List
+    </a>
+</div>
+
+<div class="card shadow-sm border-0 rounded-4">
+    <div class="card-header bg-white py-3 border-bottom">
+        <h5 class="mb-0 fw-bold text-primary">Cylinder @Model.CylinderCode</h5>
+    </div>
+    <div class="card-body p-4">
+        <div class="row g-4">
+            <div class="col-md-4">
+                <label class="text-muted small fw-bold text-uppercase">Cylinder Name</label>
+                <div class="fs-6 fw-medium text-dark">@Model.CylinderName</div>
+            </div>
+            <div class="col-md-4">
+                <label class="text-muted small fw-bold text-uppercase">Job</label>
+                <div class="fs-6 fw-medium text-dark">@(Model.CustomerJob?.JobName ?? "-")</div>
+            </div>
+            <div class="col-md-4">
+                <label class="text-muted small fw-bold text-uppercase">No. of Cylinders</label>
+                <div class="fs-6 fw-medium text-dark">@(Model.NoOfCylinders?.ToString() ?? "-")</div>
+            </div>
+            
+            <div class="col-md-4">
+                <label class="text-muted small fw-bold text-uppercase">Structure</label>
+                <div class="fs-6 fw-medium text-dark">@(Model.Structure ?? "-")</div>
+            </div>
+            <div class="col-md-4">
+                <label class="text-muted small fw-bold text-uppercase">Cylinder Size</label>
+                <div class="fs-6 fw-medium text-dark">@(Model.CylinderSize?.ToString("N2") ?? "-")</div>
+            </div>
+            <div class="col-md-4">
+                <label class="text-muted small fw-bold text-uppercase">Coil Size</label>
+                <div class="fs-6 fw-medium text-dark">@(Model.CoilSize?.ToString("N2") ?? "-")</div>
+            </div>
+
+            <div class="col-md-4">
+                <label class="text-muted small fw-bold text-uppercase">Repeat Size</label>
+                <div class="fs-6 fw-medium text-dark">@(Model.RepeatSize?.ToString("N2") ?? "-")</div>
+            </div>
+            <div class="col-md-4">
+                <label class="text-muted small fw-bold text-uppercase">PET Size</label>
+                <div class="fs-6 fw-medium text-dark">@(Model.PetSize?.ToString("N2") ?? "-")</div>
+            </div>
+            <div class="col-md-4">
+                <label class="text-muted small fw-bold text-uppercase">Bore ID</label>
+                <div class="fs-6 fw-medium text-dark">@(Model.BoreId ?? "-")</div>
+            </div>
+
+            <div class="col-md-4">
+                <label class="text-muted small fw-bold text-uppercase">Degree</label>
+                <div class="fs-6 fw-medium text-dark">@(Model.Degree ?? "-")</div>
+            </div>
+            <div class="col-md-4">
+                <label class="text-muted small fw-bold text-uppercase">Keycut</label>
+                <div class="fs-6 fw-medium text-dark">@(Model.Keycut ?? "-")</div>
+            </div>
+            <div class="col-md-4">
+                <label class="text-muted small fw-bold text-uppercase">Product Packed</label>
+                <div class="fs-6 fw-medium text-dark">@(Model.ProductPacked ?? "-")</div>
+            </div>
+        </div>
+    </div>
+</div>

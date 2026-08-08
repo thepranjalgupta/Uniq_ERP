@@ -1,0 +1,201 @@
+@using Microsoft.AspNetCore.Authorization
+@inject IAuthorizationService AuthorizationService
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - UniqPac ERP</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@@phosphor-icons/web"></script>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    @if (User.Identity != null && User.Identity.IsAuthenticated)
+    {
+        <div class="app-wrapper">
+            <!-- Sidebar -->
+            <nav class="sidebar">
+                <div class="sidebar-header">
+                    <a href="/Dashboard" class="brand-logo text-decoration-none">
+                        <i class="ph-fill ph-package"></i> UniqPac ERP
+                    </a>
+                </div>
+                
+                <div class="sidebar-menu">
+                    <div class="menu-label">Main Menu</div>
+                    <div class="nav-item">
+                        <a href="/Dashboard" class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Dashboard" ? "active" : "")">
+                            <i class="ph ph-squares-four"></i> Dashboard
+                        </a>
+                    </div>
+                    
+                    <div class="menu-label">Sales & Operations</div>
+                    <div class="nav-item">
+                        <a href="/Customers" class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Customers" ? "active" : "")">
+                            <i class="ph ph-users"></i> Customers
+                        </a>
+                    </div>
+                    <div class="nav-item">
+                        <a href="/CustomerJobs" class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "CustomerJobs" ? "active" : "")">
+                            <i class="ph ph-briefcase"></i> Job Cards
+                        </a>
+                    </div>
+                    <div class="nav-item">
+                        <a href="/Cylinders" class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Cylinders" ? "active" : "")">
+                            <i class="ph ph-cylinder"></i> Cylinders Master
+                        </a>
+                    </div>
+                    <div class="nav-item">
+                        <a href="/Quotations" class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Quotations" ? "active" : "")">
+                            <i class="ph ph-file-text"></i> Quotations
+                        </a>
+                    </div>
+                    <div class="nav-item">
+                        <a href="/SalesOrders" class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "SalesOrders" ? "active" : "")">
+                            <i class="ph ph-shopping-cart"></i> Sales Orders
+                        </a>
+                    </div>
+                    
+                    <div class="nav-item">
+                        <a href="/Dispatches" class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Dispatches" ? "active" : "")">
+                            <i class="ph ph-truck"></i> Dispatches
+                        </a>
+                    </div>
+
+                    <div class="menu-label">Procurement</div>
+                    <div class="nav-item">
+                        <a href="/PurchaseOrders?type=Material" class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "PurchaseOrders" && Context.Request.Query["type"] == "Material" ? "active" : "")">
+                            <i class="ph ph-receipt"></i> Material PO
+                        </a>
+                    </div>
+                    <div class="nav-item">
+                        <a href="/PurchaseOrders?type=Cylinder" class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "PurchaseOrders" && Context.Request.Query["type"] == "Cylinder" ? "active" : "")">
+                            <i class="ph ph-cylinder"></i> Cylinder PO
+                        </a>
+                    </div>
+                    <div class="nav-item">
+                        <a href="/GoodsReceiptNotes" class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "GoodsReceiptNotes" ? "active" : "")">
+                            <i class="ph ph-box-arrow-down"></i> Goods Receipt Note
+                        </a>
+                    </div>
+                    <div class="nav-item">
+                        <a href="/VendorCategories" class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "VendorCategories" ? "active" : "")">
+                            <i class="ph ph-folders"></i> Vendor Categories
+                        </a>
+                    </div>
+                    <div class="nav-item">
+                        <a href="/Vendors" class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Vendors" ? "active" : "")">
+                            <i class="ph ph-storefront"></i> Vendors
+                        </a>
+                    </div>
+
+                    <div class="menu-label">Inventory & Masters</div>
+                    <div class="nav-item">
+                        <a href="/Items" class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Items" ? "active" : "")">
+                            <i class="ph ph-package"></i> Items
+                        </a>
+                    </div>
+                    <div class="nav-item">
+                        <a href="/StockLedgers" class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "StockLedgers" ? "active" : "")">
+                            <i class="ph ph-stack"></i> Stock Ledgers
+                        </a>
+                    </div>
+                    <div class="nav-item">
+                        <a href="/ItemCategories" class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "ItemCategories" ? "active" : "")">
+                            <i class="ph ph-folder-notch"></i> Item Categories
+                        </a>
+                    </div>
+                    <div class="nav-item">
+                        <a href="/UOMs" class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "UOMs" ? "active" : "")">
+                            <i class="ph ph-scales"></i> Unit of Measure (UOM)
+                        </a>
+                    </div>
+                    <div class="nav-item">
+                        <a href="/ItemTypes" class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "ItemTypes" ? "active" : "")">
+                            <i class="ph ph-tag"></i> Item Types
+                        </a>
+                    </div>
+
+                    <div class="menu-label">Settings & Security</div>
+                    @if ((await AuthorizationService.AuthorizeAsync(User, "Permissions.Users.View")).Succeeded)
+                    {
+                        <div class="nav-item">
+                            <a href="/Users" class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Users" ? "active" : "")">
+                                <i class="ph ph-users-three"></i> User Management
+                            </a>
+                        </div>
+                    }
+                    @if ((await AuthorizationService.AuthorizeAsync(User, "Permissions.Roles.View")).Succeeded)
+                    {
+                        <div class="nav-item">
+                            <a href="/Roles" class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Roles" ? "active" : "")">
+                                <i class="ph ph-shield-check"></i> Roles & Permissions
+                            </a>
+                        </div>
+                    }
+                </div>
+            </nav>
+
+            <!-- Main Content Area -->
+            <main class="main-wrapper">
+                <!-- Top Navbar -->
+                <header class="topbar">
+                    <div class="d-flex align-items-center gap-3">
+                        <h4 class="mb-0 fw-bold">@ViewData["Title"]</h4>
+                    </div>
+                    
+                    <div class="d-flex align-items-center gap-4">
+                        <div class="topbar-search d-none d-md-block">
+                            <i class="ph ph-magnifying-glass"></i>
+                            <input type="text" placeholder="Search across ERP...">
+                        </div>
+                        
+                        <div class="dropdown">
+                            <div class="user-profile" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
+                                <div class="avatar">
+                                    @User.Identity.Name?.Substring(0, 1).ToUpper()
+                                </div>
+                                <div class="d-none d-md-block">
+                                    <div class="fw-semibold text-dark" style="font-size: 0.875rem;">@User.Identity.Name</div>
+                                    <div class="text-muted" style="font-size: 0.75rem;">Administrator</div>
+                                </div>
+                                <i class="ph ph-caret-down text-muted"></i>
+                            </div>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2" aria-labelledby="userMenu">
+                                <li>
+                                    <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Dashboard", new { area = "" })">
+                                        <button type="submit" class="dropdown-item text-danger d-flex align-items-center gap-2">
+                                            <i class="ph ph-sign-out"></i> Logout
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </header>
+
+                <!-- Page Content -->
+                <div class="page-content">
+                    @RenderBody()
+                </div>
+            </main>
+        </div>
+    }
+    else
+    {
+        <!-- Auth Layout -->
+        <div class="d-flex align-items-center justify-content-center min-vh-100" style="background-color: var(--bg-main);">
+            @RenderBody()
+        </div>
+    }
+
+    <!-- jQuery and Bootstrap Bundle with Popper -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

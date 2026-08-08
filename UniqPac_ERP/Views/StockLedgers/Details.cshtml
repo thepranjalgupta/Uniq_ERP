@@ -1,0 +1,105 @@
+@model IEnumerable<UniqPac_ERP.Models.StockLedger>
+
+@{
+    ViewData["Title"] = "Stock Ledger";
+    var item = ViewBag.Item as UniqPac_ERP.Models.Item;
+}
+
+<div class="container-fluid px-4 py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="h3 mb-0 text-gray-800">Stock Ledger</h2>
+            <p class="text-muted mb-0">Transaction history for @item?.ItemName</p>
+        </div>
+        <div>
+            <a asp-action="Index" class="btn btn-outline-secondary shadow-sm">
+                <i class="bi bi-arrow-left me-1"></i> Back to Stock
+            </a>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100 py-2 border-start border-primary border-4">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Item Code</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@item?.ItemCode</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-upc fs-2 text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100 py-2 border-start border-success border-4">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Current Stock</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@item?.CurrentStock @item?.UOM?.UomCode</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-box-seam fs-2 text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover table-striped align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="px-4 py-3">Date</th>
+                            <th class="py-3">Transaction Type</th>
+                            <th class="py-3">Reference No</th>
+                            <th class="py-3 text-end">Quantity In</th>
+                            <th class="py-3 text-end">Quantity Out</th>
+                            <th class="py-3 text-end px-4 border-start">Running Balance</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var entry in Model)
+                        {
+                            <tr>
+                                <td class="px-4">@entry.TransactionDate.ToString("dd MMM yyyy")</td>
+                                <td>
+                                    @if(entry.TransactionType == "GRN") { <span class="badge bg-success">@entry.TransactionType</span> }
+                                    else if(entry.TransactionType.Contains("Dispatch")) { <span class="badge bg-primary">@entry.TransactionType</span> }
+                                    else { <span class="badge bg-secondary">@entry.TransactionType</span> }
+                                </td>
+                                <td>@entry.ReferenceNumber</td>
+                                <td class="text-end text-success fw-bold">
+                                    @(entry.Quantity > 0 ? $"+{entry.Quantity}" : "-")
+                                </td>
+                                <td class="text-end text-danger fw-bold">
+                                    @(entry.Quantity < 0 ? entry.Quantity.ToString() : "-")
+                                </td>
+                                <td class="text-end px-4 border-start fw-bold bg-light">
+                                    @entry.RunningBalance
+                                </td>
+                            </tr>
+                        }
+                        
+                        @if (!Model.Any())
+                        {
+                            <tr>
+                                <td colspan="6" class="text-center py-5 text-muted">
+                                    <i class="bi bi-journal-x fs-2 d-block mb-2"></i>
+                                    No ledger entries found for this item.
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

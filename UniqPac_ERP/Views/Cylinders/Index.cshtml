@@ -1,0 +1,73 @@
+@model IEnumerable<UniqPac_ERP.Models.CylinderMaster>
+@using Microsoft.AspNetCore.Authorization
+@inject IAuthorizationService AuthorizationService
+
+@{
+    ViewData["Title"] = "Cylinders Master";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="fw-bold text-dark mb-0">Cylinders Master</h3>
+    @if ((await AuthorizationService.AuthorizeAsync(User, "Permissions.Cylinders.Create")).Succeeded)
+    {
+        <a asp-action="Create" class="btn btn-primary fw-semibold shadow-sm">
+            <i class="ph ph-plus me-1"></i> New Cylinder
+        </a>
+    }
+</div>
+
+<div class="card shadow-sm border-0 rounded-4">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4 fw-semibold text-secondary">Cylinder Code</th>
+                        <th class="fw-semibold text-secondary">Cylinder Name</th>
+                        <th class="fw-semibold text-secondary">Job</th>
+                        <th class="fw-semibold text-secondary">No. of Cylinders</th>
+                        <th class="fw-semibold text-secondary">Structure</th>
+                        <th class="text-end pe-4 fw-semibold text-secondary">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model) {
+                        <tr>
+                            <td class="ps-4 fw-medium text-primary">@item.CylinderCode</td>
+                            <td>@item.CylinderName</td>
+                            <td>@item.CustomerJob?.JobName</td>
+                            <td>@item.NoOfCylinders</td>
+                            <td>@item.Structure</td>
+                            <td class="text-end pe-4">
+                                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-light border me-1" title="View Details">
+                                    <i class="ph ph-eye"></i>
+                                </a>
+                                @if ((await AuthorizationService.AuthorizeAsync(User, "Permissions.Cylinders.Edit")).Succeeded)
+                                {
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-light border me-1" title="Edit">
+                                        <i class="ph ph-pencil-simple"></i>
+                                    </a>
+                                }
+                                @if ((await AuthorizationService.AuthorizeAsync(User, "Permissions.Cylinders.Delete")).Succeeded)
+                                {
+                                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-light border text-danger" title="Delete">
+                                        <i class="ph ph-trash"></i>
+                                    </a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center py-5 text-muted">
+                                <i class="ph ph-tray fs-1 d-block mb-2"></i>
+                                No Cylinders Found
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

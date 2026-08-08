@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "dgSpecHash": "JazjxSog2Sw=",
+  "success": true,
+  "projectFilePath": "/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/scratch/scratch.csproj",
+  "expectedPackageFiles": [
+    "/Users/admin/.nuget/packages/runtime.native.system.data.sqlclient.sni/4.4.0/runtime.native.system.data.sqlclient.sni.4.4.0.nupkg.sha512",
+    "/Users/admin/.nuget/packages/runtime.win-arm64.runtime.native.system.data.sqlclient.sni/4.4.0/runtime.win-arm64.runtime.native.system.data.sqlclient.sni.4.4.0.nupkg.sha512",
+    "/Users/admin/.nuget/packages/runtime.win-x64.runtime.native.system.data.sqlclient.sni/4.4.0/runtime.win-x64.runtime.native.system.data.sqlclient.sni.4.4.0.nupkg.sha512",
+    "/Users/admin/.nuget/packages/runtime.win-x86.runtime.native.system.data.sqlclient.sni/4.4.0/runtime.win-x86.runtime.native.system.data.sqlclient.sni.4.4.0.nupkg.sha512",
+    "/Users/admin/.nuget/packages/system.data.sqlclient/4.9.1/system.data.sqlclient.4.9.1.nupkg.sha512"
+  ],
+  "logs": []
+}

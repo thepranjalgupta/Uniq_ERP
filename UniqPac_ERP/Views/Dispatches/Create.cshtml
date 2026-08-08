@@ -1,0 +1,178 @@
+@model UniqPac_ERP.Models.Dispatch
+
+@{
+    ViewData["Title"] = "Create Dispatch";
+}
+
+<div class="container-fluid px-4 py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="h3 mb-0 text-gray-800">New Dispatch</h2>
+            <p class="text-muted mb-0">Create a new Delivery Note</p>
+        </div>
+        <a asp-action="Index" class="btn btn-outline-secondary shadow-sm">
+            <i class="bi bi-arrow-left me-1"></i> Back to List
+        </a>
+    </div>
+
+    <form asp-action="Create" id="dispatchForm">
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+        
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-body">
+                <div class="row g-4">
+                    <div class="col-md-3">
+                        <label asp-for="SalesOrderId" class="form-label fw-bold"></label>
+                        <select asp-for="SalesOrderId" class="form-select" asp-items="ViewBag.SalesOrderId" id="SalesOrderId">
+                            <option value="">-- Select Sales Order --</option>
+                        </select>
+                        <span asp-validation-for="SalesOrderId" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-3">
+                        <label asp-for="DispatchNumber" class="form-label fw-bold"></label>
+                        <input asp-for="DispatchNumber" class="form-control bg-light" readonly />
+                        <span asp-validation-for="DispatchNumber" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-3">
+                        <label asp-for="DispatchDate" class="form-label fw-bold"></label>
+                        <input asp-for="DispatchDate" class="form-control" type="date" />
+                        <span asp-validation-for="DispatchDate" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Customer</label>
+                        <select asp-for="CustomerId" class="form-select bg-light" asp-items="ViewBag.CustomerId" disabled>
+                            <option value="">-- Auto-filled --</option>
+                        </select>
+                        <input type="hidden" asp-for="CustomerId" />
+                    </div>
+                </div>
+
+                <hr class="my-4">
+
+                <div class="row g-4">
+                    <div class="col-md-3">
+                        <label asp-for="TransportMode" class="form-label fw-bold"></label>
+                        <input asp-for="TransportMode" class="form-control" placeholder="e.g. By Road, By Air" />
+                        <span asp-validation-for="TransportMode" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-3">
+                        <label asp-for="TransporterName" class="form-label fw-bold"></label>
+                        <input asp-for="TransporterName" class="form-control" />
+                        <span asp-validation-for="TransporterName" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-3">
+                        <label asp-for="LRNumber" class="form-label fw-bold"></label>
+                        <input asp-for="LRNumber" class="form-control" />
+                        <span asp-validation-for="LRNumber" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-3">
+                        <label asp-for="VehicleNumber" class="form-label fw-bold"></label>
+                        <input asp-for="VehicleNumber" class="form-control" />
+                        <span asp-validation-for="VehicleNumber" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-3">
+                        <label asp-for="DriverName" class="form-label fw-bold"></label>
+                        <input asp-for="DriverName" class="form-control" />
+                        <span asp-validation-for="DriverName" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h5 class="mb-3 text-gray-800">Dispatch Items <span class="text-danger">*</span></h5>
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-bordered mb-0" id="itemsTable">
+                        <thead class="bg-light">
+                            <tr>
+                                <th>Item / Job Name</th>
+                                <th style="width: 15%;">Ordered Qty</th>
+                                <th style="width: 15%;">Prev Dispatched</th>
+                                <th style="width: 15%;">Remaining</th>
+                                <th style="width: 15%;">Dispatch Qty</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.DispatchItems != null && Model.DispatchItems.Count > 0)
+                            {
+                                for (int i = 0; i < Model.DispatchItems.Count; i++)
+                                {
+                                    var remaining = Model.DispatchItems[i].OrderedQuantity - Model.DispatchItems[i].PreviouslyDispatchedQuantity;
+                                    <tr>
+                                        <td>
+                                            <input type="hidden" asp-for="DispatchItems[i].SalesOrderItemId" />
+                                            <input type="hidden" asp-for="DispatchItems[i].ItemName" />
+                                            @Model.DispatchItems[i].ItemName
+                                        </td>
+                                        <td class="text-end">
+                                            <input type="hidden" asp-for="DispatchItems[i].OrderedQuantity" />
+                                            @Model.DispatchItems[i].OrderedQuantity
+                                        </td>
+                                        <td class="text-end">
+                                            <input type="hidden" asp-for="DispatchItems[i].PreviouslyDispatchedQuantity" />
+                                            @Model.DispatchItems[i].PreviouslyDispatchedQuantity
+                                        </td>
+                                        <td class="text-end fw-bold">
+                                            @remaining
+                                        </td>
+                                        <td>
+                                            <input asp-for="DispatchItems[i].DispatchedQuantity" class="form-control text-end dispatch-qty" type="number" step="0.01" max="@remaining" required />
+                                            <span asp-validation-for="DispatchItems[i].DispatchedQuantity" class="text-danger d-block mt-1 small"></span>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else if(Model.SalesOrderId > 0)
+                            {
+                                <tr>
+                                    <td colspan="5" class="text-center py-4 text-success">
+                                        <i class="bi bi-check-circle-fill fs-3 d-block mb-2"></i>
+                                        This Sales Order is fully dispatched. No remaining items.
+                                    </td>
+                                </tr>
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="5" class="text-center py-4 text-muted">
+                                        Please select a Sales Order to load items.
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mb-4">
+            <label asp-for="Remarks" class="form-label fw-bold">General Remarks</label>
+            <textarea asp-for="Remarks" class="form-control" rows="3"></textarea>
+            <span asp-validation-for="Remarks" class="text-danger"></span>
+        </div>
+
+        <div class="d-flex gap-2">
+            @if(Model.DispatchItems != null && Model.DispatchItems.Count > 0)
+            {
+                <button type="submit" class="btn btn-primary px-4 shadow-sm">Save & Generate DN</button>
+            }
+            <a asp-action="Index" class="btn btn-light border shadow-sm">Cancel</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        $(document).ready(function () {
+            $('#SalesOrderId').change(function() {
+                var soId = $(this).val();
+                if(soId) {
+                    window.location.href = '@Url.Action("Create")?salesOrderId=' + soId;
+                }
+            });
+        });
+    </script>
+}

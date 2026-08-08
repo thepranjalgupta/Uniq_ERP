@@ -1,0 +1,231 @@
+@model UniqPac_ERP.Models.Quotation
+
+@{
+    ViewData["Title"] = "Edit Quotation";
+}
+
+<div class="container-fluid px-4 py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="h4 mb-0 text-gray-800 fw-bold">@ViewData["Title"]</h2>
+    </div>
+
+    <div class="card shadow-sm border-0 rounded-3">
+        <div class="card-header bg-primary text-white py-3">
+            <h6 class="m-0 font-weight-bold">Edit Quotation: @Model.QuotationNo</h6>
+        </div>
+        <div class="card-body p-4">
+            <form asp-action="Edit" id="quotationForm">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="QuotationNo" />
+                <input type="hidden" asp-for="CreatedAt" />
+                <input type="hidden" asp-for="CreatedBy" />
+                <input type="hidden" asp-for="Status" />
+
+                <div class="row mb-3">
+                    <div class="col-md-5">
+                        <label asp-for="CustomerId" class="form-label fw-bold">Customer <span class="text-danger">*</span></label>
+                        <select asp-for="CustomerId" class="form-select" asp-items="ViewBag.CustomerId" required>
+                            <option value="">-- Select --</option>
+                        </select>
+                        <span asp-validation-for="CustomerId" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-3">
+                        <label asp-for="ValidUntil" class="form-label fw-bold"></label>
+                        <input asp-for="ValidUntil" class="form-control" type="date" value="@(Model.ValidUntil.HasValue ? Model.ValidUntil.Value.ToString("yyyy-MM-dd") : "")" />
+                        <span asp-validation-for="ValidUntil" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="Terms" class="form-label fw-bold"></label>
+                        <input asp-for="Terms" class="form-control" />
+                        <span asp-validation-for="Terms" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <label asp-for="Remarks" class="form-label fw-bold"></label>
+                        <input asp-for="Remarks" class="form-control" />
+                        <span asp-validation-for="Remarks" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <h5 class="fw-bold mb-3">Line Items <span class="text-danger">*</span></h5>
+                <div class="table-responsive mb-3">
+                    <table class="table table-bordered align-middle" id="itemsTable">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Description</th>
+                                <th style="width: 12%;">Qty</th>
+                                <th style="width: 15%;">Unit Rate (₹)</th>
+                                <th style="width: 12%;">Disc %</th>
+                                <th style="width: 15%;">Line Total</th>
+                                <th style="width: 5%;"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="itemsBody">
+                            @if (Model.QuotationItems == null || !Model.QuotationItems.Any())
+                            {
+                                <tr id="noItemsRow">
+                                    <td colspan="6" class="text-muted">No items added yet.</td>
+                                </tr>
+                            }
+                            else
+                            {
+                                var i = 0;
+                                foreach (var item in Model.QuotationItems)
+                                {
+                                    <tr class="item-row">
+                                        <td>
+                                            <input type="text" name="QuotationItems[@i].Description" class="form-control form-control-sm border-0" required value="@item.Description" />
+                                        </td>
+                                        <td>
+                                            <input type="number" name="QuotationItems[@i].Quantity" class="form-control form-control-sm border-0 text-end qty-input calc-trigger" required min="0.01" step="0.01" value="@item.Quantity" />
+                                        </td>
+                                        <td>
+                                            <input type="number" name="QuotationItems[@i].UnitRate" class="form-control form-control-sm border-0 text-end rate-input calc-trigger" required min="0" step="0.01" value="@item.UnitRate" />
+                                        </td>
+                                        <td>
+                                            <input type="number" name="QuotationItems[@i].DiscountPercentage" class="form-control form-control-sm border-0 text-end disc-input calc-trigger" min="0" max="100" step="0.01" value="@item.DiscountPercentage" />
+                                        </td>
+                                        <td class="bg-light align-middle text-end pe-3">
+                                            <span class="line-total-display fw-bold">@item.LineTotal.ToString("F2")</span>
+                                            <input type="hidden" name="QuotationItems[@i].LineTotal" class="line-total-input" value="@item.LineTotal" />
+                                        </td>
+                                        <td class="text-center align-middle">
+                                            <button type="button" class="btn btn-sm text-danger remove-line-btn">
+                                                <i class="bi bi-trash"></i> 🗑
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    i++;
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <button type="button" class="btn btn-outline-primary btn-sm" id="addLineBtn">
+                        <i class="bi bi-plus-lg"></i> + Add Line
+                    </button>
+                    <h5 class="fw-bold mb-0">Total: ₹<span id="totalAmountDisplay">@Model.TotalAmount.ToString("F2")</span></h5>
+                    <input type="hidden" asp-for="TotalAmount" id="TotalAmount" value="@Model.TotalAmount" />
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary px-4">Save Quotation</button>
+                    <a asp-action="Index" class="btn btn-light border px-4">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script>
+        $(document).ready(function () {
+            let itemIndex = @(Model.QuotationItems?.Count ?? 0);
+
+            function updateLineTotal(row) {
+                var qty = parseFloat(row.find('.qty-input').val()) || 0;
+                var rate = parseFloat(row.find('.rate-input').val()) || 0;
+                var disc = parseFloat(row.find('.disc-input').val()) || 0;
+
+                var gross = qty * rate;
+                var discountAmt = gross * (disc / 100.0);
+                var net = gross - discountAmt;
+                
+                row.find('.line-total-input').val(net.toFixed(2));
+                row.find('.line-total-display').text(net.toFixed(2));
+                
+                updateGrandTotal();
+            }
+
+            function updateGrandTotal() {
+                var total = 0;
+                $('.line-total-input').each(function() {
+                    total += parseFloat($(this).val()) || 0;
+                });
+                $('#TotalAmount').val(total.toFixed(2));
+                $('#totalAmountDisplay').text(total.toFixed(2));
+            }
+
+            $('#addLineBtn').click(function () {
+                $('#noItemsRow').hide();
+                
+                var tr = `
+                    <tr class="item-row">
+                        <td>
+                            <input type="text" name="QuotationItems[${itemIndex}].Description" class="form-control form-control-sm border-0" required placeholder="Enter description..." />
+                        </td>
+                        <td>
+                            <input type="number" name="QuotationItems[${itemIndex}].Quantity" class="form-control form-control-sm border-0 text-end qty-input calc-trigger" required min="0.01" step="0.01" value="1" />
+                        </td>
+                        <td>
+                            <input type="number" name="QuotationItems[${itemIndex}].UnitRate" class="form-control form-control-sm border-0 text-end rate-input calc-trigger" required min="0" step="0.01" value="0" />
+                        </td>
+                        <td>
+                            <input type="number" name="QuotationItems[${itemIndex}].DiscountPercentage" class="form-control form-control-sm border-0 text-end disc-input calc-trigger" min="0" max="100" step="0.01" value="0" />
+                        </td>
+                        <td class="bg-light align-middle text-end pe-3">
+                            <span class="line-total-display fw-bold">0.00</span>
+                            <input type="hidden" name="QuotationItems[${itemIndex}].LineTotal" class="line-total-input" value="0" />
+                        </td>
+                        <td class="text-center align-middle">
+                            <button type="button" class="btn btn-sm text-danger remove-line-btn">
+                                <i class="bi bi-trash"></i> 🗑
+                            </button>
+                        </td>
+                    </tr>
+                `;
+                
+                $('#itemsBody').append(tr);
+                itemIndex++;
+            });
+
+            $(document).on('input', '.calc-trigger', function() {
+                var row = $(this).closest('tr');
+                updateLineTotal(row);
+            });
+
+            $(document).on('click', '.remove-line-btn', function() {
+                $(this).closest('tr').remove();
+                
+                // Reindex
+                $('#itemsBody .item-row').each(function(index) {
+                    $(this).find('input').each(function() {
+                        var name = $(this).attr('name');
+                        if (name) {
+                            var newName = name.replace(/\[\d+\]/, '[' + index + ']');
+                            $(this).attr('name', newName);
+                        }
+                    });
+                });
+                
+                itemIndex = $('#itemsBody .item-row').length;
+                
+                if(itemIndex === 0) {
+                    if ($('#noItemsRow').length === 0) {
+                        $('#itemsBody').html('<tr id="noItemsRow"><td colspan="6" class="text-muted">No items added yet.</td></tr>');
+                    } else {
+                        $('#noItemsRow').show();
+                    }
+                }
+                
+                updateGrandTotal();
+            });
+
+            // Form validation
+            $('#quotationForm').submit(function(e) {
+                if ($('.item-row').length === 0) {
+                    e.preventDefault();
+                    alert('Please add at least one line item to the quotation.');
+                    return false;
+                }
+            });
+        });
+    </script>
+}

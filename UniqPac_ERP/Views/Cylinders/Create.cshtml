@@ -1,0 +1,148 @@
+@model UniqPac_ERP.Models.CylinderMaster
+
+@{
+    ViewData["Title"] = "Create Cylinder Master";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="fw-bold text-dark mb-0">Create Cylinder</h3>
+    <a asp-action="Index" class="btn btn-light border shadow-sm">
+        <i class="ph ph-arrow-left me-1"></i> Back to List
+    </a>
+</div>
+
+<div class="card shadow-sm border-0 rounded-4">
+    <div class="card-body p-4">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+            
+            <div class="row g-4 mb-4">
+                <div class="col-md-6">
+                    <label asp-for="CustomerJobId" class="form-label fw-semibold">Job <span class="text-danger">*</span></label>
+                    <select asp-for="CustomerJobId" class="form-select form-select-lg" asp-items="ViewBag.CustomerJobId" id="jobSelect">
+                        <option value="">-- Select Job --</option>
+                    </select>
+                    <span asp-validation-for="CustomerJobId" class="text-danger"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="CylinderCode" class="form-label fw-semibold">Cylinder Code / ID <span class="text-danger">*</span></label>
+                    <input asp-for="CylinderCode" class="form-control form-control-lg" placeholder="Enter Cylinder Code" />
+                    <span asp-validation-for="CylinderCode" class="text-danger"></span>
+                </div>
+                
+                <div class="col-md-6">
+                    <label asp-for="CylinderName" class="form-label fw-semibold">Cylinder Name <span class="text-danger">*</span></label>
+                    <input asp-for="CylinderName" class="form-control form-control-lg" placeholder="Enter Cylinder Name" />
+                    <span asp-validation-for="CylinderName" class="text-danger"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="NoOfCylinders" class="form-label fw-semibold">No. of Cylinders</label>
+                    <input asp-for="NoOfCylinders" class="form-control form-control-lg bg-light" id="noOfCylinders" readonly placeholder="Auto-filled from job" />
+                    <span asp-validation-for="NoOfCylinders" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="Structure" class="form-label fw-semibold">Structure</label>
+                    <input asp-for="Structure" class="form-control form-control-lg bg-light" id="structure" readonly placeholder="Auto-filled from job" />
+                    <span asp-validation-for="Structure" class="text-danger"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="CylinderSize" class="form-label fw-semibold">Cylinder Size</label>
+                    <input asp-for="CylinderSize" class="form-control form-control-lg" type="number" step="0.01" />
+                    <span asp-validation-for="CylinderSize" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="CoilSize" class="form-label fw-semibold">Coil Size</label>
+                    <input asp-for="CoilSize" class="form-control form-control-lg" type="number" step="0.01" />
+                    <span asp-validation-for="CoilSize" class="text-danger"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="RepeatSize" class="form-label fw-semibold">Repeat Size</label>
+                    <input asp-for="RepeatSize" class="form-control form-control-lg" type="number" step="0.01" />
+                    <span asp-validation-for="RepeatSize" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="PetSize" class="form-label fw-semibold">PET Size</label>
+                    <input asp-for="PetSize" class="form-control form-control-lg" type="number" step="0.01" />
+                    <span asp-validation-for="PetSize" class="text-danger"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="BoreId" class="form-label fw-semibold">Bore ID</label>
+                    <input asp-for="BoreId" class="form-control form-control-lg" />
+                    <span asp-validation-for="BoreId" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="Degree" class="form-label fw-semibold">Degree</label>
+                    <input asp-for="Degree" class="form-control form-control-lg" />
+                    <span asp-validation-for="Degree" class="text-danger"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Keycut" class="form-label fw-semibold">Keycut</label>
+                    <input asp-for="Keycut" class="form-control form-control-lg" />
+                    <span asp-validation-for="Keycut" class="text-danger"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="ProductPacked" class="form-label fw-semibold">Product Packed</label>
+                    <input asp-for="ProductPacked" class="form-control form-control-lg" />
+                    <span asp-validation-for="ProductPacked" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="mt-4 pt-3 border-top">
+                <button type="submit" class="btn btn-primary btn-lg px-5 shadow-sm">
+                    <i class="ph ph-floppy-disk me-2"></i>Save Cylinder
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        $(document).ready(function() {
+            $('#jobSelect').change(function() {
+                var jobId = $(this).val();
+                if (jobId) {
+                    $.get('@Url.Action("GetJobDetails", "Cylinders")', { jobId: jobId }, function(data) {
+                        if (data) {
+                            $('#noOfCylinders').val(data.colorCount);
+                            $('#structure').val(data.substrate);
+
+                            var coilSize = 0;
+                            var repeatSize = 0;
+
+                            if (data.width) {
+                                coilSize = data.width * 3;
+                                $('#CoilSize').val(coilSize.toFixed(2));
+                                $('#PetSize').val((coilSize + 10).toFixed(2));
+                            }
+
+                            if (data.length) {
+                                repeatSize = data.length * 3;
+                                if (repeatSize < 400) repeatSize = 400;
+                                $('#RepeatSize').val(repeatSize.toFixed(2));
+                            }
+
+                            // Cylinder Size = (Coil Size + 10) x Repeat Size
+                            if (coilSize > 0 && repeatSize > 0) {
+                                $('#CylinderSize').val(((coilSize + 10) * repeatSize).toFixed(2));
+                            }
+                        }
+                    });
+                } else {
+                    $('#noOfCylinders').val('');
+                    $('#structure').val('');
+                    $('#CoilSize').val('');
+                    $('#PetSize').val('');
+                    $('#CylinderSize').val('');
+                    $('#RepeatSize').val('');
+                }
+            });
+        });
+    </script>
+}

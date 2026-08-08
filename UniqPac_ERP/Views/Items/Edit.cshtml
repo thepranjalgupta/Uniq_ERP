@@ -1,0 +1,79 @@
+@model UniqPac_ERP.Models.Item
+
+@{
+    ViewData["Title"] = "Edit Items";
+}
+
+<div class="card"><div class="card-header"><h4 class="mb-0">Edit Record</h4></div><div class="card-body">
+<div class="row">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Id" />
+            <div class="col-md-6 mb-3">
+                <label asp-for="ItemCode" class="control-label"></label>
+                <input asp-for="ItemCode" class="form-control" />
+                <span asp-validation-for="ItemCode" class="text-danger"></span>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label asp-for="ItemName" class="control-label"></label>
+                <input asp-for="ItemName" class="form-control" />
+                <span asp-validation-for="ItemName" class="text-danger"></span>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label asp-for="Description" class="control-label"></label>
+                <input asp-for="Description" class="form-control" />
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label asp-for="ItemCategoryId" class="control-label"></label>
+                <select asp-for="ItemCategoryId" class="form-control" asp-items="ViewBag.ItemCategoryId"></select>
+                <span asp-validation-for="ItemCategoryId" class="text-danger"></span>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label asp-for="UomId" class="control-label"></label>
+                <select asp-for="UomId" class="form-control" asp-items="ViewBag.UomId"></select>
+                <span asp-validation-for="UomId" class="text-danger"></span>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label asp-for="ItemTypeId" class="control-label"></label>
+                <select asp-for="ItemTypeId" class="form-control" asp-items="ViewBag.ItemTypeId"></select>
+                <span asp-validation-for="ItemTypeId" class="text-danger"></span>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label asp-for="MinStockLevel" class="control-label"></label>
+                <input asp-for="MinStockLevel" class="form-control" />
+                <span asp-validation-for="MinStockLevel" class="text-danger"></span>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label asp-for="ReorderQty" class="control-label"></label>
+                <input asp-for="ReorderQty" class="form-control" />
+                <span asp-validation-for="ReorderQty" class="text-danger"></span>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label asp-for="StandardCost" class="control-label"></label>
+                <input asp-for="StandardCost" class="form-control" />
+                <span asp-validation-for="StandardCost" class="text-danger"></span>
+            </div>
+            <div class="form-group form-check">
+                <label class="form-check-label">
+                    <input class="form-check-input" asp-for="IsActive" /> @Html.DisplayNameFor(model => model.IsActive)
+                </label>
+            </div>
+            <div class="form-group form-check">
+                <label class="form-check-label">
+                    <input class="form-check-input" asp-for="IsDeleted" /> @Html.DisplayNameFor(model => model.IsDeleted)
+                </label>
+            </div>
+            <div class="col-md-6 mb-3">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+</div>
+</div>
+</div>
+
+
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

@@ -1,0 +1,85 @@
+@model IEnumerable<UniqPac_ERP.Models.Customer>
+
+@{
+    ViewData["Title"] = "Manage Customers";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="fw-bold text-dark mb-0">Customers</h3>
+    <a asp-action="Create" class="btn btn-primary fw-semibold shadow-sm">
+        <i class="ph ph-plus me-1"></i> New Customer
+    </a>
+</div>
+
+<div class="card shadow-sm border-0 rounded-4">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4 fw-semibold text-secondary">
+                            @Html.DisplayNameFor(model => model.CustomerCode)
+                        </th>
+                        <th class="fw-semibold text-secondary">
+                            @Html.DisplayNameFor(model => model.Name)
+                        </th>
+                        <th class="fw-semibold text-secondary">
+                            @Html.DisplayNameFor(model => model.CustomerType)
+                        </th>
+                        <th class="fw-semibold text-secondary">
+                            @Html.DisplayNameFor(model => model.ContactPerson)
+                        </th>
+                        <th class="fw-semibold text-secondary">
+                            @Html.DisplayNameFor(model => model.Email)
+                        </th>
+                        <th class="fw-semibold text-secondary">
+                            @Html.DisplayNameFor(model => model.PaymentTerms)
+                        </th>
+                        <th class="text-end pe-4 fw-semibold text-secondary">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model) {
+                        <tr>
+                            <td class="ps-4 fw-medium text-primary">
+                                @Html.DisplayFor(modelItem => item.CustomerCode)
+                            </td>
+                            <td class="fw-medium text-dark">
+                                @Html.DisplayFor(modelItem => item.Name)
+                            </td>
+                            <td>
+                                @if(!string.IsNullOrEmpty(item.CustomerType)){
+                                    <span class="badge bg-light text-secondary border px-2 py-1 rounded-pill">@item.CustomerType</span>
+                                } else {
+                                    <span>-</span>
+                                }
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.ContactPerson)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Email)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.PaymentTerms)
+                            </td>
+                            <td class="text-end pe-4 text-nowrap">
+                                <div class="d-flex justify-content-end align-items-center gap-1 flex-nowrap">
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-light border" title="View Details">
+                                        <i class="ph ph-eye"></i>
+                                    </a>
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-light border" title="Edit">
+                                        <i class="ph ph-pencil-simple"></i>
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-light border text-danger" title="Delete">
+                                        <i class="ph ph-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

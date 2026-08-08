@@ -1,0 +1,44 @@
+@model UniqPac_ERP.Models.PurchaseOrder
+
+@{
+    ViewData["Title"] = $"Delete {(Model.POType)} PO";
+}
+
+<div class="container-fluid px-4 py-4">
+    <div class="card shadow-sm border-0 rounded-4 border-top border-danger border-4 mx-auto" style="max-width: 600px;">
+        <div class="card-body p-4 p-md-5 text-center">
+            <div class="mb-4 text-danger">
+                <i class="bi bi-exclamation-triangle-fill" style="font-size: 3rem;"></i>
+            </div>
+            <h3 class="fw-bold mb-2">Delete Purchase Order</h3>
+            <p class="text-muted mb-4">Are you sure you want to delete PO <strong>@Model.PONumber</strong>? This action cannot be undone.</p>
+            
+            <div class="bg-light p-3 rounded text-start mb-4">
+                <div class="row">
+                    <div class="col-6 mb-2">
+                        <small class="text-muted d-block">Date</small>
+                        <span class="fw-medium">@Model.PODate.ToShortDateString()</span>
+                    </div>
+                    <div class="col-6 mb-2">
+                        <small class="text-muted d-block">Vendor</small>
+                        <span class="fw-medium">@Model.Vendor.Name</span>
+                    </div>
+                    <div class="col-12">
+                        <small class="text-muted d-block">Amount</small>
+                        <span class="fw-bold fs-5 text-dark">₹@Model.TotalAmount.ToString("N2")</span>
+                    </div>
+                </div>
+            </div>
+
+            <form asp-action="Delete">
+                <input type="hidden" asp-for="Id" />
+                <div class="d-flex gap-2 justify-content-center">
+                    <button type="submit" class="btn btn-danger px-4 fw-semibold shadow-sm">
+                        <i class="bi bi-trash me-1"></i> Yes, Delete
+                    </button>
+                    <a asp-action="Index" class="btn btn-light border fw-semibold shadow-sm">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

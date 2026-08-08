@@ -1,0 +1,358 @@
+@model UniqPac_ERP.Models.SalesOrder
+@using Microsoft.AspNetCore.Authorization
+@inject IAuthorizationService AuthorizationService
+@{
+    ViewData["Title"] = "Sales Order Details";
+}
+
+<div class="card shadow-sm border-0 rounded-4" style="max-width: 900px; margin: 0 auto;">
+    <div class="card-header bg-white border-bottom p-4 d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center gap-3">
+            <h4 class="mb-0 fw-bold text-dark">Order @Model.OrderNo</h4>
+            <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill fs-6">@Model.Status</span>
+            <span class="badge @(Model.ApprovalStatus == "Approved" ? "bg-success" : Model.ApprovalStatus == "Rejected" ? "bg-danger" : Model.ApprovalStatus == "Manager Approved" ? "bg-info" : "bg-warning text-dark") px-3 py-2 rounded-pill fs-6">@Model.ApprovalStatus</span>
+        </div>
+        <button id="downloadPdfBtn" class="btn btn-outline-danger shadow-sm">
+            <i class="ph ph-file-pdf me-2"></i>Download PDF
+        </button>
+    </div>
+    <div class="card-body p-4 p-md-5">
+        <div class="row g-4 mb-4 pb-4 border-bottom">
+            <div class="col-sm-4">
+                <p class="text-muted mb-1 text-uppercase fs-7 fw-semibold">Customer</p>
+                <h5 class="fw-bold mb-0">@Model.Customer.Name</h5>
+            </div>
+            <div class="col-sm-4">
+                <p class="text-muted mb-1 text-uppercase fs-7 fw-semibold">Linked Jobs</p>
+                <h5 class="fw-bold mb-0">@(Model.LinkedJobs?.Count ?? 0)</h5>
+            </div>
+            <div class="col-sm-4 text-sm-end">
+                <p class="text-muted mb-1 text-uppercase fs-7 fw-semibold">Dates</p>
+                <p class="mb-0 fw-medium">Order: @Model.OrderDate.ToShortDateString()</p>
+                @if(Model.ExpectedDeliveryDate.HasValue){
+                    <p class="mb-0 fw-medium">Delivery: @Model.ExpectedDeliveryDate.Value.ToShortDateString()</p>
+                }
+            </div>
+
+        <div class="mb-4 pb-4 border-bottom">
+            @if (Model.ApprovalStatus == "Pending" && (await AuthorizationService.AuthorizeAsync(User, UniqPac_ERP.Constants.Permissions.Approvals.Manager)).Succeeded)
+            {
+                <form asp-action="ApproveManager" method="post" class="d-inline">
+                    <input type="hidden" name="id" value="@Model.Id" />
+                    <button type="submit" class="btn btn-sm btn-info">Approve (Manager)</button>
+                </form>
+            }
+            
+            @if (Model.ApprovalStatus != "Approved" && Model.ApprovalStatus != "Rejected" && (await AuthorizationService.AuthorizeAsync(User, UniqPac_ERP.Constants.Permissions.Approvals.Admin)).Succeeded)
+            {
+                <form asp-action="ApproveAdmin" method="post" class="d-inline">
+                    <input type="hidden" name="id" value="@Model.Id" />
+                    <button type="submit" class="btn btn-sm btn-success">Approve (Admin)</button>
+                </form>
+            }
+
+            @if (Model.ApprovalStatus != "Approved" && Model.ApprovalStatus != "Rejected" && ((await AuthorizationService.AuthorizeAsync(User, UniqPac_ERP.Constants.Permissions.Approvals.Manager)).Succeeded || (await AuthorizationService.AuthorizeAsync(User, UniqPac_ERP.Constants.Permissions.Approvals.Admin)).Succeeded))
+            {
+                <form asp-action="Reject" method="post" class="d-inline ms-2">
+                    <input type="hidden" name="id" value="@Model.Id" />
+                    <div class="input-group input-group-sm d-inline-flex" style="width: auto;">
+                        <input type="text" name="reason" class="form-control" placeholder="Rejection reason" required />
+                        <button type="submit" class="btn btn-danger">Reject</button>
+                    </div>
+                </form>
+            }
+
+            @if (Model.ApprovalStatus == "Rejected")
+            {
+                <form asp-action="Resubmit" method="post" class="d-inline">
+                    <input type="hidden" name="id" value="@Model.Id" />
+                    <div class="input-group input-group-sm d-inline-flex" style="width: auto;">
+                        <input type="text" name="remarks" class="form-control" placeholder="Resubmission remarks" />
+                        <button type="submit" class="btn btn-warning">Resubmit</button>
+                    </div>
+                </form>
+            }
+        </div>
+
+        <h6 class="fw-bold mb-3">Approval History</h6>
+        <div class="table-responsive mb-4 border rounded">
+            <table class="table table-sm align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th>Action</th>
+                        <th>Action By</th>
+                        <th>Date</th>
+                        <th>Remarks</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (ViewBag.ApprovalHistories != null)
+                    {
+                        foreach (UniqPac_ERP.Models.ApprovalHistory history in ViewBag.ApprovalHistories)
+                        {
+                            <tr>
+                                <td>@history.Action</td>
+                                <td>@(history.ActionBy?.FirstName) @(history.ActionBy?.LastName)</td>
+                                <td>@history.ActionDate.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
+                                <td>@history.Remarks</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+        </div>
+
+        <h6 class="fw-bold mb-3">Linked Jobs</h6>
+        <div class="table-responsive mb-4 border rounded">
+            <table class="table table-sm align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th>Job Title</th>
+                        <th>Substrate</th>
+                        <th>Dimensions</th>
+                        <th>Colors</th>
+                        <th>Finish</th>
+                        <th>Instructions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if(Model.LinkedJobs != null && Model.LinkedJobs.Any())
+                    {
+                        foreach(var link in Model.LinkedJobs)
+                        {
+                            <tr>
+                                <td>@link.CustomerJob.JobName</td>
+                                <td>@link.CustomerJob.Substrate</td>
+                                <td>@link.CustomerJob.Width x @link.CustomerJob.Length mm</td>
+                                <td>@link.CustomerJob.ColorCount</td>
+                                <td>@link.CustomerJob.Finish</td>
+                                <td>@link.CustomerJob.SpecialInstructions</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr><td colspan="3" class="text-muted text-center py-2">No jobs linked.</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <h6 class="fw-bold mb-3">Line Items</h6>
+        <div class="table-responsive mb-4 border rounded">
+            <table class="table table-bordered align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th>Item</th>
+                        <th class="text-end">Qty</th>
+                        <th class="text-end">Rate</th>
+                        <th class="text-end">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach(var item in Model.SalesOrderItems)
+                    {
+                        <tr>
+                            <td class="fw-medium">
+                                <div>@item.Item.ItemName</div>
+                                @if(!string.IsNullOrEmpty(item.JobName) || !string.IsNullOrEmpty(item.JobCode))
+                                {
+                                    <div class="mt-2 p-2 bg-light rounded text-muted" style="font-size: 0.85rem;">
+                                        <div class="row g-2">
+                                            @if(!string.IsNullOrEmpty(item.JobCode)) { <div class="col-sm-6"><strong>Job Code:</strong> @item.JobCode</div> }
+                                            @if(!string.IsNullOrEmpty(item.JobName)) { <div class="col-sm-6"><strong>Job Name:</strong> @item.JobName</div> }
+                                            @if(!string.IsNullOrEmpty(item.Specs)) { <div class="col-sm-6"><strong>Specs:</strong> @item.Specs</div> }
+                                            @if(!string.IsNullOrEmpty(item.JobSize)) { <div class="col-sm-6"><strong>Job Size:</strong> @item.JobSize</div> }
+                                            @if(!string.IsNullOrEmpty(item.CylinderStatus)) { <div class="col-sm-6"><strong>Cylinder Status:</strong> @item.CylinderStatus</div> }
+                                            @if(!string.IsNullOrEmpty(item.CylinderCharges)) { <div class="col-sm-6"><strong>Cylinder Charges:</strong> @item.CylinderCharges</div> }
+                                            @if(!string.IsNullOrEmpty(item.RollWeight)) { <div class="col-sm-6"><strong>Roll Weight:</strong> @item.RollWeight</div> }
+                                            @if(!string.IsNullOrEmpty(item.Direction)) { <div class="col-sm-6"><strong>Direction:</strong> @item.Direction</div> }
+                                            @if(!string.IsNullOrEmpty(item.ShadeMatch)) { <div class="col-sm-6"><strong>Shade Match:</strong> @item.ShadeMatch</div> }
+                                            @if(!string.IsNullOrEmpty(item.SampleRequired)) { <div class="col-sm-6"><strong>Sample Required:</strong> @item.SampleRequired</div> }
+                                            @if(!string.IsNullOrEmpty(item.DelDate)) { <div class="col-sm-6"><strong>Del. Date:</strong> @item.DelDate</div> }
+                                        </div>
+                                    </div>
+                                }
+                            </td>
+                            <td class="text-end">@item.Quantity</td>
+                            <td class="text-end">₹@item.Rate.ToString("N2")</td>
+                            <td class="text-end fw-semibold">₹@item.TotalAmount.ToString("N2")</td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="3" class="text-end fw-bold">Grand Total</td>
+                        <td class="text-end fw-bold text-primary fs-5">₹@Model.TotalAmount.ToString("N2")</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <div class="d-flex gap-2 border-top pt-4">
+            <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-primary px-4">Edit Order</a>
+            <a asp-action="Index" class="btn btn-light border px-4">Back to List</a>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden PDF Container -->
+<div style="position: absolute; left: -9999px; top: 0;">
+    <div id="pdf-content" style="width: 190mm; font-family: Arial, sans-serif; font-size: 11px; color: #000; background-color: #fff; padding: 0;">
+        <table style="width: 100%; border-collapse: collapse; border: 2px solid #000;">
+            <!-- Header -->
+            <tr>
+                <td colspan="2" style="text-align: center; padding: 10px; border-bottom: 1px solid #000;">
+                    <div style="font-size: 28px; font-weight: bold; color: #1e3a8a; display: flex; align-items: center; justify-content: center;">
+                        <span style="color: #ea580c; font-size: 32px; margin-right: 5px;">&#9679;</span> UNIQUE <span style="font-size: 12px; color: #6b7280; margin-left: 5px;">PACKTECH</span>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2" style="text-align: center; padding: 5px; font-weight: bold; font-size: 14px; border-bottom: 1px solid #000;">
+                    Sales Order
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2" style="text-align: center; padding: 5px; font-weight: bold; color: #dc2626; background-color: #dbeafe; border-bottom: 1px solid #000;">
+                    CUSTOMER DETAILS
+                </td>
+            </tr>
+
+            <!-- Billing & Shipping -->
+            <tr>
+                <td style="width: 50%; padding: 10px; border-right: 1px solid #000; vertical-align: top;">
+                    <strong>Billing Name & Address:</strong><br />
+                    @(Model!.BillingName ?? Model.Customer?.Name)<br />
+                    @Html.Raw((Model!.BillingAddress ?? "").Replace("\n", "<br/>"))<br />
+                    <strong>GSTIN: @(Model.Customer?.GSTNo ?? "-")</strong>
+                </td>
+                <td style="width: 50%; padding: 10px; vertical-align: top;">
+                    <strong>Consignee/Dispatch Name & Address:</strong><br />
+                    @if(Model.IsShippingSameAsBilling)
+                    {
+                        <span>Same as billing</span>
+                    }
+                    else
+                    {
+                        @Html.Raw((Model.ShippingName ?? "").Replace("\n", "<br/>"))<br />
+                        @Html.Raw((Model.ShippingAddress ?? "").Replace("\n", "<br/>"))
+                    }
+                </td>
+            </tr>
+
+            <!-- Terms Grid -->
+            <tr style="border-top: 1px solid #000; border-bottom: 1px solid #000;">
+                <td style="width: 50%; padding: 5px 10px; border-right: 1px solid #000; vertical-align: top;">
+                    <table style="width: 100%; border: none;">
+                        <tr><td style="width: 100px; padding: 2px 0;"><strong>Date of order</strong></td><td style="padding: 2px 0;">: @Model.OrderDate.ToString("dd-MM-yyyy")</td></tr>
+                        <tr><td style="padding: 2px 0;"><strong>Mkt. Person</strong></td><td style="padding: 2px 0;">: @(Model.MktPerson ?? "-")</td></tr>
+                        <tr><td style="padding: 2px 0;"><strong>Order Type</strong></td><td style="padding: 2px 0;">: @(Model.OrderType ?? "-")</td></tr>
+                    </table>
+                </td>
+                <td style="width: 50%; padding: 5px 10px; vertical-align: top;">
+                    <table style="width: 100%; border: none;">
+                        <tr><td style="width: 120px; padding: 2px 0;"><strong>Delivery Terms</strong></td><td style="padding: 2px 0;">: @(Model.DeliveryTerms ?? "-")</td></tr>
+                        <tr><td style="padding: 2px 0;"><strong>Payment Terms</strong></td><td style="padding: 2px 0;">: @(Model.PaymentTerms ?? "-")</td></tr>
+                        <tr><td style="padding: 2px 0;"><strong>Contact Person</strong></td><td style="padding: 2px 0;">: @(Model.Customer?.ContactPerson ?? "-")</td></tr>
+                        <tr><td style="padding: 2px 0;"><strong>Packing Charges</strong></td><td style="padding: 2px 0;">: @(Model.PackingCharges ?? "-")</td></tr>
+                        <tr><td style="padding: 2px 0;"><strong>Mode of Transport</strong></td><td style="padding: 2px 0;">: @(Model.ModeOfTransport ?? "-")</td></tr>
+                    </table>
+                </td>
+            </tr>
+
+            <tr>
+                <td colspan="2" style="text-align: center; padding: 5px; font-weight: bold; font-size: 13px; border-bottom: 1px solid #000;">
+                    Order Details
+                </td>
+            </tr>
+
+            <!-- Line Items Loop -->
+            @{ var artwork = Model.LinkedJobs?.FirstOrDefault()?.CustomerJob?.ArtworkImagePath; }
+            @foreach(var item in Model.SalesOrderItems)
+            {
+                <tr>
+                    <td colspan="2" style="padding: 0; border-bottom: 1px solid #000;">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <tr>
+                                <td colspan="2" style="padding: 10px; font-weight: bold;">
+                                    @item.Item?.ItemName<br />
+                                    Job Code &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: @(item.JobCode ?? "-")<br />
+                                    Job Name &nbsp;&nbsp;&nbsp;: @(item.JobName ?? "-")
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="width: 50%; padding: 10px; vertical-align: top;">
+                                    <table style="width: 100%; border: none;">
+                                        <tr><td style="width: 120px; padding: 2px 0;"><strong>Quantity</strong></td><td style="padding: 2px 0;">: @item.Quantity</td></tr>
+                                        <tr><td style="padding: 2px 0;"><strong>Qty In Words</strong></td><td style="padding: 2px 0;">: @(item.Quantity) ONLY</td></tr>
+                                        <tr><td style="padding: 2px 0;"><strong>Specs</strong></td><td style="padding: 2px 0;">: @(item.Specs ?? "-")</td></tr>
+                                        <tr><td style="padding: 2px 0;"><strong>Unit Price</strong></td><td style="padding: 2px 0;">: Rs @item.Rate</td></tr>
+                                        <tr><td style="padding: 2px 0;"><strong>Cylinder Status</strong></td><td style="padding: 2px 0;">: @(item.CylinderStatus ?? "-")</td></tr>
+                                        <tr><td style="padding: 2px 0;"><strong>Del. Date</strong></td><td style="padding: 2px 0;">: @(item.DelDate ?? "-")</td></tr>
+                                        <tr><td style="padding: 2px 0;"><strong>Cylinder Charges</strong></td><td style="padding: 2px 0;">: @(item.CylinderCharges ?? "-")</td></tr>
+                                        <tr><td style="padding: 2px 0;"><strong>Netwt/Batch/Pkd/Rate</strong></td><td style="padding: 2px 0;"></td></tr>
+                                    </table>
+                                </td>
+                                <td style="width: 50%; padding: 10px; vertical-align: top;">
+                                    <div style="border: 1px solid #ccc; height: 100px; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; background-color: #f9f9f9; overflow: hidden;">
+                                        @if (!string.IsNullOrEmpty(artwork))
+                                        {
+                                            <img src="@artwork" style="max-height: 100px; max-width: 100%; object-fit: contain;" alt="Artwork" />
+                                        }
+                                        else
+                                        {
+                                            <span style="color: #999;">Artwork Image Placeholder</span>
+                                        }
+                                    </div>
+                                    <table style="width: 100%; border: none;">
+                                        <tr><td style="width: 100px; padding: 2px 0;"><strong>Roll weight:</strong></td><td style="padding: 2px 0;">@(item.RollWeight ?? "-")</td></tr>
+                                        <tr><td style="padding: 2px 0;"><strong>Direction:</strong></td><td style="padding: 2px 0;">@(item.Direction ?? "-")</td></tr>
+                                        <tr><td style="padding: 2px 0;"><strong>Shade match:</strong></td><td style="padding: 2px 0;">@(item.ShadeMatch ?? "-")</td></tr>
+                                        <tr><td style="padding: 2px 0;"><strong>Sample Required:</strong></td><td style="padding: 2px 0;">@(item.SampleRequired ?? "-")</td></tr>
+                                        <tr><td style="padding: 2px 0;"><strong>Job Size:</strong></td><td style="padding: 2px 0;">@(item.JobSize ?? "-")</td></tr>
+                                        <tr><td style="padding: 2px 0;"><strong>Packing Type:</strong></td><td style="padding: 2px 0;">@(item.PackingType ?? "-")</td></tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <!-- Footer for this item -->
+                <tr>
+                    <td colspan="2" style="padding: 10px; font-weight: bold; color: #dc2626;">
+                        <div style="display: flex; justify-content: space-between;">
+                            <span>@(item.Item?.ItemName?.ToUpper())</span>
+                            <span>@(item.PackingType ?? "ROLL")</span>
+                        </div>
+                        FORM - @(string.IsNullOrEmpty(Model.FormValue) ? "300 KG" : Model.FormValue)<br />
+                        NOTE: This is to confirm that the artwork has been processed strictly in accordance with the final approval received from your end. The approval provided was considered as the final go-ahead for all aspects of the artwork, including but not limited to the overall dimensions, text content, image placements, layout, design elements, and all other specifications.<br />
+                        We had reviewed and reconfirmed these details multiple times during the approval process, and the production was initiated only after receiving your final confirmation.<br />
+                        Accordingly, any concerns, discrepancies, or issues relating to the approved size, content, image placement, or any other approved element identified after production has commenced or upon delivery shall not be the responsibility of Unique Packtech, as the work has been executed exactly as per the approved artwork.
+                    </td>
+                </tr>
+            }
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- html2pdf library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script>
+        document.getElementById('downloadPdfBtn').addEventListener('click', function () {
+            var element = document.getElementById('pdf-content');
+            var opt = {
+                margin:       10, // 10mm margin
+                filename:     'SalesOrder_@(Model.OrderNo).pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            // New Promise-based usage:
+            html2pdf().set(opt).from(element).save();
+        });
+    </script>
+}

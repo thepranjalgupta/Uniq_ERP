@@ -1,0 +1,517 @@
+@model UniqPac_ERP.Models.SalesOrder
+@using System.Text.Json
+
+@{
+    ViewData["Title"] = "Edit Sales Order";
+    var itemsJson = JsonSerializer.Serialize(ViewBag.Items);
+    var selectedJobIds = ViewBag.SelectedJobIds as List<int> ?? new List<int>();
+    var selectedJobIdsJson = JsonSerializer.Serialize(selectedJobIds);
+}
+
+<div class="card shadow border-0 rounded-4" style="max-width: 1200px; margin: 0 auto;">
+    <div class="card-header bg-primary text-white p-3 border-0" style="border-top-left-radius: inherit; border-top-right-radius: inherit;">
+        <h4 class="mb-0 fw-bold">Edit Sales Order</h4>
+    </div>
+    <div class="card-body p-4 p-md-5">
+        <form asp-action="Edit" id="orderForm">
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="CustomerId" id="hiddenCustomerId" />
+            
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-4"></div>
+            
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <label asp-for="CustomerId" class="form-label fw-bold">Customer <span class="text-danger">*</span></label>
+                    <select class="form-select bg-light" disabled>
+                        <option value="@Model.CustomerId">@Model.Customer?.Name</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="QuotationRef" class="form-label fw-bold"></label>
+                    <select asp-for="QuotationRef" class="form-select" id="quotationRef">
+                        <option value="">-- Without Quotation --</option>
+                        @if (!string.IsNullOrEmpty(Model.QuotationRef))
+                        {
+                            <option value="@Model.QuotationRef" selected>@Model.QuotationRef (Current)</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="ExpectedDeliveryDate" class="form-label fw-bold">Required By Date</label>
+                    <input asp-for="ExpectedDeliveryDate" class="form-control" type="date" />
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <label asp-for="CustomerPORef" class="form-label fw-bold"></label>
+                    <input asp-for="CustomerPORef" class="form-control" />
+                </div>
+                <div class="col-md-8">
+                    <label asp-for="OrderNo" class="form-label fw-bold">System Order No</label>
+                    <input asp-for="OrderNo" class="form-control" />
+                </div>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-12">
+                    <label asp-for="Remarks" class="form-label fw-bold"></label>
+                    <input asp-for="Remarks" class="form-control" />
+                </div>
+            </div>
+
+            <!-- PDF Specific Fields (Hidden by default, shown if needed) -->
+            <h5 class="fw-bold mb-3 text-dark">Additional details (Optional)</h5>
+            <div class="row mb-3 bg-light p-3 border rounded mx-0">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="BillingName" class="form-label fw-bold"></label>
+                    <input asp-for="BillingName" class="form-control" />
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="BillingAddress" class="form-label fw-bold"></label>
+                    <textarea asp-for="BillingAddress" class="form-control" rows="2"></textarea>
+                </div>
+                <div class="col-md-12 mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" asp-for="IsShippingSameAsBilling" id="sameAsBillingCheck">
+                        <label class="form-check-label fw-bold" for="sameAsBillingCheck">
+                            Shipping Address Same as Billing
+                        </label>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="ShippingName" class="form-label fw-bold"></label>
+                    <input asp-for="ShippingName" class="form-control" />
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="ShippingAddress" class="form-label fw-bold"></label>
+                    <textarea asp-for="ShippingAddress" class="form-control" rows="2"></textarea>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="MktPerson" class="form-label fw-bold"></label>
+                    <input asp-for="MktPerson" class="form-control" />
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="OrderType" class="form-label fw-bold"></label>
+                    <input asp-for="OrderType" class="form-control" placeholder="e.g. NEW" />
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label asp-for="DeliveryTerms" class="form-label fw-bold"></label>
+                    <input asp-for="DeliveryTerms" class="form-control" />
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label asp-for="PaymentTerms" class="form-label fw-bold"></label>
+                    <input asp-for="PaymentTerms" class="form-control" />
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label asp-for="PackingCharges" class="form-label fw-bold"></label>
+                    <input asp-for="PackingCharges" class="form-control" />
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label asp-for="ModeOfTransport" class="form-label fw-bold"></label>
+                    <input asp-for="ModeOfTransport" class="form-control" />
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label asp-for="FormValue" class="form-label fw-bold"></label>
+                    <input asp-for="FormValue" class="form-control" placeholder="e.g. 300 KG" />
+                </div>
+            </div>
+
+            <!-- Jobs Linked Table -->
+            <div class="card bg-light border mb-4">
+                <div class="card-header bg-light border-bottom d-flex justify-content-between align-items-center py-2">
+                    <h6 class="mb-0 fw-bold text-primary"><i class="ph ph-briefcase me-2"></i>Select Customer Jobs to Link</h6>
+                    <span class="badge bg-secondary rounded-pill" id="jobsCountBadge">0 found</span>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0 bg-white" id="jobsTable">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 5%">Link</th>
+                                <th style="width: 15%">Job Title</th>
+                                <th style="width: 15%">Substrate</th>
+                                <th style="width: 20%">Dimensions</th>
+                                <th style="width: 10%">Colors</th>
+                                <th style="width: 10%">Finish</th>
+                                <th style="width: 25%">Special Instructions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="jobsBody">
+                            <tr><td colspan="7" class="text-center py-3"><div class="spinner-border spinner-border-sm text-primary"></div></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Line Items Section -->
+            <h5 class="fw-bold mb-3 text-dark">Order Items <span class="text-danger">*</span></h5>
+            
+            <div class="table-responsive mb-3 border rounded">
+                <table class="table table-bordered align-middle mb-0" id="itemsTable">
+                    <thead class="bg-light">
+                        <tr>
+                            <th style="width: 45%;">Description</th>
+                            <th style="width: 15%;">Qty</th>
+                            <th style="width: 20%;">Unit Rate (₹)</th>
+                            <th style="width: 15%;">Line Total</th>
+                            <th style="width: 5%;"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="itemsBody">
+                        @if(Model.SalesOrderItems != null && Model.SalesOrderItems.Any())
+                        {
+                            var idx = 0;
+                            foreach(var item in Model.SalesOrderItems)
+                            {
+                                <tr class="item-row">
+                                    <td>
+                                        <select name="SalesOrderItems[@idx].ItemId" class="form-select border-0 item-select" required>
+                                            <option value="">-- Select Item --</option>
+                                            @foreach(var vItem in ViewBag.Items)
+                                            {
+                                                if(vItem.Id == item.ItemId) { <option value="@vItem.Id" selected>@vItem.ItemName</option> }
+                                                else { <option value="@vItem.Id">@vItem.ItemName</option> }
+                                            }
+                                        </select>
+                                        <a href="javascript:void(0)" class="text-primary mt-1 d-block" onclick="togglePdfDetails(this)">
+                                            <i class="ph ph-plus-circle"></i> View/Edit Additional details
+                                        </a>
+                                        <div class="pdf-details mt-3 p-3 bg-white border rounded" style="display:none;">
+                                            <div class="row g-2">
+                                                <div class="col-6"><label class="form-label text-muted small mb-0 fw-semibold">Job Code</label><input type="text" name="SalesOrderItems[@idx].JobCode" class="form-control form-control-sm" placeholder="Job Code" value="@item.JobCode" /></div>
+                                                <div class="col-6"><label class="form-label text-muted small mb-0 fw-semibold">Job Name</label><input type="text" name="SalesOrderItems[@idx].JobName" class="form-control form-control-sm" placeholder="Job Name" value="@item.JobName" /></div>
+                                                <div class="col-12"><label class="form-label text-muted small mb-0 fw-semibold">Specs</label><input type="text" name="SalesOrderItems[@idx].Specs" class="form-control form-control-sm" placeholder="Specs" value="@item.Specs" /></div>
+                                                <div class="col-6"><label class="form-label text-muted small mb-0 fw-semibold">Cylinder Status</label><input type="text" name="SalesOrderItems[@idx].CylinderStatus" class="form-control form-control-sm" placeholder="Cylinder Status" value="@item.CylinderStatus" /></div>
+                                                <div class="col-6"><label class="form-label text-muted small mb-0 fw-semibold">Delivery Date</label><input type="date" name="SalesOrderItems[@idx].DelDate" class="form-control form-control-sm" placeholder="Del. Date" value="@item.DelDate" /></div>
+                                                <div class="col-6"><label class="form-label text-muted small mb-0 fw-semibold">Cylinder Charges</label><input type="text" name="SalesOrderItems[@idx].CylinderCharges" class="form-control form-control-sm" placeholder="Cylinder Charges" value="@item.CylinderCharges" /></div>
+                                                <div class="col-6"><label class="form-label text-muted small mb-0 fw-semibold">Roll Weight</label><input type="text" name="SalesOrderItems[@idx].RollWeight" class="form-control form-control-sm" placeholder="Roll Weight" value="@item.RollWeight" /></div>
+                                                <div class="col-6"><label class="form-label text-muted small mb-0 fw-semibold">Direction</label><input type="text" name="SalesOrderItems[@idx].Direction" class="form-control form-control-sm" placeholder="Direction" value="@item.Direction" /></div>
+                                                <div class="col-6"><label class="form-label text-muted small mb-0 fw-semibold">Shade Match</label><input type="text" name="SalesOrderItems[@idx].ShadeMatch" class="form-control form-control-sm" placeholder="Shade Match" value="@item.ShadeMatch" /></div>
+                                                <div class="col-6"><label class="form-label text-muted small mb-0 fw-semibold">Sample Required</label><input type="text" name="SalesOrderItems[@idx].SampleRequired" class="form-control form-control-sm" placeholder="Sample Required" value="@item.SampleRequired" /></div>
+                                                <div class="col-6"><label class="form-label text-muted small mb-0 fw-semibold">Job Size</label><input type="text" name="SalesOrderItems[@idx].JobSize" class="form-control form-control-sm" placeholder="Job Size" value="@item.JobSize" /></div>
+                                                <div class="col-6"><label class="form-label text-muted small mb-0 fw-semibold">Packing Type</label><input type="text" name="SalesOrderItems[@idx].PackingType" class="form-control form-control-sm" placeholder="Packing Type" value="@item.PackingType" /></div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <input type="number" name="SalesOrderItems[@idx].Quantity" class="form-control border-0 qty-input calc-trigger" required min="1" value="@item.Quantity" />
+                                    </td>
+                                    <td>
+                                        <input type="number" step="0.01" name="SalesOrderItems[@idx].Rate" class="form-control border-0 rate-input calc-trigger" required min="0.01" value="@item.Rate" />
+                                    </td>
+                                    <td class="bg-light">
+                                        <input type="text" class="form-control-plaintext row-total-display fw-bold" readonly value="@item.TotalAmount" />
+                                        <input type="hidden" name="SalesOrderItems[@idx].TotalAmount" class="row-total-input" value="@item.TotalAmount" />
+                                    </td>
+                                    <td class="text-center bg-light">
+                                        <button type="button" class="btn btn-sm btn-light text-danger border-0 remove-row">
+                                            <i class="ph ph-x fw-bold"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                idx++;
+                            }
+                        }
+                        else 
+                        {
+                            <tr id="emptyItemsRow">
+                                <td colspan="5" class="text-muted py-3">No items added yet.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <button type="button" class="btn btn-sm btn-outline-primary bg-white" id="addRowBtn">
+                    <i class="ph ph-plus"></i> Add Item
+                </button>
+                <div class="fw-bold fs-5">
+                    Total: <span id="grandTotalDisplay">₹@Model.TotalAmount.ToString("N2")</span>
+                    <input type="hidden" asp-for="TotalAmount" id="grandTotal" />
+                </div>
+            </div>
+
+            <div class="d-flex gap-2 pt-2">
+                <button type="submit" class="btn btn-primary px-4 fw-semibold">Save Changes</button>
+                <a asp-action="Index" class="btn btn-light border fw-semibold">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        var itemsList = [];
+        try { itemsList = @Html.Raw(itemsJson != null ? itemsJson : "[]"); } catch(e) {}
+        
+        var selectedJobIds = @Html.Raw(selectedJobIdsJson);
+        var rowIdx = $('#itemsBody tr.item-row').length;
+
+        $(document).ready(function () {
+            
+            var customerId = $('#hiddenCustomerId').val();
+            var jobsBody = $('#jobsBody');
+            var quotationSelect = $('#quotationRef');
+            
+            if (customerId) {
+                // Fetch Quotations
+                $.getJSON('@Url.Action("GetQuotationsByCustomer", "SalesOrders")', { customerId: customerId }, function (data) {
+                    // Only populate if we have new data, keep the current one if it's there
+                    var currentVal = quotationSelect.val();
+                    quotationSelect.empty();
+                    quotationSelect.append('<option value="">-- Without Quotation --</option>');
+                    if (data && data.length > 0) {
+                        $.each(data, function(i, q) {
+                            var selected = (q.quotationNo === currentVal) ? 'selected' : '';
+                            quotationSelect.append(`<option value="${q.quotationNo}" ${selected}>${q.quotationNo} (${q.status}, ₹${q.totalAmount})</option>`);
+                        });
+                    }
+                });
+
+                $.getJSON('@Url.Action("GetJobsByCustomer", "SalesOrders")', { customerId: customerId }, function (data) {
+                    jobsBody.empty();
+                    $('#jobsCountBadge').text(data.length + ' found');
+                    
+                    if(data.length === 0) {
+                        jobsBody.html('<tr><td colspan="8" class="text-center py-4 text-muted">No jobs found for this customer.</td></tr>');
+                        return;
+                    }
+
+                    $.each(data, function(i, job) {
+                        var isChecked = selectedJobIds.includes(job.id) ? 'checked' : '';
+                        var tr = `
+                            <tr>
+                                <td>
+                                    <input class="form-check-input border-secondary job-radio" type="radio" name="SelectedJobIds" value="${job.id}" data-item-id="${job.linkedItemId}" ${isChecked}>
+                                </td>
+                                <td class="fw-bold text-dark">${job.jobName || '-'}</td>
+                                <td>${job.substrate || '-'}</td>
+                                <td>${job.width || '-'} x ${job.length || '-'} mm</td>
+                                <td>${job.colorCount || '-'}</td>
+                                <td>${job.finish || '-'}</td>
+                                <td class="text-truncate" style="max-width: 150px;" title="${job.specialInstructions || ''}">${job.specialInstructions || '-'}</td>
+                            </tr>
+                        `;
+                        jobsBody.append(tr);
+                    });
+                });
+            }
+
+            // Sync shipping with billing if "Same as Billing" is checked
+            $('#sameAsBillingCheck').change(function() {
+                if ($(this).is(':checked')) {
+                    $('#ShippingName').val($('#BillingName').val()).prop('readonly', true);
+                    $('#ShippingAddress').val($('#BillingAddress').val()).prop('readonly', true);
+                } else {
+                    $('#ShippingName').prop('readonly', false);
+                    $('#ShippingAddress').prop('readonly', false);
+                }
+            });
+
+            // Keep shipping in sync if billing changes while checked
+            $('#BillingName, #BillingAddress').on('input', function() {
+                if ($('#sameAsBillingCheck').is(':checked')) {
+                    if($(this).attr('id') === 'BillingName') {
+                        $('#ShippingName').val($(this).val());
+                    } else {
+                        $('#ShippingAddress').val($(this).val());
+                    }
+                }
+            });
+            
+            // Set initial state of fields if checked
+            if ($('#sameAsBillingCheck').is(':checked')) {
+                $('#ShippingName').prop('readonly', true);
+                $('#ShippingAddress').prop('readonly', true);
+            }
+
+            // When a job is selected via radio button
+            $('#jobsTable').on('change', '.job-radio', function() {
+                var jobId = $(this).val();
+                
+                if (jobId) {
+                    $.getJSON('@Url.Action("GetJobDetailsByJobId", "SalesOrders")', { jobId: jobId }, function (data) {
+                        // Clear existing items
+                        $('#itemsBody').empty();
+                        rowIdx = 0;
+                        
+                        // Add new row for this item
+                        addRow();
+                        
+                        var newRow = $('#itemsBody tr.item-row').first();
+                        
+                        if (data) {
+                            if (data.linkedItemId) {
+                                var selectEl = newRow.find('.item-select');
+                                if (selectEl.find('option[value="' + data.linkedItemId + '"]').length === 0) {
+                                    selectEl.append(new Option(data.itemName || 'Item ' + data.linkedItemId, data.linkedItemId));
+                                }
+                                selectEl.val(data.linkedItemId);
+                            }
+                            newRow.find('input[name$=".JobCode"]').val(data.jobCode || '');
+                            newRow.find('input[name$=".JobName"]').val(data.jobName || '');
+                            newRow.find('input[name$=".Specs"]').val(data.specs || '');
+                            newRow.find('input[name$=".CylinderStatus"]').val(data.cylinderStatus || '');
+                            newRow.find('input[name$=".DelDate"]').val(data.delDate || '');
+                            newRow.find('input[name$=".CylinderCharges"]').val(data.cylinderCharges || '');
+                            newRow.find('input[name$=".RollWeight"]').val(data.rollWeight || '');
+                            newRow.find('input[name$=".Direction"]').val(data.direction || '');
+                            newRow.find('input[name$=".ShadeMatch"]').val(data.shadeMatch || '');
+                            newRow.find('input[name$=".SampleRequired"]').val(data.sampleRequired || '');
+                            newRow.find('input[name$=".JobSize"]').val(data.jobSize || '');
+                            newRow.find('input[name$=".PackingType"]').val(data.packingType || '');
+                            
+                            // Highlight to show it was auto-filled
+                            newRow.find('.pdf-details').fadeIn();
+                        }
+                    });
+                }
+            });
+
+            $('#addRowBtn').click(function () {
+                $('#emptyItemsRow').remove();
+                addRow();
+            });
+
+            $('#itemsTable').on('click', '.remove-row', function () {
+                $(this).closest('tr').remove();
+                reindexRows();
+                calculateGrandTotal();
+                if($('#itemsBody tr.item-row').length === 0) {
+                    $('#itemsBody').html('<tr id="emptyItemsRow"><td colspan="5" class="text-muted py-3">No items added yet.</td></tr>');
+                }
+            });
+
+            $('#itemsTable').on('input', '.calc-trigger', function () {
+                var row = $(this).closest('tr');
+                var qty = parseFloat(row.find('.qty-input').val()) || 0;
+                var rate = parseFloat(row.find('.rate-input').val()) || 0;
+                var total = qty * rate;
+                row.find('.row-total-display').val(total.toFixed(2));
+                row.find('.row-total-input').val(total);
+                calculateGrandTotal();
+            });
+
+            // Fetch Job details when an item is selected
+            $('#itemsTable').on('change', '.item-select', function() {
+                var itemId = $(this).val();
+                var row = $(this).closest('tr.item-row');
+                
+                if(itemId) {
+                    $.getJSON('@Url.Action("GetJobDetailsByItemId", "SalesOrders")', { itemId: itemId }, function (data) {
+                        if(data) {
+                            row.find('input[name$=".JobCode"]').val(data.jobCode || '');
+                            row.find('input[name$=".JobName"]').val(data.jobName || '');
+                            row.find('input[name$=".Specs"]').val(data.specs || '');
+                            row.find('input[name$=".CylinderStatus"]').val(data.cylinderStatus || '');
+                            row.find('input[name$=".DelDate"]').val(data.delDate || '');
+                            row.find('input[name$=".CylinderCharges"]').val(data.cylinderCharges || '');
+                            row.find('input[name$=".RollWeight"]').val(data.rollWeight || '');
+                            row.find('input[name$=".Direction"]').val(data.direction || '');
+                            row.find('input[name$=".ShadeMatch"]').val(data.shadeMatch || '');
+                            row.find('input[name$=".SampleRequired"]').val(data.sampleRequired || '');
+                            row.find('input[name$=".JobSize"]').val(data.jobSize || '');
+                            row.find('input[name$=".PackingType"]').val(data.packingType || '');
+                            
+                            // Highlight to show it was auto-filled
+                            row.find('.pdf-details').fadeIn();
+                        }
+                    });
+                }
+            });
+        });
+
+        function addRow() {
+            var itemOptions = '<option value="">-- Select Item --</option>';
+            $.each(itemsList, function(i, item) { var itemId = item.id !== undefined ? item.id : item.Id; var itemName = item.itemName !== undefined ? item.itemName : item.ItemName;
+                itemOptions += '<option value="' + itemId + '">' + itemName + '</option>';
+            });
+
+            var tr = `
+                <tr class="item-row">
+                    <td>
+                        <select name="SalesOrderItems[${rowIdx}].ItemId" class="form-select border-0 item-select" required>
+                            ${itemOptions}
+                        </select>
+                        <a href="javascript:void(0)" class="text-primary mt-1 d-block" onclick="togglePdfDetails(this)">
+                            <i class="ph ph-plus-circle"></i> Add Additional details
+                        </a>
+                        <div class="pdf-details mt-3 p-3 bg-white border rounded" style="display:none;">
+                            <div class="row g-2">
+                                <div class="col-6"><label class="form-label text-muted small mb-0 fw-semibold">Job Code</label><input type="text" name="SalesOrderItems[${rowIdx}].JobCode" class="form-control form-control-sm" placeholder="Job Code" /></div>
+                                <div class="col-6"><label class="form-label text-muted small mb-0 fw-semibold">Job Name</label><input type="text" name="SalesOrderItems[${rowIdx}].JobName" class="form-control form-control-sm" placeholder="Job Name" /></div>
+                                <div class="col-12"><label class="form-label text-muted small mb-0 fw-semibold">Specs</label><input type="text" name="SalesOrderItems[${rowIdx}].Specs" class="form-control form-control-sm" placeholder="Specs" /></div>
+                                <div class="col-6"><label class="form-label text-muted small mb-0 fw-semibold">Cylinder Status</label><input type="text" name="SalesOrderItems[${rowIdx}].CylinderStatus" class="form-control form-control-sm" placeholder="Cylinder Status" /></div>
+                                <div class="col-6"><label class="form-label text-muted small mb-0 fw-semibold">Delivery Date</label><input type="date" name="SalesOrderItems[${rowIdx}].DelDate" class="form-control form-control-sm" placeholder="Del. Date" /></div>
+                                <div class="col-6"><label class="form-label text-muted small mb-0 fw-semibold">Cylinder Charges</label><input type="text" name="SalesOrderItems[${rowIdx}].CylinderCharges" class="form-control form-control-sm" placeholder="Cylinder Charges" /></div>
+                                <div class="col-6"><label class="form-label text-muted small mb-0 fw-semibold">Roll Weight</label><input type="text" name="SalesOrderItems[${rowIdx}].RollWeight" class="form-control form-control-sm" placeholder="Roll Weight" /></div>
+                                <div class="col-6"><label class="form-label text-muted small mb-0 fw-semibold">Direction</label><input type="text" name="SalesOrderItems[${rowIdx}].Direction" class="form-control form-control-sm" placeholder="Direction" /></div>
+                                <div class="col-6"><label class="form-label text-muted small mb-0 fw-semibold">Shade Match</label><input type="text" name="SalesOrderItems[${rowIdx}].ShadeMatch" class="form-control form-control-sm" placeholder="Shade Match" /></div>
+                                <div class="col-6"><label class="form-label text-muted small mb-0 fw-semibold">Sample Required</label><input type="text" name="SalesOrderItems[${rowIdx}].SampleRequired" class="form-control form-control-sm" placeholder="Sample Required" /></div>
+                                <div class="col-6"><label class="form-label text-muted small mb-0 fw-semibold">Job Size</label><input type="text" name="SalesOrderItems[${rowIdx}].JobSize" class="form-control form-control-sm" placeholder="Job Size" /></div>
+                                <div class="col-6"><label class="form-label text-muted small mb-0 fw-semibold">Packing Type</label><input type="text" name="SalesOrderItems[${rowIdx}].PackingType" class="form-control form-control-sm" placeholder="Packing Type" /></div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <input type="number" name="SalesOrderItems[${rowIdx}].Quantity" class="form-control border-0 qty-input calc-trigger" required min="1" value="1" />
+                    </td>
+                    <td>
+                        <input type="number" step="0.01" name="SalesOrderItems[${rowIdx}].Rate" class="form-control border-0 rate-input calc-trigger" required min="0.01" value="0.00" />
+                    </td>
+                    <td class="bg-light">
+                        <input type="text" class="form-control-plaintext row-total-display fw-bold" readonly value="0.00" />
+                        <input type="hidden" name="SalesOrderItems[${rowIdx}].TotalAmount" class="row-total-input" value="0" />
+                    </td>
+                    <td class="text-center bg-light">
+                        <button type="button" class="btn btn-sm btn-light text-danger border-0 remove-row">
+                            <i class="ph ph-x fw-bold"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+            $('#itemsBody').append(tr);
+            rowIdx++;
+            reindexRows();
+        }
+
+        function reindexRows() {
+            $('#itemsBody tr.item-row').each(function (index) {
+                $(this).find('select.item-select').attr('name', `SalesOrderItems[${index}].ItemId`);
+                $(this).find('input.qty-input').attr('name', `SalesOrderItems[${index}].Quantity`);
+                $(this).find('input.rate-input').attr('name', `SalesOrderItems[${index}].Rate`);
+                $(this).find('input.row-total-input').attr('name', `SalesOrderItems[${index}].TotalAmount`);
+                
+                // Reindex PDF details
+                $(this).find('input[name$=".JobCode"]').attr('name', `SalesOrderItems[${index}].JobCode`);
+                $(this).find('input[name$=".JobName"]').attr('name', `SalesOrderItems[${index}].JobName`);
+                $(this).find('input[name$=".Specs"]').attr('name', `SalesOrderItems[${index}].Specs`);
+                $(this).find('input[name$=".CylinderStatus"]').attr('name', `SalesOrderItems[${index}].CylinderStatus`);
+                $(this).find('input[name$=".DelDate"]').attr('name', `SalesOrderItems[${index}].DelDate`);
+                $(this).find('input[name$=".CylinderCharges"]').attr('name', `SalesOrderItems[${index}].CylinderCharges`);
+                $(this).find('input[name$=".RollWeight"]').attr('name', `SalesOrderItems[${index}].RollWeight`);
+                $(this).find('input[name$=".Direction"]').attr('name', `SalesOrderItems[${index}].Direction`);
+                $(this).find('input[name$=".ShadeMatch"]').attr('name', `SalesOrderItems[${index}].ShadeMatch`);
+                $(this).find('input[name$=".SampleRequired"]').attr('name', `SalesOrderItems[${index}].SampleRequired`);
+                $(this).find('input[name$=".JobSize"]').attr('name', `SalesOrderItems[${index}].JobSize`);
+                $(this).find('input[name$=".PackingType"]').attr('name', `SalesOrderItems[${index}].PackingType`);
+            });
+            rowIdx = $('#itemsBody tr.item-row').length;
+        }
+
+        function togglePdfDetails(element) {
+            $(element).siblings('.pdf-details').toggle();
+        }
+
+        function calculateGrandTotal() {
+            var grandTotal = 0;
+            $('.row-total-input').each(function() {
+                grandTotal += parseFloat($(this).val()) || 0;
+            });
+            $('#grandTotalDisplay').text('₹' + grandTotal.toFixed(2));
+            $('#grandTotal').val(grandTotal.toFixed(2));
+        }
+    </script>
+}

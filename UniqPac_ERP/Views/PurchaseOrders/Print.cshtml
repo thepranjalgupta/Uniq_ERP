@@ -1,0 +1,323 @@
+@model UniqPac_ERP.Models.PurchaseOrder
+
+@{
+    Layout = null; // No layout to print properly
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Print PO - @Model.PONumber</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            font-size: 12px;
+        }
+        .po-container {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            border: 2px solid #000;
+        }
+        .header {
+            display: flex;
+            border-bottom: 2px solid #000;
+            background-color: #b3cce6;
+            padding: 10px;
+            align-items: center;
+        }
+        .logo {
+            width: 150px;
+        }
+        .header-title {
+            flex: 1;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .company-info {
+            display: flex;
+            border-bottom: 2px solid #000;
+        }
+        .company-details {
+            flex: 60%;
+            padding: 10px;
+            border-right: 2px solid #000;
+            font-weight: bold;
+        }
+        .po-meta {
+            flex: 40%;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        .po-meta > div {
+            padding: 10px;
+            border-bottom: 2px solid #000;
+            flex: 1;
+        }
+        .po-meta > div:last-child {
+            border-bottom: none;
+        }
+        .addresses {
+            display: flex;
+            border-bottom: 2px solid #000;
+        }
+        .consignee {
+            flex: 50%;
+            padding: 10px;
+            border-right: 2px solid #000;
+        }
+        .shipping {
+            flex: 50%;
+            padding: 10px;
+        }
+        .address-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            text-decoration: underline;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #000;
+            padding: 5px;
+            text-align: center;
+        }
+        th {
+            font-weight: bold;
+        }
+        .details-grid {
+            display: grid;
+            grid-template-columns: 25% 25% 25% 25%;
+            border-bottom: 2px solid #000;
+        }
+        .details-grid > div {
+            border: 1px solid #000;
+            padding: 5px;
+            font-weight: bold;
+        }
+        .remarks {
+            padding: 10px;
+            border-bottom: 2px solid #000;
+            color: red;
+            font-weight: bold;
+            text-align: center;
+        }
+        .footer {
+            height: 80px;
+            position: relative;
+            border-bottom: 2px solid #000;
+        }
+        .signatory {
+            position: absolute;
+            bottom: 5px;
+            right: 10px;
+        }
+        .jurisdiction {
+            text-align: center;
+            padding: 10px;
+            font-weight: bold;
+        }
+        @@media print {
+            body { padding: 0; }
+        .po-container { border: 2px solid #000; }
+        .header { display: flex; border-bottom: 2px solid #000; background-color: #b3cce6 !important; padding: 10px; align-items: center; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        .logo { max-height: 60px; max-width: 150px; }
+        .header-title { flex: 1; text-align: center; font-size: 24px; font-weight: bold; }
+    </style>
+</head>
+<body onload="window.print()">
+    <table style="width: 100%; border-collapse: collapse; border: 2px solid #000;">
+        <!-- HEADER -->
+        <tr>
+            <td colspan="@(Model.POType == "Cylinder" ? 7 : 6)" style="padding: 0; border-bottom: 2px solid #000;">
+                <div style="display: flex; background-color: #b3cce6 !important; padding: 10px; align-items: center; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
+                    <img src="/logo.png" alt="Logo" style="max-height: 60px; max-width: 150px;" onerror="this.style.display='none'" />
+                    <div style="flex: 1; text-align: center; font-size: 24px; font-weight: bold; color: #000;">PURCHASE ORDER</div>
+                </div>
+            </td>
+        </tr>
+
+        <!-- COMPANY INFO & PO META -->
+        <tr>
+            <td colspan="@(Model.POType == "Cylinder" ? 3 : 2)" style="border-right: 2px solid #000; border-bottom: 2px solid #000; padding: 5px; vertical-align: top; text-align: left;">
+                <div style="font-size: 18px; font-weight: bold; margin-bottom: 5px;">UNIQUE PACKTECH</div>
+                <div>D-99, SECTOR-63</div>
+                <div>NOIDA, UTTAR PRADESH (INDIA)-201301</div>
+                <div>PH:- +91-9350836603, +91-120-4237516</div>
+                <div>EMAIL:- SATYAM@UNIQPACK.IN</div>
+                <div>TIN:- 09165720918</div>
+                <div>GST NO:- 09AJDPP7545D1Z2</div>
+                <div>PAN:- AJDPP7545D</div>
+            </td>
+            <td colspan="4" style="border-bottom: 2px solid #000; padding: 0; vertical-align: top; text-align: left;">
+                <div style="padding: 5px; border-bottom: 2px solid #000;">DATE: @Model.PODate.ToString("dd-MM-yyyy")</div>
+                <div style="padding: 5px;">PURCHASE ORDER NO #: @Model.PONumber</div>
+            </td>
+        </tr>
+
+        <!-- ADDRESSES -->
+        <tr>
+            <td colspan="@(Model.POType == "Cylinder" ? 3 : 2)" style="border-right: 2px solid #000; border-bottom: 2px solid #000; padding: 0; vertical-align: top; text-align: left;">
+                <div style="padding: 5px; font-weight: bold; border-bottom: 2px solid #000; text-decoration: underline;">CONSIGNEE TO,</div>
+                <div style="padding: 5px; white-space: pre-line;">@Model.Vendor.Name
+@Model.Vendor.Address
+@Model.Vendor.City, @Model.Vendor.State
+@Model.Vendor.Country - @Model.Vendor.ZipCode</div>
+            </td>
+            <td colspan="4" style="border-bottom: 2px solid #000; padding: 0; vertical-align: top; text-align: left;">
+                <div style="padding: 5px; font-weight: bold; border-bottom: 2px solid #000; text-decoration: underline;">SHIPPING TO,</div>
+                <div style="padding: 5px; white-space: pre-line;">@Model.ShippingAddress</div>
+            </td>
+        </tr>
+
+        <!-- ITEMS HEADER -->
+        <tr>
+            <th style="border: 1px solid #000; border-left: none; padding: 5px; text-align: center;">S.NO</th>
+            @if (Model.POType == "Cylinder")
+            {
+                <th style="border: 1px solid #000; padding: 5px; text-align: center;">JOB NAME</th>
+                <th style="border: 1px solid #000; padding: 5px; text-align: center;">JOB SIZE</th>
+                <th style="border: 1px solid #000; padding: 5px; text-align: center;">CYLINDER SIZE</th>
+                <th style="border: 1px solid #000; padding: 5px; text-align: center;">NO. OF CYL</th>
+            }
+            else
+            {
+                <th style="border: 1px solid #000; padding: 5px; text-align: center;">PRODUCT/JOB NAME</th>
+                <th style="border: 1px solid #000; padding: 5px; text-align: center;">POUCH / ROLL TYPE</th>
+                <th style="border: 1px solid #000; padding: 5px; text-align: center;">QUANTITY</th>
+            }
+            <th style="border: 1px solid #000; padding: 5px; text-align: center;">RATE</th>
+            <th style="border: 1px solid #000; border-right: none; padding: 5px; text-align: center;">AMOUNT</th>
+        </tr>
+
+        <!-- ITEMS BODY -->
+        @{ int sn = 1; }
+        @foreach(var item in Model.PurchaseOrderItems)
+        {
+            <tr>
+                <td style="border: 1px solid #000; border-left: none; padding: 5px; text-align: center;">@(sn++)</td>
+                <td style="border: 1px solid #000; padding: 5px; text-align: center;">@item.ProductJobName</td>
+                @if (Model.POType == "Cylinder")
+                {
+                    <td style="border: 1px solid #000; padding: 5px; text-align: center;">@item.JobSize</td>
+                    <td style="border: 1px solid #000; padding: 5px; text-align: center;">@item.CylinderSize</td>
+                    <td style="border: 1px solid #000; padding: 5px; text-align: center;">@item.NumberOfCylinders</td>
+                }
+                else
+                {
+                    <td style="border: 1px solid #000; padding: 5px; text-align: center;">@item.PouchRollType</td>
+                    <td style="border: 1px solid #000; padding: 5px; text-align: center;">@item.Quantity</td>
+                }
+                <td style="border: 1px solid #000; padding: 5px; text-align: center;">@item.Price.ToString("N2")</td>
+                <td style="border: 1px solid #000; border-right: none; padding: 5px; text-align: center;">@item.TotalAmount.ToString("N2")</td>
+            </tr>
+        }
+        @if(!Model.PurchaseOrderItems.Any())
+        {
+            <tr>
+                <td colspan="@(Model.POType == "Cylinder" ? 7 : 6)" style="border-top: 1px solid #000; border-bottom: 1px solid #000;">&nbsp;</td>
+            </tr>
+        }
+
+        <!-- DETAILS GRID -->
+        @if (Model.POType == "Cylinder")
+        {
+            <tr>
+                <td colspan="2" style="border: 1px solid #000; border-left: none; padding: 5px; font-weight: bold; text-align: left;">SURFACE OR<br/>REVERSE</td>
+                <td colspan="5" style="border: 1px solid #000; border-right: none; padding: 5px; text-align: left;">@Model.SurfaceOrReverse</td>
+            </tr>
+            <tr>
+                <td colspan="2" style="border: 1px solid #000; border-left: none; padding: 5px; font-weight: bold; text-align: left;">STRUCTURE</td>
+                <td colspan="2" style="border: 1px solid #000; padding: 5px; text-align: left;">@Model.Structure</td>
+                <td colspan="1" style="border: 1px solid #000; padding: 5px; font-weight: bold; text-align: left;">PRODUCT PACKED</td>
+                <td colspan="2" style="border: 1px solid #000; border-right: none; padding: 5px; text-align: left;">@Model.ProductPacked</td>
+            </tr>
+            <tr>
+                <td colspan="2" style="border: 1px solid #000; border-left: none; padding: 5px; font-weight: bold; text-align: left;">PET SIZE</td>
+                <td colspan="1" style="border: 1px solid #000; padding: 5px; text-align: left;">@Model.PetSize</td>
+                <td colspan="2" style="border: 1px solid #000; padding: 5px; font-weight: bold; text-align: left;">COIL SIZE &nbsp;&nbsp;<span style="font-weight: normal;">@Model.CoilSize</span></td>
+                <td colspan="2" style="border: 1px solid #000; border-right: none; padding: 5px; font-weight: bold; text-align: left;">REPEAT SIZE &nbsp;&nbsp;<span style="font-weight: normal;">@Model.RepeatSize</span></td>
+            </tr>
+            <tr>
+                <td colspan="2" style="border: 1px solid #000; border-left: none; padding: 5px; font-weight: bold; text-align: left;">DISPATCH SCHEDULE</td>
+                <td colspan="2" style="border: 1px solid #000; padding: 5px; text-align: left;">@Model.DispatchSchedule</td>
+                <td colspan="3" style="border: 1px solid #000; border-right: none; padding: 5px; font-weight: bold; text-align: left; white-space: pre-line;">@Model.BoreId</td>
+            </tr>
+            <tr>
+                <td colspan="2" style="border: 1px solid #000; border-left: none; padding: 5px; font-weight: bold; text-align: left;">REMARKS(IF ANY)</td>
+                <td colspan="5" style="border: 1px solid #000; border-right: none; padding: 5px; text-align: left;">@Model.Remarks</td>
+            </tr>
+        }
+        else
+        {
+            <tr>
+                <td colspan="2" style="border: 1px solid #000; border-left: none; padding: 5px; font-weight: bold; text-align: center;">SURFACE OR<br/>REVERSE</td>
+                <td style="border: 1px solid #000; padding: 5px; text-align: center;">@Model.SurfaceOrReverse</td>
+                <td style="border: 1px solid #000; padding: 5px;"></td>
+                <td colspan="2" style="border: 1px solid #000; border-right: none; padding: 5px;"></td>
+            </tr>
+            <tr>
+                <td colspan="2" style="border: 1px solid #000; border-left: none; padding: 5px; font-weight: bold; text-align: center;">STRUCTURE</td>
+                <td style="border: 1px solid #000; padding: 5px; text-align: center;">@Model.Structure</td>
+                <td style="border: 1px solid #000; padding: 5px; font-weight: bold; text-align: center;">PRODUCT PACKED:</td>
+                <td colspan="2" style="border: 1px solid #000; border-right: none; padding: 5px; text-align: center;">@Model.ProductPacked</td>
+            </tr>
+            <tr>
+                <td style="border: 1px solid #000; border-left: none; padding: 5px; font-weight: bold; text-align: center;">PET SIZE</td>
+                <td style="border: 1px solid #000; padding: 5px; text-align: center;">@Model.PetSize</td>
+                <td style="border: 1px solid #000; padding: 5px; font-weight: bold; text-align: center;">COIL SIZE<br/>REPEAT SIZE<br/><span style="font-weight: normal;">@Model.CoilSizeRepeatSize</span></td>
+                <td style="border: 1px solid #000; padding: 5px; font-weight: bold; text-align: center;">CYLINDER SIZE :</td>
+                <td colspan="2" style="border: 1px solid #000; border-right: none; padding: 5px; text-align: center;">@Model.CylinderSize</td>
+            </tr>
+            <tr>
+                <td style="border: 1px solid #000; border-left: none; padding: 5px; font-weight: bold; text-align: center;">UNWIND<br/>DIRECTION</td>
+                <td style="border: 1px solid #000; padding: 5px; text-align: center;">@Model.UnwindDirection</td>
+                <td style="border: 1px solid #000; padding: 5px; font-weight: bold; text-align: center;">ROLL WEIGHT<br/><span style="font-weight: normal;">@Model.RollWeight</span></td>
+                <td style="border: 1px solid #000; padding: 5px; font-weight: bold; text-align: center;">PACKING TYPE :</td>
+                <td colspan="2" style="border: 1px solid #000; border-right: none; padding: 5px; text-align: center;">@Model.PackingType</td>
+            </tr>
+            <tr>
+                <td colspan="2" style="border: 1px solid #000; border-left: none; padding: 5px; font-weight: bold; text-align: center;">DISPATCH SCHEDULE</td>
+                <td style="border: 1px solid #000; padding: 5px; text-align: center;">@Model.DispatchSchedule</td>
+                <td style="border: 1px solid #000; padding: 5px; font-weight: bold; text-align: center;">Color Reference:</td>
+                <td colspan="2" style="border: 1px solid #000; border-right: none; padding: 5px; text-align: center;">@Model.ColorReference</td>
+            </tr>
+            <tr>
+                <td colspan="3" style="border: 1px solid #000; border-left: none; padding: 5px;"></td>
+                <td style="border: 1px solid #000; padding: 5px; font-weight: bold; text-align: center;">Window Maker :</td>
+                <td colspan="2" style="border: 1px solid #000; border-right: none; padding: 5px; text-align: center;">@Model.WindowMaker</td>
+            </tr>
+            <tr>
+                <td colspan="2" style="border: 1px solid #000; border-left: none; padding: 5px; font-weight: bold; text-align: center;">REMARKS(IF ANY)</td>
+                <td style="border: 1px solid #000; padding: 5px; text-align: center;">@Model.Remarks</td>
+                <td style="border: 1px solid #000; padding: 5px; font-weight: bold; text-align: center;">CYLINDER MAKER :</td>
+                <td colspan="2" style="border: 1px solid #000; border-right: none; padding: 5px; text-align: center;">@Model.CylinderMaker</td>
+            </tr>
+        }
+
+        <!-- FOOTER / REMARKS -->
+        <tr>
+            <td colspan="@(Model.POType == "Cylinder" ? 7 : 6)" style="padding: 10px; border-top: 2px solid #000; border-bottom: 2px solid #000; color: red; font-weight: bold; text-align: center;">
+                KINDLY SENT PHOTOCOPY OF THIS PURCHASE ORDER DULY SIGNED BY YOU AS A TOKEN OF YOUR ACCEPTANCE
+            </td>
+        </tr>
+        <tr>
+            <td colspan="@(Model.POType == "Cylinder" ? 7 : 6)" style="padding: 0;">
+                <div style="height: 80px; position: relative;">
+                    <div style="position: absolute; bottom: 5px; right: 10px; font-size: 12px;">(AUTHORIZED SIGNATORY)</div>
+                </div>
+                <div style="border-top: 2px solid #000; padding: 10px; text-align: center; font-weight: bold; font-size: 12px;">
+                    <div>SUBJECT TO NOIDA JURISDICATION.</div>
+                    <div>THIS IS COMPUTER GENERATED PURCHASE ORDER.</div>
+                </div>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

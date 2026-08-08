@@ -1,0 +1,77 @@
+@model IEnumerable<UniqPac_ERP.Models.Vendor>
+
+@{
+    ViewData["Title"] = "Manage Vendors";
+}
+
+<div class="card">
+<div class="card-header">
+<h4 class="mb-0">Records</h4>
+<a asp-action="Create" class="btn btn-primary"><i class="ph ph-plus"></i> Create New</a>
+</div>
+<div class="card-body p-0">
+<div class="table-responsive">
+<table class="table table-hover align-middle">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.VendorCategory)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.VendorType)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ContactPerson)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Email)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.PaymentTerms)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.LeadTimeDays)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.VendorCategory.CategoryCode)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.VendorType)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ContactPerson)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Email)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.PaymentTerms)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.LeadTimeDays)
+            </td>
+            <td>
+                <a asp-action="Edit" class="btn btn-sm btn-light" asp-route-id="@item.Id">Edit</a>
+                <a asp-action="Details" class="btn btn-sm btn-light me-1" asp-route-id="@item.Id">Details</a>
+                <a asp-action="Delete" class="btn btn-sm btn-danger" asp-route-id="@item.Id">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
+
+</div>
+</div>
+</div>

@@ -1,0 +1,152 @@
+@model UniqPac_ERP.Models.Customer
+
+@{
+    ViewData["Title"] = "Customer Details";
+}
+
+<div class="card shadow-sm border-0" style="max-width: 900px; margin: 0 auto;">
+    <div class="card-header bg-white border-bottom p-4 d-flex justify-content-between align-items-center">
+        <div>
+            <h4 class="mb-1 fw-bold text-dark">Customer Details</h4>
+            <p class="text-muted mb-0" style="font-size: 0.9rem;">View detailed profile, contact, address, and financial records.</p>
+        </div>
+        <div>
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary px-3 py-2 me-1" style="font-weight: 500;"><i class="ph ph-pencil"></i> Edit</a>
+            <a asp-action="Index" class="btn btn-light px-3 py-2 border text-dark" style="font-weight: 500;">Back to List</a>
+        </div>
+    </div>
+    <div class="card-body p-4 p-md-5">
+        <!-- Basic Information -->
+        <h5 class="fw-bold mb-3 pb-2 text-dark border-bottom" style="font-size: 1.1rem;">Basic Information</h5>
+        <div class="row mb-4">
+            <div class="col-sm-4 mb-3">
+                <span class="text-secondary fw-semibold d-block" style="font-size: 0.85rem;">Customer Code</span>
+                <span class="text-dark fs-6 fw-bold">@Model.CustomerCode</span>
+            </div>
+            <div class="col-sm-8 mb-3">
+                <span class="text-secondary fw-semibold d-block" style="font-size: 0.85rem;">Customer Name</span>
+                <span class="text-dark fs-6">@Model.Name</span>
+            </div>
+            <div class="col-sm-4 mb-3">
+                <span class="text-secondary fw-semibold d-block" style="font-size: 0.85rem;">Customer Type</span>
+                <span class="text-dark fs-6">@(Model.CustomerType ?? "-")</span>
+            </div>
+            <div class="col-sm-4 mb-3">
+                <span class="text-secondary fw-semibold d-block" style="font-size: 0.85rem;">Contact Person</span>
+                <span class="text-dark fs-6">@(Model.ContactPerson ?? "-")</span>
+            </div>
+            <div class="col-sm-4 mb-3">
+                <span class="text-secondary fw-semibold d-block" style="font-size: 0.85rem;">Website</span>
+                <span class="text-dark fs-6">
+                    @if (!string.IsNullOrEmpty(Model.Website))
+                    {
+                        <a href="@Model.Website" target="_blank">@Model.Website</a>
+                    }
+                    else
+                    {
+                        <span>-</span>
+                    }
+                </span>
+            </div>
+        </div>
+
+        <!-- Contact & Address Details -->
+        <h5 class="fw-bold mb-3 pb-2 text-dark border-bottom mt-4" style="font-size: 1.1rem;">Contact & Address Details</h5>
+        <div class="row mb-4">
+            <div class="col-sm-6 mb-3">
+                <span class="text-secondary fw-semibold d-block" style="font-size: 0.85rem;">Email Address</span>
+                <span class="text-dark fs-6">@(Model.Email ?? "-")</span>
+            </div>
+            <div class="col-sm-6 mb-3">
+                <span class="text-secondary fw-semibold d-block" style="font-size: 0.85rem;">Phone Number</span>
+                <span class="text-dark fs-6">@(Model.Phone ?? "-")</span>
+            </div>
+            <div class="col-sm-6 mb-3">
+                <span class="text-secondary fw-semibold d-block" style="font-size: 0.85rem;">Billing Address</span>
+                <span class="text-dark fs-6" style="white-space: pre-line;">@(Model.BillingAddress ?? "-")</span>
+            </div>
+            <div class="col-sm-6 mb-3">
+                <span class="text-secondary fw-semibold d-block" style="font-size: 0.85rem;">Shipping Address</span>
+                <span class="text-dark fs-6" style="white-space: pre-line;">@(Model.ShippingAddress ?? "-")</span>
+            </div>
+            <div class="col-sm-3 mb-3">
+                <span class="text-secondary fw-semibold d-block" style="font-size: 0.85rem;">Billing City</span>
+                <span class="text-dark fs-6">@(Model.City ?? "-")</span>
+            </div>
+            <div class="col-sm-3 mb-3">
+                <span class="text-secondary fw-semibold d-block" style="font-size: 0.85rem;">Billing State</span>
+                <span class="text-dark fs-6">@(Model.State ?? "-")</span>
+            </div>
+            <div class="col-sm-3 mb-3">
+                <span class="text-secondary fw-semibold d-block" style="font-size: 0.85rem;">Billing Zip/Postal Code</span>
+                <span class="text-dark fs-6">@(Model.ZipCode ?? "-")</span>
+            </div>
+            <div class="col-sm-3 mb-3">
+                <span class="text-secondary fw-semibold d-block" style="font-size: 0.85rem;">Billing Country</span>
+                <span class="text-dark fs-6">@(Model.Country ?? "-")</span>
+            </div>
+            <div class="col-sm-3 mb-3">
+                <span class="text-secondary fw-semibold d-block" style="font-size: 0.85rem;">Shipping City</span>
+                <span class="text-dark fs-6">@(Model.ShippingCity ?? "-")</span>
+            </div>
+            <div class="col-sm-3 mb-3">
+                <span class="text-secondary fw-semibold d-block" style="font-size: 0.85rem;">Shipping State</span>
+                <span class="text-dark fs-6">@(Model.ShippingState ?? "-")</span>
+            </div>
+            <div class="col-sm-3 mb-3">
+                <span class="text-secondary fw-semibold d-block" style="font-size: 0.85rem;">Shipping Zip/Postal Code</span>
+                <span class="text-dark fs-6">@(Model.ShippingZipCode ?? "-")</span>
+            </div>
+            <div class="col-sm-3 mb-3">
+                <span class="text-secondary fw-semibold d-block" style="font-size: 0.85rem;">Shipping Country</span>
+                <span class="text-dark fs-6">@(Model.ShippingCountry ?? "-")</span>
+            </div>
+        </div>
+
+        <!-- Financials & Tax Information -->
+        <h5 class="fw-bold mb-3 pb-2 text-dark border-bottom mt-4" style="font-size: 1.1rem;">Financials & Tax Information</h5>
+        <div class="row mb-4">
+            <div class="col-sm-6 mb-3">
+                <span class="text-secondary fw-semibold d-block" style="font-size: 0.85rem;">GST No</span>
+                <span class="text-dark fs-6">@(Model.GSTNo ?? "-")</span>
+            </div>
+            <div class="col-sm-6 mb-3">
+                <span class="text-secondary fw-semibold d-block" style="font-size: 0.85rem;">PAN No</span>
+                <span class="text-dark fs-6">@(Model.PanNo ?? "-")</span>
+            </div>
+            <div class="col-sm-6 mb-3">
+                <span class="text-secondary fw-semibold d-block" style="font-size: 0.85rem;">Credit Limit</span>
+                <span class="text-dark fs-6">@(Model.CreditLimit.HasValue ? Model.CreditLimit.Value.ToString("C") : "-")</span>
+            </div>
+            <div class="col-sm-6 mb-3">
+                <span class="text-secondary fw-semibold d-block" style="font-size: 0.85rem;">Payment Terms</span>
+                <span class="text-dark fs-6">@(Model.PaymentTerms ?? "-")</span>
+            </div>
+            <div class="col-sm-12 mb-3">
+                <span class="text-secondary fw-semibold d-block" style="font-size: 0.85rem;">Bank Details</span>
+                <span class="text-dark fs-6" style="white-space: pre-line;">@(Model.BankDetails ?? "-")</span>
+            </div>
+        </div>
+
+        <!-- System & Audit Information -->
+        <h5 class="fw-bold mb-3 pb-2 text-dark border-bottom mt-4" style="font-size: 1.1rem;">System & Audit Details</h5>
+        <div class="row mb-4">
+            <div class="col-sm-3 mb-3">
+                <span class="text-secondary fw-semibold d-block" style="font-size: 0.85rem;">Created At</span>
+                <span class="text-muted fs-6">@Model.CreatedAt.ToLocalTime().ToString("g")</span>
+            </div>
+            <div class="col-sm-3 mb-3">
+                <span class="text-secondary fw-semibold d-block" style="font-size: 0.85rem;">Created By</span>
+                <span class="text-muted fs-6">@(Model.CreatedBy ?? "-")</span>
+            </div>
+            <div class="col-sm-3 mb-3">
+                <span class="text-secondary fw-semibold d-block" style="font-size: 0.85rem;">Last Updated At</span>
+                <span class="text-muted fs-6">@(Model.UpdatedAt.HasValue ? Model.UpdatedAt.Value.ToLocalTime().ToString("g") : "-")</span>
+            </div>
+            <div class="col-sm-3 mb-3">
+                <span class="text-secondary fw-semibold d-block" style="font-size: 0.85rem;">Last Updated By</span>
+                <span class="text-muted fs-6">@(Model.UpdatedBy ?? "-")</span>
+            </div>
+        </div>
+    </div>
+</div>
