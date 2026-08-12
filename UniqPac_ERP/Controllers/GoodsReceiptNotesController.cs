@@ -130,6 +130,7 @@ namespace UniqPac_ERP.Controllers
                             RejectedQuantity = 0
                         });
                     }
+                    ViewBag.POType = po.POType;
                 }
             }
 
@@ -155,6 +156,21 @@ namespace UniqPac_ERP.Controllers
 
             if (ModelState.IsValid)
             {
+                if (goodsReceiptNote.GoodsReceiptNoteItems != null)
+                {
+                    foreach (var item in goodsReceiptNote.GoodsReceiptNoteItems)
+                    {
+                        if (item.Rolls != null)
+                        {
+                            foreach (var roll in item.Rolls) roll.ItemId = item.ItemId;
+                        }
+                        if (item.Cylinders != null)
+                        {
+                            foreach (var cyl in item.Cylinders) cyl.ItemId = item.ItemId;
+                        }
+                    }
+                }
+
                 goodsReceiptNote.CreatedBy = User.Identity?.Name ?? "System";
                 goodsReceiptNote.CreatedAt = DateTime.UtcNow;
 
@@ -208,6 +224,9 @@ namespace UniqPac_ERP.Controllers
 
             var goodsReceiptNote = await _context.GoodsReceiptNotes
                 .Include(g => g.GoodsReceiptNoteItems)
+                    .ThenInclude(i => i.Rolls)
+                .Include(g => g.GoodsReceiptNoteItems)
+                    .ThenInclude(i => i.Cylinders)
                 .FirstOrDefaultAsync(p => p.Id == id);
                 
             if (goodsReceiptNote == null) return NotFound();
@@ -216,6 +235,12 @@ namespace UniqPac_ERP.Controllers
             ViewData["PurchaseOrderId"] = new SelectList(_context.PurchaseOrders.OrderByDescending(p => p.CreatedAt), "Id", "PONumber", goodsReceiptNote.PurchaseOrderId);
             ViewData["ItemId"] = new SelectList(_context.Items.Where(i => i.IsActive), "Id", "ItemName");
             
+            if (goodsReceiptNote.PurchaseOrderId.HasValue)
+            {
+                var po = await _context.PurchaseOrders.FindAsync(goodsReceiptNote.PurchaseOrderId);
+                if (po != null) ViewBag.POType = po.POType;
+            }
+
             return View(goodsReceiptNote);
         }
 
@@ -294,6 +319,15 @@ namespace UniqPac_ERP.Controllers
                     {
                         foreach (var item in goodsReceiptNote.GoodsReceiptNoteItems)
                         {
+                            if (item.Rolls != null)
+                            {
+                                foreach (var roll in item.Rolls) roll.ItemId = item.ItemId;
+                            }
+                            if (item.Cylinders != null)
+                            {
+                                foreach (var cyl in item.Cylinders) cyl.ItemId = item.ItemId;
+                            }
+
                             item.Id = 0; 
                             item.GoodsReceiptNoteId = existing.Id;
                             existing.GoodsReceiptNoteItems.Add(item);

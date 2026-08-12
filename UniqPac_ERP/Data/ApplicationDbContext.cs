@@ -25,7 +25,8 @@ namespace UniqPac_ERP.Data
         public DbSet<PurchaseOrderItem> PurchaseOrderItems { get; set; }
         public DbSet<GoodsReceiptNote> GoodsReceiptNotes { get; set; }
         public DbSet<GoodsReceiptNoteItem> GoodsReceiptNoteItems { get; set; }
-
+        public DbSet<GoodsReceiptNoteRoll> GoodsReceiptNoteRolls { get; set; }
+        public DbSet<GoodsReceiptNoteCylinder> GoodsReceiptNoteCylinders { get; set; }
         public DbSet<Dispatch> Dispatches { get; set; }
         public DbSet<DispatchItem> DispatchItems { get; set; }
         

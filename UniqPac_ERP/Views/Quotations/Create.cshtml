@@ -38,10 +38,20 @@
                 </div>
 
                 <div class="row mb-4">
-                    <div class="col-12">
+                    <div class="col-md-9">
                         <label asp-for="Remarks" class="form-label fw-bold"></label>
                         <input asp-for="Remarks" class="form-control" />
                         <span asp-validation-for="Remarks" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-3">
+                        <label asp-for="Status" class="form-label fw-bold"></label>
+                        <select asp-for="Status" class="form-select">
+                            <option value="Draft">Draft</option>
+                            <option value="Sent">Sent</option>
+                            <option value="Accepted">Accepted</option>
+                            <option value="Rejected">Rejected</option>
+                        </select>
+                        <span asp-validation-for="Status" class="text-danger"></span>
                     </div>
                 </div>
 

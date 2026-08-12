@@ -58,6 +58,28 @@ namespace UniqPac_ERP.Controllers
             return View(ledgerEntries);
         }
 
+        // GET: Rolls list for a specific item
+        public async Task<IActionResult> ItemRolls(int? id)
+        {
+            if (id == null) return NotFound();
+
+            var item = await _context.Items
+                .Include(i => i.UOM)
+                .FirstOrDefaultAsync(m => m.Id == id);
+                
+            if (item == null) return NotFound();
+
+            var rolls = await _context.GoodsReceiptNoteRolls
+                .Include(r => r.GoodsReceiptNoteItem)
+                .ThenInclude(g => g.GoodsReceiptNote)
+                .Where(r => r.ItemId == id)
+                .OrderByDescending(r => r.Id)
+                .ToListAsync();
+
+            ViewBag.Item = item;
+            return View(rolls);
+        }
+
         // GET: Manual Adjustment
         [Authorize(Policy = Permissions.StockLedgers.Create)]
         public IActionResult Create(int? itemId)

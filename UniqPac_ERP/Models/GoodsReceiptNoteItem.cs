@@ -47,5 +47,8 @@ namespace UniqPac_ERP.Models
 
         [StringLength(500)]
         public string? Remarks { get; set; }
+
+        public ICollection<GoodsReceiptNoteRoll> Rolls { get; set; } = new List<GoodsReceiptNoteRoll>();
+        public ICollection<GoodsReceiptNoteCylinder> Cylinders { get; set; } = new List<GoodsReceiptNoteCylinder>();
     }
 }

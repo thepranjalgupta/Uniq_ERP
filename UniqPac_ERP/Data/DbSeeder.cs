@@ -96,6 +96,41 @@ namespace UniqPac_ERP.Data
                     await userManager.AddToRoleAsync(adminUser, "Admin");
                 }
             }
+
+            // 5. Seed Item Categories, UOMs, and Item Types
+            var dbContext = serviceProvider.GetRequiredService<ApplicationDbContext>();
+            
+            // Seed Item Types
+            if (!dbContext.ItemTypes.Any())
+            {
+                dbContext.ItemTypes.AddRange(
+                    new ItemType { TypeCode = "RM", TypeName = "Raw Material", CreatedAt = DateTime.UtcNow, CreatedBy = "System", IsActive = true },
+                    new ItemType { TypeCode = "FG", TypeName = "Finished Goods", CreatedAt = DateTime.UtcNow, CreatedBy = "System", IsActive = true }
+                );
+            }
+
+            // Seed Item Categories
+            if (!dbContext.ItemCategories.Any())
+            {
+                dbContext.ItemCategories.AddRange(
+                    new ItemCategory { CategoryCode = "PCH", CategoryName = "Pouch", CreatedAt = DateTime.UtcNow, CreatedBy = "System", IsActive = true },
+                    new ItemCategory { CategoryCode = "RLL", CategoryName = "Roll", CreatedAt = DateTime.UtcNow, CreatedBy = "System", IsActive = true },
+                    new ItemCategory { CategoryCode = "LAM", CategoryName = "Laminate", CreatedAt = DateTime.UtcNow, CreatedBy = "System", IsActive = true }
+                );
+            }
+
+            // Seed UOMs
+            if (!dbContext.UOMs.Any())
+            {
+                dbContext.UOMs.AddRange(
+                    new UOM { UomCode = "KG", UomName = "Kilogram", CreatedAt = DateTime.UtcNow, CreatedBy = "System", IsActive = true },
+                    new UOM { UomCode = "NOS", UomName = "Numbers", CreatedAt = DateTime.UtcNow, CreatedBy = "System", IsActive = true },
+                    new UOM { UomCode = "MTR", UomName = "Meter", CreatedAt = DateTime.UtcNow, CreatedBy = "System", IsActive = true },
+                    new UOM { UomCode = "PCS", UomName = "Pieces", CreatedAt = DateTime.UtcNow, CreatedBy = "System", IsActive = true }
+                );
+            }
+
+            await dbContext.SaveChangesAsync();
         }
     }
 }

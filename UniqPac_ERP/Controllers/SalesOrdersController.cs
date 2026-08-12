@@ -52,6 +52,12 @@ namespace UniqPac_ERP.Controllers
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (salesOrder == null) return NotFound();
 
+            ViewBag.ApprovalHistories = await _context.ApprovalHistories
+                .Include(a => a.ActionBy)
+                .Where(a => a.EntityType == "SalesOrder" && a.EntityId == id)
+                .OrderByDescending(a => a.ActionDate)
+                .ToListAsync();
+
             return View(salesOrder);
         }
 
@@ -354,7 +360,7 @@ namespace UniqPac_ERP.Controllers
         public async Task<IActionResult> GetQuotationsByCustomer(int customerId)
         {
             var quotations = await _context.Quotations
-                .Where(q => q.CustomerId == customerId && q.IsActive && q.Status != "Rejected")
+                .Where(q => q.CustomerId == customerId && q.IsActive && q.Status == "Accepted")
                 .Select(q => new {
                     quotationNo = q.QuotationNo,
                     totalAmount = q.TotalAmount,
@@ -364,6 +370,14 @@ namespace UniqPac_ERP.Controllers
                 .ToListAsync();
 
             return Json(quotations);
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> TestStatus()
+        {
+            var all = await _context.Quotations.Select(q => new { q.Id, q.CustomerId, q.Status, q.IsActive }).ToListAsync();
+            return Json(all);
         }
 
         [HttpGet]

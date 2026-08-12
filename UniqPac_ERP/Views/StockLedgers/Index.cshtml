@@ -70,6 +70,9 @@
                                     else { <span class="badge bg-success">In Stock</span> }
                                 </td>
                                 <td class="text-end px-4">
+                                    <a asp-action="ItemRolls" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary me-1" title="View Rolls">
+                                        <i class="bi bi-vinyl me-1"></i> Rolls
+                                    </a>
                                     <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info" title="View Ledger">
                                         <i class="bi bi-journal-text me-1"></i> Ledger
                                     </a>

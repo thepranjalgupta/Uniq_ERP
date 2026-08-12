@@ -86,6 +86,7 @@
                                 <th style="width: 12%;">Accepted Qty</th>
                                 <th style="width: 12%;">Rejected Qty</th>
                                 <th style="width: 20%;">Remarks</th>
+                                <th style="width: 10%;">Details</th>
                                 <th style="width: 5%;"></th>
                             </tr>
                         </thead>
@@ -118,6 +119,23 @@
                                             <input asp-for="GoodsReceiptNoteItems[i].Remarks" class="form-control" />
                                         </td>
                                         <td class="text-center align-middle">
+                                            @if (ViewBag.POType == "Cylinder")
+                                            {
+                                                <button type="button" class="btn btn-outline-info btn-sm btn-details" data-type="Cylinder" data-index="@i">
+                                                    <i class="bi bi-list-ul"></i> Cylinders
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <button type="button" class="btn btn-outline-info btn-sm btn-details" data-type="Roll" data-index="@i">
+                                                    <i class="bi bi-list-ul"></i> Rolls
+                                                </button>
+                                            }
+                                            <div class="item-details-container" id="details-container-@i">
+                                                <!-- Hidden inputs will be generated here by JS -->
+                                            </div>
+                                        </td>
+                                        <td class="text-center align-middle">
                                             <button type="button" class="btn btn-outline-danger btn-sm remove-item" tabindex="-1">
                                                 <i class="bi bi-x-lg"></i>
                                             </button>
@@ -147,6 +165,67 @@
             <a asp-action="Index" class="btn btn-light border shadow-sm">Cancel</a>
         </div>
     </form>
+</div>
+
+<!-- Rolls Modal -->
+<div class="modal fade" id="rollsModal" tabindex="-1" aria-labelledby="rollsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="rollsModalLabel">Rolls Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="currentRollItemIndex" />
+                <table class="table table-bordered" id="rollsTable">
+                    <thead class="bg-light">
+                        <tr>
+                            <th>Roll No</th>
+                            <th>Roll Weight (Kg)</th>
+                            <th style="width: 50px;"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+                <button type="button" class="btn btn-sm btn-outline-primary" id="btnAddRollRow"><i class="bi bi-plus"></i> Add Roll</button>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="btnSaveRolls">Save Rolls</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Cylinders Modal -->
+<div class="modal fade" id="cylindersModal" tabindex="-1" aria-labelledby="cylindersModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="cylindersModalLabel">Cylinders Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="currentCylinderItemIndex" />
+                <table class="table table-bordered" id="cylindersTable">
+                    <thead class="bg-light">
+                        <tr>
+                            <th>Cylinder No</th>
+                            <th style="width: 50px;"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+                <button type="button" class="btn btn-sm btn-outline-primary" id="btnAddCylinderRow"><i class="bi bi-plus"></i> Add Cylinder</button>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="btnSaveCylinders">Save Cylinders</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 @section Scripts {
@@ -193,6 +272,21 @@
                             <input name="GoodsReceiptNoteItems[${itemIndex}].Remarks" class="form-control" />
                         </td>
                         <td class="text-center align-middle">
+                            @if (ViewBag.POType == "Cylinder")
+                            {
+                                <button type="button" class="btn btn-outline-info btn-sm btn-details" data-type="Cylinder" data-index="${itemIndex}">
+                                    <i class="bi bi-list-ul"></i> Cylinders
+                                </button>
+                            }
+                            else
+                            {
+                                <button type="button" class="btn btn-outline-info btn-sm btn-details" data-type="Roll" data-index="${itemIndex}">
+                                    <i class="bi bi-list-ul"></i> Rolls
+                                </button>
+                            }
+                            <div class="item-details-container" id="details-container-${itemIndex}"></div>
+                        </td>
+                        <td class="text-center align-middle">
                             <button type="button" class="btn btn-outline-danger btn-sm remove-item" tabindex="-1">
                                 <i class="bi bi-x-lg"></i>
                             </button>
@@ -236,6 +330,122 @@
                     }
                 }
             });
+
+            // Modals logic
+            var poType = '@ViewBag.POType';
+            
+            $(document).on('click', '.btn-details', function() {
+                var type = $(this).data('type');
+                var index = $(this).data('index');
+                var containerId = '#details-container-' + index;
+                
+                if (type === 'Roll') {
+                    $('#currentRollItemIndex').val(index);
+                    $('#rollsTable tbody').empty();
+                    
+                    // Populate modal from hidden inputs
+                    var rollCount = 0;
+                    $(containerId).find('input[name$=".RollNo"]').each(function() {
+                        var no = $(this).val();
+                        var weight = $(this).closest('.item-details-container').find('input[name="GoodsReceiptNoteItems[' + index + '].Rolls[' + rollCount + '].RollWeight"]').val();
+                        
+                        var tr = `<tr>
+                            <td><input type="text" class="form-control roll-no" value="${no}" /></td>
+                            <td><input type="number" step="0.01" class="form-control roll-weight" value="${weight}" /></td>
+                            <td class="text-center"><button type="button" class="btn btn-sm btn-danger remove-modal-row"><i class="bi bi-x"></i></button></td>
+                        </tr>`;
+                        $('#rollsTable tbody').append(tr);
+                        rollCount++;
+                    });
+                    
+                    if(rollCount === 0) $('#btnAddRollRow').click(); // Add empty row if none
+                    
+                    var rollsModal = new bootstrap.Modal(document.getElementById('rollsModal'));
+                    rollsModal.show();
+                } else if (type === 'Cylinder') {
+                    $('#currentCylinderItemIndex').val(index);
+                    $('#cylindersTable tbody').empty();
+                    
+                    var cylCount = 0;
+                    $(containerId).find('input[name$=".CylinderNo"]').each(function() {
+                        var no = $(this).val();
+                        var tr = `<tr>
+                            <td><input type="text" class="form-control cyl-no" value="${no}" /></td>
+                            <td class="text-center"><button type="button" class="btn btn-sm btn-danger remove-modal-row"><i class="bi bi-x"></i></button></td>
+                        </tr>`;
+                        $('#cylindersTable tbody').append(tr);
+                        cylCount++;
+                    });
+                    
+                    if(cylCount === 0) $('#btnAddCylinderRow').click();
+                    
+                    var cylModal = new bootstrap.Modal(document.getElementById('cylindersModal'));
+                    cylModal.show();
+                }
+            });
+
+            $('#btnAddRollRow').click(function() {
+                var tr = `<tr>
+                    <td><input type="text" class="form-control roll-no" /></td>
+                    <td><input type="number" step="0.01" class="form-control roll-weight" value="0" /></td>
+                    <td class="text-center"><button type="button" class="btn btn-sm btn-danger remove-modal-row"><i class="bi bi-x"></i></button></td>
+                </tr>`;
+                $('#rollsTable tbody').append(tr);
+            });
+
+            $('#btnAddCylinderRow').click(function() {
+                var tr = `<tr>
+                    <td><input type="text" class="form-control cyl-no" /></td>
+                    <td class="text-center"><button type="button" class="btn btn-sm btn-danger remove-modal-row"><i class="bi bi-x"></i></button></td>
+                </tr>`;
+                $('#cylindersTable tbody').append(tr);
+            });
+
+            $(document).on('click', '.remove-modal-row', function() {
+                $(this).closest('tr').remove();
+            });
+
+            $('#btnSaveRolls').click(function() {
+                var index = $('#currentRollItemIndex').val();
+                var container = $('#details-container-' + index);
+                container.empty();
+                
+                var rollCount = 0;
+                $('#rollsTable tbody tr').each(function() {
+                    var no = $(this).find('.roll-no').val();
+                    var weight = $(this).find('.roll-weight').val();
+                    if(no) {
+                        var h1 = `<input type="hidden" name="GoodsReceiptNoteItems[${index}].Rolls[${rollCount}].RollNo" value="${no}" />`;
+                        var h2 = `<input type="hidden" name="GoodsReceiptNoteItems[${index}].Rolls[${rollCount}].RollWeight" value="${weight}" />`;
+                        container.append(h1).append(h2);
+                        rollCount++;
+                    }
+                });
+                
+                // Also automatically update received qty maybe? Optional, user might want manual.
+                // Let's just update if user wants to maintain stock as per rolls.
+                
+                bootstrap.Modal.getInstance(document.getElementById('rollsModal')).hide();
+            });
+
+            $('#btnSaveCylinders').click(function() {
+                var index = $('#currentCylinderItemIndex').val();
+                var container = $('#details-container-' + index);
+                container.empty();
+                
+                var cylCount = 0;
+                $('#cylindersTable tbody tr').each(function() {
+                    var no = $(this).find('.cyl-no').val();
+                    if(no) {
+                        var h1 = `<input type="hidden" name="GoodsReceiptNoteItems[${index}].Cylinders[${cylCount}].CylinderNo" value="${no}" />`;
+                        container.append(h1);
+                        cylCount++;
+                    }
+                });
+                
+                bootstrap.Modal.getInstance(document.getElementById('cylindersModal')).hide();
+            });
+
         });
     </script>
 }

@@ -39,9 +39,14 @@
                     <label asp-for="CustomerPORef" class="form-label fw-bold"></label>
                     <input asp-for="CustomerPORef" class="form-control" />
                 </div>
-                <div class="col-md-8">
+                <div class="col-md-4">
                     <label asp-for="OrderNo" class="form-label fw-bold">Sales Order No</label>
                     <input asp-for="OrderNo" class="form-control" />
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="OrderDate" class="form-label fw-bold">Order Date</label>
+                    <input asp-for="OrderDate" class="form-control" type="date" />
+                    <span asp-validation-for="OrderDate" class="text-danger"></span>
                 </div>
             </div>
 
