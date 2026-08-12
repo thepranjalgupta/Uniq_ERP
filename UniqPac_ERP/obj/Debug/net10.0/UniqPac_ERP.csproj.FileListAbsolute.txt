@@ -402,5 +402,5 @@
 /Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/bin/Debug/net10.0/tr/Microsoft.CodeAnalysis.Scripting.resources.dll
 /Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/bin/Debug/net10.0/zh-Hans/Microsoft.CodeAnalysis.Scripting.resources.dll
 /Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/bin/Debug/net10.0/zh-Hant/Microsoft.CodeAnalysis.Scripting.resources.dll
-/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/obj/Debug/net10.0/compressed/7oewqw2s9w-{0}-7netvc8ww5-7netvc8ww5.gz
 /Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/obj/Debug/net10.0/UniqPac_ERP.sourcelink.json
+/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/obj/Debug/net10.0/compressed/7oewqw2s9w-{0}-8yxeysd94e-8yxeysd94e.gz

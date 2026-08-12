@@ -154,6 +154,7 @@ a:hover {
 /* Main Content Area */
 .main-wrapper {
     flex: 1;
+    min-width: 0;
     margin-left: var(--sidebar-width);
     display: flex;
     flex-direction: column;
@@ -263,7 +264,8 @@ a:hover {
     border-radius: var(--radius-lg);
     border: 1px solid var(--border-color);
     background: #fff;
-    overflow: hidden;
+    overflow-x: auto;
+    overflow-y: hidden;
 }
 
 .table {
