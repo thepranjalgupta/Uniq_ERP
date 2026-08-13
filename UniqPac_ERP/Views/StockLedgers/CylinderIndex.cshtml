@@ -1,0 +1,86 @@
+@model IEnumerable<UniqPac_ERP.Models.CylinderMaster>
+
+@{
+    ViewData["Title"] = "Cylinder Stock Balance";
+}
+
+<div class="container-fluid px-4 py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="h3 mb-0 text-gray-800">Cylinder Stock Balance</h2>
+            <p class="text-muted mb-0">Current stock levels for all cylinders</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a asp-controller="StockLedgers" asp-action="Index" class="btn btn-outline-primary shadow-sm">
+                <i class="bi bi-box me-1"></i> Item Stock
+            </a>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0" id="cylinderStockTable">
+                    <thead class="bg-light">
+                        <tr>
+                            <th>Cylinder Code</th>
+                            <th>Cylinder Name</th>
+                            <th>Job</th>
+                            <th class="text-end">Current Stock</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td><span class="fw-medium">@item.CylinderCode</span></td>
+                                <td>@item.CylinderName</td>
+                                <td>@(item.CustomerJob?.JobName ?? "-")</td>
+                                <td class="text-end">
+                                    <span class="badge @(item.CurrentStock <= 0 ? "bg-danger" : "bg-success") rounded-pill px-3 py-2">
+                                        @item.CurrentStock.ToString("0.##")
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <div class="btn-group">
+                                        <a asp-action="CylinderList" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary" title="View Cylinders">
+                                            <i class="bi bi-vinyl"></i> Cylinders
+                                        </a>
+                                        <a asp-action="CylinderDetails" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info" title="View Ledger">
+                                            <i class="bi bi-journal-text"></i> Ledger
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            @if (!Model.Any())
+            {
+                <div class="text-center p-5 text-muted">
+                    <i class="bi bi-box-seam display-4 mb-3 d-block opacity-50"></i>
+                    <p class="mb-0">No cylinders found.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#cylinderStockTable').DataTable({
+                "order": [[1, "asc"]],
+                "pageLength": 25,
+                "language": {
+                    "search": "",
+                    "searchPlaceholder": "Search cylinders..."
+                }
+            });
+            $('.dataTables_filter input').addClass('form-control form-control-sm');
+            $('.dataTables_length select').addClass('form-select form-select-sm');
+        });
+    </script>
+}

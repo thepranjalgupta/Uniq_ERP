@@ -62,5 +62,9 @@ namespace UniqPac_ERP.Models
         [StringLength(200)]
         [Display(Name = "Product Packed")]
         public string? ProductPacked { get; set; }
+
+        [Display(Name = "Current Stock")]
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal CurrentStock { get; set; } = 0;
     }
 }

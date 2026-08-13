@@ -127,5 +127,60 @@ namespace UniqPac_ERP.Controllers
             ViewData["ItemId"] = new SelectList(_context.Items.Where(i => i.IsActive), "Id", "ItemName", stockLedger.ItemId);
             return View(stockLedger);
         }
+
+        // GET: Cylinder Stock Balance
+        public async Task<IActionResult> CylinderIndex()
+        {
+            var cylinders = await _context.CylinderMasters
+                .Include(c => c.CustomerJob)
+                .Where(c => c.IsActive)
+                .OrderBy(c => c.CylinderName)
+                .ToListAsync();
+            return View(cylinders);
+        }
+
+        // GET: Cylinder Stock Ledger Details
+        public async Task<IActionResult> CylinderDetails(int? id)
+        {
+            if (id == null) return NotFound();
+
+            var cylinder = await _context.CylinderMasters
+                .Include(c => c.CustomerJob)
+                .FirstOrDefaultAsync(m => m.Id == id);
+                
+            if (cylinder == null) return NotFound();
+
+            var ledgerEntries = await _context.CylinderStockLedgers
+                .Where(s => s.CylinderMasterId == id)
+                .OrderByDescending(s => s.TransactionDate)
+                .ThenByDescending(s => s.Id)
+                .ToListAsync();
+
+            ViewBag.Cylinder = cylinder;
+            return View(ledgerEntries);
+        }
+
+        // GET: Cylinder List for a specific Cylinder Master
+        public async Task<IActionResult> CylinderList(int? id)
+        {
+            if (id == null) return NotFound();
+
+            var cylinder = await _context.CylinderMasters
+                .Include(c => c.CustomerJob)
+                .FirstOrDefaultAsync(m => m.Id == id);
+                
+            if (cylinder == null) return NotFound();
+
+            var cylindersList = await _context.GoodsReceiptNoteCylinders
+                .Include(c => c.GoodsReceiptNoteItem)
+                    .ThenInclude(g => g.GoodsReceiptNote)
+                        .ThenInclude(grn => grn.PurchaseOrder)
+                .Where(c => c.GoodsReceiptNoteItem.CylinderMasterId == id)
+                .OrderByDescending(c => c.Id)
+                .ToListAsync();
+
+            ViewBag.Cylinder = cylinder;
+            return View(cylindersList);
+        }
     }
 }

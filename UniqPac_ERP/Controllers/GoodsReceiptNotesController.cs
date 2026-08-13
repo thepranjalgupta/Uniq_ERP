@@ -82,6 +82,7 @@ namespace UniqPac_ERP.Controllers
             ViewData["VendorId"] = new SelectList(_context.Vendors.Where(v => v.IsActive), "Id", "Name");
             ViewData["PurchaseOrderId"] = new SelectList(_context.PurchaseOrders.OrderByDescending(p => p.CreatedAt), "Id", "PONumber", purchaseOrderId);
             ViewData["ItemId"] = new SelectList(_context.Items.Where(i => i.IsActive), "Id", "ItemName");
+            ViewData["CylinderMasterId"] = new SelectList(_context.CylinderMasters, "Id", "CylinderName");
 
             string newGrnNo = "GRN/26-27/0001";
             var lastGrn = await _context.GoodsReceiptNotes.OrderByDescending(o => o.Id).FirstOrDefaultAsync();
@@ -151,6 +152,7 @@ namespace UniqPac_ERP.Controllers
                 {
                     ModelState.Remove($"GoodsReceiptNoteItems[{i}].GoodsReceiptNote");
                     ModelState.Remove($"GoodsReceiptNoteItems[{i}].Item");
+                    ModelState.Remove($"GoodsReceiptNoteItems[{i}].CylinderMaster");
                 }
             }
 
@@ -180,9 +182,33 @@ namespace UniqPac_ERP.Controllers
                 // Add Stock Ledger Entries
                 if (goodsReceiptNote.GoodsReceiptNoteItems != null)
                 {
+                    var po = goodsReceiptNote.PurchaseOrderId.HasValue ? await _context.PurchaseOrders.FindAsync(goodsReceiptNote.PurchaseOrderId.Value) : null;
+                    bool isCylinderPo = po?.POType == "Cylinder";
+
                     foreach (var item in goodsReceiptNote.GoodsReceiptNoteItems)
                     {
-                        if (item.ItemId.HasValue && item.AcceptedQuantity > 0)
+                        if (isCylinderPo && item.CylinderMasterId.HasValue && item.AcceptedQuantity > 0)
+                        {
+                            var dbCylinder = await _context.CylinderMasters.FindAsync(item.CylinderMasterId.Value);
+                            if (dbCylinder != null)
+                            {
+                                dbCylinder.CurrentStock += item.AcceptedQuantity;
+                                
+                                var ledger = new CylinderStockLedger
+                                {
+                                    CylinderMasterId = item.CylinderMasterId.Value,
+                                    TransactionDate = goodsReceiptNote.GRNDate,
+                                    TransactionType = "GRN",
+                                    ReferenceNumber = goodsReceiptNote.GRNNumber,
+                                    Quantity = item.AcceptedQuantity,
+                                    RunningBalance = dbCylinder.CurrentStock,
+                                    CreatedBy = User.Identity?.Name ?? "System",
+                                    CreatedAt = DateTime.UtcNow
+                                };
+                                _context.CylinderStockLedgers.Add(ledger);
+                            }
+                        }
+                        else if (!isCylinderPo && item.ItemId.HasValue && item.AcceptedQuantity > 0)
                         {
                             var dbItem = await _context.Items.FindAsync(item.ItemId.Value);
                             if (dbItem != null)
@@ -213,6 +239,7 @@ namespace UniqPac_ERP.Controllers
             ViewData["VendorId"] = new SelectList(_context.Vendors.Where(v => v.IsActive), "Id", "Name", goodsReceiptNote.VendorId);
             ViewData["PurchaseOrderId"] = new SelectList(_context.PurchaseOrders.OrderByDescending(p => p.CreatedAt), "Id", "PONumber", goodsReceiptNote.PurchaseOrderId);
             ViewData["ItemId"] = new SelectList(_context.Items.Where(i => i.IsActive), "Id", "ItemName");
+            ViewData["CylinderMasterId"] = new SelectList(_context.CylinderMasters, "Id", "CylinderName");
             return View(goodsReceiptNote);
         }
 
@@ -234,6 +261,7 @@ namespace UniqPac_ERP.Controllers
             ViewData["VendorId"] = new SelectList(_context.Vendors.Where(v => v.IsActive), "Id", "Name", goodsReceiptNote.VendorId);
             ViewData["PurchaseOrderId"] = new SelectList(_context.PurchaseOrders.OrderByDescending(p => p.CreatedAt), "Id", "PONumber", goodsReceiptNote.PurchaseOrderId);
             ViewData["ItemId"] = new SelectList(_context.Items.Where(i => i.IsActive), "Id", "ItemName");
+            ViewData["CylinderMasterId"] = new SelectList(_context.CylinderMasters, "Id", "CylinderName");
             
             if (goodsReceiptNote.PurchaseOrderId.HasValue)
             {
@@ -260,6 +288,7 @@ namespace UniqPac_ERP.Controllers
                 {
                     ModelState.Remove($"GoodsReceiptNoteItems[{i}].GoodsReceiptNote");
                     ModelState.Remove($"GoodsReceiptNoteItems[{i}].Item");
+                    ModelState.Remove($"GoodsReceiptNoteItems[{i}].CylinderMaster");
                 }
             }
 
@@ -275,9 +304,31 @@ namespace UniqPac_ERP.Controllers
                     if (existing == null) return NotFound();
                     
                     // Revert old stock ledger entries and item stock
+                    bool oldIsCylinderPo = existing.PurchaseOrder?.POType == "Cylinder";
                     foreach(var oldItem in existing.GoodsReceiptNoteItems)
                     {
-                        if (oldItem.ItemId.HasValue && oldItem.AcceptedQuantity > 0)
+                        if (oldIsCylinderPo && oldItem.CylinderMasterId.HasValue && oldItem.AcceptedQuantity > 0)
+                        {
+                            var dbCylinder = await _context.CylinderMasters.FindAsync(oldItem.CylinderMasterId.Value);
+                            if (dbCylinder != null)
+                            {
+                                dbCylinder.CurrentStock -= oldItem.AcceptedQuantity;
+                                
+                                var ledger = new CylinderStockLedger
+                                {
+                                    CylinderMasterId = oldItem.CylinderMasterId.Value,
+                                    TransactionDate = DateTime.UtcNow,
+                                    TransactionType = "GRN Edit Revert",
+                                    ReferenceNumber = existing.GRNNumber,
+                                    Quantity = -oldItem.AcceptedQuantity,
+                                    RunningBalance = dbCylinder.CurrentStock,
+                                    CreatedBy = User.Identity?.Name ?? "System",
+                                    CreatedAt = DateTime.UtcNow
+                                };
+                                _context.CylinderStockLedgers.Add(ledger);
+                            }
+                        }
+                        else if (!oldIsCylinderPo && oldItem.ItemId.HasValue && oldItem.AcceptedQuantity > 0)
                         {
                             var dbItem = await _context.Items.FindAsync(oldItem.ItemId.Value);
                             if (dbItem != null)
@@ -333,7 +384,30 @@ namespace UniqPac_ERP.Controllers
                             existing.GoodsReceiptNoteItems.Add(item);
                             
                             // Apply new stock
-                            if (item.ItemId.HasValue && item.AcceptedQuantity > 0)
+                            var po = goodsReceiptNote.PurchaseOrderId.HasValue ? await _context.PurchaseOrders.FindAsync(goodsReceiptNote.PurchaseOrderId.Value) : null;
+                            bool newIsCylinderPo = po?.POType == "Cylinder";
+
+                            if (newIsCylinderPo && item.CylinderMasterId.HasValue && item.AcceptedQuantity > 0)
+                            {
+                                var dbCylinder = await _context.CylinderMasters.FindAsync(item.CylinderMasterId.Value);
+                                if (dbCylinder != null)
+                                {
+                                    dbCylinder.CurrentStock += item.AcceptedQuantity;
+                                    var ledger = new CylinderStockLedger
+                                    {
+                                        CylinderMasterId = item.CylinderMasterId.Value,
+                                        TransactionDate = goodsReceiptNote.GRNDate,
+                                        TransactionType = "GRN Edit Apply",
+                                        ReferenceNumber = existing.GRNNumber,
+                                        Quantity = item.AcceptedQuantity,
+                                        RunningBalance = dbCylinder.CurrentStock,
+                                        CreatedBy = User.Identity?.Name ?? "System",
+                                        CreatedAt = DateTime.UtcNow
+                                    };
+                                    _context.CylinderStockLedgers.Add(ledger);
+                                }
+                            }
+                            else if (!newIsCylinderPo && item.ItemId.HasValue && item.AcceptedQuantity > 0)
                             {
                                 var dbItem = await _context.Items.FindAsync(item.ItemId.Value);
                                 if (dbItem != null)
@@ -371,6 +445,7 @@ namespace UniqPac_ERP.Controllers
             ViewData["VendorId"] = new SelectList(_context.Vendors.Where(v => v.IsActive), "Id", "Name", goodsReceiptNote.VendorId);
             ViewData["PurchaseOrderId"] = new SelectList(_context.PurchaseOrders.OrderByDescending(p => p.CreatedAt), "Id", "PONumber", goodsReceiptNote.PurchaseOrderId);
             ViewData["ItemId"] = new SelectList(_context.Items.Where(i => i.IsActive), "Id", "ItemName");
+            ViewData["CylinderMasterId"] = new SelectList(_context.CylinderMasters, "Id", "CylinderName");
             
             return View(goodsReceiptNote);
         }
@@ -404,9 +479,30 @@ namespace UniqPac_ERP.Controllers
             if (goodsReceiptNote != null)
             {
                 // Revert stock
+                bool delIsCylinderPo = goodsReceiptNote.PurchaseOrder?.POType == "Cylinder";
                 foreach (var item in goodsReceiptNote.GoodsReceiptNoteItems)
                 {
-                    if (item.ItemId.HasValue && item.AcceptedQuantity > 0)
+                    if (delIsCylinderPo && item.CylinderMasterId.HasValue && item.AcceptedQuantity > 0)
+                    {
+                        var dbCylinder = await _context.CylinderMasters.FindAsync(item.CylinderMasterId.Value);
+                        if (dbCylinder != null)
+                        {
+                            dbCylinder.CurrentStock -= item.AcceptedQuantity;
+                            var ledger = new CylinderStockLedger
+                            {
+                                CylinderMasterId = item.CylinderMasterId.Value,
+                                TransactionDate = DateTime.UtcNow,
+                                TransactionType = "GRN Delete",
+                                ReferenceNumber = goodsReceiptNote.GRNNumber,
+                                Quantity = -item.AcceptedQuantity,
+                                RunningBalance = dbCylinder.CurrentStock,
+                                CreatedBy = User.Identity?.Name ?? "System",
+                                CreatedAt = DateTime.UtcNow
+                            };
+                            _context.CylinderStockLedgers.Add(ledger);
+                        }
+                    }
+                    else if (!delIsCylinderPo && item.ItemId.HasValue && item.AcceptedQuantity > 0)
                     {
                         var dbItem = await _context.Items.FindAsync(item.ItemId.Value);
                         if (dbItem != null)

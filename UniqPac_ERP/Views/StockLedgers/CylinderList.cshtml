@@ -1,0 +1,139 @@
+@model IEnumerable<UniqPac_ERP.Models.GoodsReceiptNoteCylinder>
+
+@{
+    var cylinder = ViewBag.Cylinder as UniqPac_ERP.Models.CylinderMaster;
+    ViewData["Title"] = $"Individual Cylinders - {cylinder?.CylinderName}";
+}
+
+<div class="container-fluid px-4 py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="h3 mb-0 text-gray-800">Individual Cylinders Inventory</h2>
+            <p class="text-muted mb-0">List of cylinders in stock for @cylinder?.CylinderName</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a asp-action="CylinderIndex" class="btn btn-outline-secondary shadow-sm">
+                <i class="bi bi-arrow-left me-1"></i> Back to Stock Balance
+            </a>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-info text-white shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-white-50 small text-uppercase fw-bold mb-1">Total Cylinders (All Time)</div>
+                            <div class="h2 mb-0 fw-bold">@Model.Count()</div>
+                        </div>
+                        <div class="fs-1 text-white-50">
+                            <i class="bi bi-vinyl"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-9 col-md-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold text-info mb-3">Master Cylinder Information</h5>
+                    <div class="row">
+                        <div class="col-sm-3 mb-2">
+                            <small class="text-muted d-block">Cylinder Code</small>
+                            <strong>@cylinder?.CylinderCode</strong>
+                        </div>
+                        <div class="col-sm-3 mb-2">
+                            <small class="text-muted d-block">Job</small>
+                            <strong>@(cylinder?.CustomerJob?.JobName ?? "-")</strong>
+                        </div>
+                        <div class="col-sm-3 mb-2">
+                            <small class="text-muted d-block">Current Stock Balance</small>
+                            <strong>@cylinder?.CurrentStock.ToString("0.##")</strong>
+                        </div>
+                        <div class="col-sm-3 mb-2">
+                            <small class="text-muted d-block">Product Packed</small>
+                            <strong>@(cylinder?.ProductPacked ?? "-")</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0" id="cylindersListTable">
+                    <thead class="bg-light">
+                        <tr>
+                            <th>Cylinder No</th>
+                            <th>Received On</th>
+                            <th>GRN No</th>
+                            <th>Purchase Order</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <span class="badge bg-primary fs-6 px-3 py-2 rounded-pill shadow-sm">
+                                        <i class="bi bi-upc-scan me-1"></i> @item.CylinderNo
+                                    </span>
+                                </td>
+                                <td>
+                                    @(item.GoodsReceiptNoteItem?.GoodsReceiptNote?.GRNDate.ToString("dd MMM yyyy") ?? "-")
+                                </td>
+                                <td>
+                                    @if(item.GoodsReceiptNoteItem?.GoodsReceiptNote != null)
+                                    {
+                                        <a href="/GoodsReceiptNotes/Details/@item.GoodsReceiptNoteItem.GoodsReceiptNote.Id" class="text-decoration-none fw-medium">
+                                            @item.GoodsReceiptNoteItem.GoodsReceiptNote.GRNNumber
+                                        </a>
+                                    }
+                                </td>
+                                <td>
+                                    @if(item.GoodsReceiptNoteItem?.GoodsReceiptNote?.PurchaseOrder != null)
+                                    {
+                                        <a href="/PurchaseOrders/Details/@item.GoodsReceiptNoteItem.GoodsReceiptNote.PurchaseOrder.Id" class="text-decoration-none text-muted">
+                                            @item.GoodsReceiptNoteItem.GoodsReceiptNote.PurchaseOrder.PONumber
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            @if (!Model.Any())
+            {
+                <div class="text-center p-5 text-muted">
+                    <i class="bi bi-vinyl display-4 mb-3 d-block opacity-50"></i>
+                    <p class="mb-0">No individual cylinders found.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#cylindersListTable').DataTable({
+                "order": [[1, "desc"]],
+                "pageLength": 25,
+                "language": {
+                    "search": "",
+                    "searchPlaceholder": "Search cylinders..."
+                }
+            });
+            $('.dataTables_filter input').addClass('form-control form-control-sm');
+            $('.dataTables_length select').addClass('form-select form-select-sm');
+        });
+    </script>
+}

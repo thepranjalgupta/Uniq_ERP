@@ -99,11 +99,21 @@
                                     <tr>
                                         <td>
                                             <input type="hidden" asp-for="GoodsReceiptNoteItems[i].Id" />
-                                            <select asp-for="GoodsReceiptNoteItems[i].ItemId" class="form-select item-id-select" asp-items="ViewBag.ItemId" required>
-                                                <option value="">-- Select Item --</option>
-                                            </select>
+                                            @if (ViewBag.POType == "Cylinder")
+                                            {
+                                                <select asp-for="GoodsReceiptNoteItems[i].CylinderMasterId" class="form-select item-id-select" asp-items="ViewBag.CylinderMasterId" required>
+                                                    <option value="">-- Select Cylinder --</option>
+                                                </select>
+                                                <span asp-validation-for="GoodsReceiptNoteItems[i].CylinderMasterId" class="text-danger d-block mt-1 small"></span>
+                                            }
+                                            else
+                                            {
+                                                <select asp-for="GoodsReceiptNoteItems[i].ItemId" class="form-select item-id-select" asp-items="ViewBag.ItemId" required>
+                                                    <option value="">-- Select Item --</option>
+                                                </select>
+                                                <span asp-validation-for="GoodsReceiptNoteItems[i].ItemId" class="text-danger d-block mt-1 small"></span>
+                                            }
                                             <input type="hidden" asp-for="GoodsReceiptNoteItems[i].ItemName" />
-                                            <span asp-validation-for="GoodsReceiptNoteItems[i].ItemId" class="text-danger d-block mt-1 small"></span>
                                         </td>
                                         <td>
                                             <input asp-for="GoodsReceiptNoteItems[i].ExpectedQuantity" class="form-control expected-qty" type="number" step="0.01" />
@@ -268,13 +278,26 @@
                     <tr>
                         <td>
                             <input name="GoodsReceiptNoteItems[${itemIndex}].Id" type="hidden" value="0" />
-                            <select name="GoodsReceiptNoteItems[${itemIndex}].ItemId" class="form-select item-id-select" required>
-                                <option value="">-- Select Item --</option>
-                                @foreach(var item in (SelectList)ViewBag.ItemId)
-                                {
-                                    <option value="@item.Value">@item.Text</option>
-                                }
-                            </select>
+                            @if (ViewBag.POType == "Cylinder")
+                            {
+                                <select name="GoodsReceiptNoteItems[${itemIndex}].CylinderMasterId" class="form-select item-id-select" required>
+                                    <option value="">-- Select Cylinder --</option>
+                                    @foreach(var item in (SelectList)ViewBag.CylinderMasterId)
+                                    {
+                                        <option value="@item.Value">@item.Text</option>
+                                    }
+                                </select>
+                            }
+                            else
+                            {
+                                <select name="GoodsReceiptNoteItems[${itemIndex}].ItemId" class="form-select item-id-select" required>
+                                    <option value="">-- Select Item --</option>
+                                    @foreach(var item in (SelectList)ViewBag.ItemId)
+                                    {
+                                        <option value="@item.Value">@item.Text</option>
+                                    }
+                                </select>
+                            }
                             <input type="hidden" name="GoodsReceiptNoteItems[${itemIndex}].ItemName" value="Item" />
                         </td>
                         <td>

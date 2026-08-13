@@ -330,6 +330,18 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU3RvY2tMZWRnZXJzL0NyZWF0ZS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/StockLedgers/CylinderDetails.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU3RvY2tMZWRnZXJzL0N5bGluZGVyRGV0YWlscy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/StockLedgers/CylinderIndex.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU3RvY2tMZWRnZXJzL0N5bGluZGVySW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/StockLedgers/CylinderList.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU3RvY2tMZWRnZXJzL0N5bGluZGVyTGlzdC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [/Users/admin/Jovial Digital/Uniqpac_erp/UniqPac_ERP/UniqPac_ERP/Views/StockLedgers/Details.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU3RvY2tMZWRnZXJzL0RldGFpbHMuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 

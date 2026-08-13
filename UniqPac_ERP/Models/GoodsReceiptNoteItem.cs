@@ -20,6 +20,12 @@ namespace UniqPac_ERP.Models
         [ForeignKey("ItemId")]
         public Item? Item { get; set; }
 
+        [Display(Name = "Cylinder Master")]
+        public int? CylinderMasterId { get; set; }
+
+        [ForeignKey("CylinderMasterId")]
+        public CylinderMaster? CylinderMaster { get; set; }
+
         [Required]
         [Display(Name = "Item / Product Name")]
         [StringLength(200)]
