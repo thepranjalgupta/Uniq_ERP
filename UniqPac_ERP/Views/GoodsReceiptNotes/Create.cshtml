@@ -97,7 +97,22 @@
                                 {
                                     <tr>
                                         <td>
-                                            @if (ViewBag.POType == "Cylinder")
+                                            @if (string.IsNullOrEmpty(ViewBag.POType))
+                                            {
+                                                <select class="form-select row-type-select mb-1">
+                                                    <option value="Material" selected="@(!Model.GoodsReceiptNoteItems[i].CylinderMasterId.HasValue ? "selected" : null)">Material</option>
+                                                    <option value="Cylinder" selected="@(Model.GoodsReceiptNoteItems[i].CylinderMasterId.HasValue ? "selected" : null)">Cylinder</option>
+                                                </select>
+                                                <select asp-for="GoodsReceiptNoteItems[i].ItemId" class="form-select item-id-select @(Model.GoodsReceiptNoteItems[i].CylinderMasterId.HasValue ? "d-none" : "")" asp-items="ViewBag.ItemId">
+                                                    <option value="">-- Select Item --</option>
+                                                </select>
+                                                <select asp-for="GoodsReceiptNoteItems[i].CylinderMasterId" class="form-select cylinder-id-select @(Model.GoodsReceiptNoteItems[i].CylinderMasterId.HasValue ? "" : "d-none")" asp-items="ViewBag.CylinderMasterId">
+                                                    <option value="">-- Select Cylinder --</option>
+                                                </select>
+                                                <span asp-validation-for="GoodsReceiptNoteItems[i].ItemId" class="text-danger d-block mt-1 small"></span>
+                                                <span asp-validation-for="GoodsReceiptNoteItems[i].CylinderMasterId" class="text-danger d-block mt-1 small"></span>
+                                            }
+                                            else if (ViewBag.POType == "Cylinder")
                                             {
                                                 <select asp-for="GoodsReceiptNoteItems[i].CylinderMasterId" class="form-select item-id-select" asp-items="ViewBag.CylinderMasterId" required>
                                                     <option value="">-- Select Cylinder --</option>
@@ -111,7 +126,7 @@
                                                 </select>
                                                 <span asp-validation-for="GoodsReceiptNoteItems[i].ItemId" class="text-danger d-block mt-1 small"></span>
                                             }
-                                            <input type="hidden" asp-for="GoodsReceiptNoteItems[i].ItemName" />
+                                            <input type="hidden" asp-for="GoodsReceiptNoteItems[i].ItemName" class="hidden-item-name" />
                                         </td>
                                         <td>
                                             <input asp-for="GoodsReceiptNoteItems[i].ExpectedQuantity" class="form-control expected-qty" type="number" step="0.01" />
@@ -129,7 +144,16 @@
                                             <input asp-for="GoodsReceiptNoteItems[i].Remarks" class="form-control" />
                                         </td>
                                         <td class="text-center align-middle">
-                                            @if (ViewBag.POType == "Cylinder")
+                                            @if (string.IsNullOrEmpty(ViewBag.POType))
+                                            {
+                                                <button type="button" class="btn btn-outline-info btn-sm btn-details btn-details-roll @(Model.GoodsReceiptNoteItems[i].CylinderMasterId.HasValue ? "d-none" : "")" data-type="Roll" data-index="@i">
+                                                    <i class="bi bi-list-ul"></i> Rolls
+                                                </button>
+                                                <button type="button" class="btn btn-outline-info btn-sm btn-details btn-details-cylinder @(Model.GoodsReceiptNoteItems[i].CylinderMasterId.HasValue ? "" : "d-none")" data-type="Cylinder" data-index="@i">
+                                                    <i class="bi bi-list-ul"></i> Cylinders
+                                                </button>
+                                            }
+                                            else if (ViewBag.POType == "Cylinder")
                                             {
                                                 <button type="button" class="btn btn-outline-info btn-sm btn-details" data-type="Cylinder" data-index="@i">
                                                     <i class="bi bi-list-ul"></i> Cylinders
@@ -218,6 +242,8 @@
             </div>
             <div class="modal-body">
                 <input type="hidden" id="currentCylinderItemIndex" />
+                <div id="returnedCylindersContainer" class="mb-3"></div>
+                <h6 class="mb-2 text-primary">Add New Cylinders</h6>
                 <table class="table table-bordered" id="cylindersTable">
                     <thead class="bg-light">
                         <tr>
@@ -257,7 +283,28 @@
                 var newRow = `
                     <tr>
                         <td>
-                            @if (ViewBag.POType == "Cylinder")
+                            @if (string.IsNullOrEmpty(ViewBag.POType))
+                            {
+                                <select class="form-select row-type-select mb-1">
+                                    <option value="Material">Material</option>
+                                    <option value="Cylinder">Cylinder</option>
+                                </select>
+                                <select name="GoodsReceiptNoteItems[${itemIndex}].ItemId" class="form-select item-id-select" required>
+                                    <option value="">-- Select Item --</option>
+                                    @foreach(var item in (SelectList)ViewBag.ItemId)
+                                    {
+                                        <option value="@item.Value">@item.Text</option>
+                                    }
+                                </select>
+                                <select name="GoodsReceiptNoteItems[${itemIndex}].CylinderMasterId" class="form-select cylinder-id-select d-none">
+                                    <option value="">-- Select Cylinder --</option>
+                                    @foreach(var item in (SelectList)ViewBag.CylinderMasterId)
+                                    {
+                                        <option value="@item.Value">@item.Text</option>
+                                    }
+                                </select>
+                            }
+                            else if (ViewBag.POType == "Cylinder")
                             {
                                 <select name="GoodsReceiptNoteItems[${itemIndex}].CylinderMasterId" class="form-select item-id-select" required>
                                     <option value="">-- Select Cylinder --</option>
@@ -277,7 +324,7 @@
                                     }
                                 </select>
                             }
-                            <input type="hidden" name="GoodsReceiptNoteItems[${itemIndex}].ItemName" value="Item" />
+                            <input type="hidden" name="GoodsReceiptNoteItems[${itemIndex}].ItemName" value="Item" class="hidden-item-name" />
                         </td>
                         <td>
                             <input name="GoodsReceiptNoteItems[${itemIndex}].ExpectedQuantity" class="form-control expected-qty" type="number" step="0.01" value="0.00" />
@@ -295,7 +342,16 @@
                             <input name="GoodsReceiptNoteItems[${itemIndex}].Remarks" class="form-control" />
                         </td>
                         <td class="text-center align-middle">
-                            @if (ViewBag.POType == "Cylinder")
+                            @if (string.IsNullOrEmpty(ViewBag.POType))
+                            {
+                                <button type="button" class="btn btn-outline-info btn-sm btn-details btn-details-roll" data-type="Roll" data-index="${itemIndex}">
+                                    <i class="bi bi-list-ul"></i> Rolls
+                                </button>
+                                <button type="button" class="btn btn-outline-info btn-sm btn-details btn-details-cylinder d-none" data-type="Cylinder" data-index="${itemIndex}">
+                                    <i class="bi bi-list-ul"></i> Cylinders
+                                </button>
+                            }
+                            else if (ViewBag.POType == "Cylinder")
                             {
                                 <button type="button" class="btn btn-outline-info btn-sm btn-details" data-type="Cylinder" data-index="${itemIndex}">
                                     <i class="bi bi-list-ul"></i> Cylinders
@@ -340,9 +396,26 @@
                 calculateRejection($(this).closest('tr'));
             });
 
-            $(document).on('change', '.item-id-select', function() {
+            $(document).on('change', '.item-id-select, .cylinder-id-select', function() {
                 var selectedText = $(this).find("option:selected").text();
-                $(this).closest('td').find('input[type="hidden"]').val(selectedText);
+                $(this).closest('td').find('.hidden-item-name').val(selectedText);
+            });
+
+            $(document).on('change', '.row-type-select', function() {
+                var type = $(this).val();
+                var row = $(this).closest('tr');
+                if (type === 'Material') {
+                    row.find('.item-id-select').removeClass('d-none').attr('required', true);
+                    row.find('.cylinder-id-select').addClass('d-none').removeAttr('required').val('');
+                    row.find('.btn-details-roll').removeClass('d-none');
+                    row.find('.btn-details-cylinder').addClass('d-none');
+                } else {
+                    row.find('.cylinder-id-select').removeClass('d-none').attr('required', true);
+                    row.find('.item-id-select').addClass('d-none').removeAttr('required').val('');
+                    row.find('.btn-details-cylinder').removeClass('d-none');
+                    row.find('.btn-details-roll').addClass('d-none');
+                }
+                row.find('.hidden-item-name').val('');
             });
 
             $('#PurchaseOrderId').change(function() {
@@ -389,6 +462,32 @@
                     $('#currentCylinderItemIndex').val(index);
                     $('#cylindersTable tbody').empty();
                     
+                    var cylMasterId = $(containerId).closest('tr').find('.cylinder-id-select').val() || $(containerId).closest('tr').find('.item-id-select').val();
+                    var returnedContainer = $('#returnedCylindersContainer');
+                    returnedContainer.empty();
+                    
+                    if (cylMasterId) {
+                        $.get('/GoodsReceiptNotes/GetDispatchedCylinders', { cylinderMasterId: cylMasterId }, function(data) {
+                             if(data && data.length > 0) {
+                                 var html = '<h6 class="text-success mb-2">Existing Dispatched Cylinders (Select to Return)</h6><div class="row g-2">';
+                                 data.forEach(function(cyl) {
+                                     var isChecked = $(containerId).find('input[name="GoodsReceiptNoteItems[' + index + '].SelectedReturnedCylinderIds"][value="' + cyl.id + '"]').length > 0 ? 'checked' : '';
+                                     var text = cyl.cylinderNo + (cyl.dispatchedTo ? ' <small class="text-muted">(' + cyl.dispatchedTo + ')</small>' : '');
+                                     html += `<div class="col-md-4">
+                                         <div class="form-check border rounded p-2 h-100 d-flex align-items-center">
+                                             <input class="form-check-input ms-1 returned-cyl-checkbox" type="checkbox" value="${cyl.id}" id="ret-cyl-${cyl.id}" ${isChecked}>
+                                             <label class="form-check-label ms-2 w-100" style="cursor:pointer;" for="ret-cyl-${cyl.id}">
+                                                 ${text}
+                                             </label>
+                                         </div>
+                                     </div>`;
+                                 });
+                                 html += '</div><hr class="my-4" />';
+                                 returnedContainer.html(html);
+                             }
+                        });
+                    }
+
                     var cylCount = 0;
                     $(containerId).find('input[name$=".CylinderNo"]').each(function() {
                         var no = $(this).val();
@@ -456,6 +555,15 @@
                 var container = $('#details-container-' + index);
                 container.empty();
                 
+                var totalSelected = 0;
+                
+                // Save returned cylinders
+                $('.returned-cyl-checkbox:checked').each(function() {
+                    var cylId = $(this).val();
+                    container.append(`<input type="hidden" name="GoodsReceiptNoteItems[${index}].SelectedReturnedCylinderIds" value="${cylId}" />`);
+                    totalSelected++;
+                });
+
                 var cylCount = 0;
                 $('#cylindersTable tbody tr').each(function() {
                     var no = $(this).find('.cyl-no').val();
@@ -463,8 +571,16 @@
                         var h1 = `<input type="hidden" name="GoodsReceiptNoteItems[${index}].Cylinders[${cylCount}].CylinderNo" value="${no}" />`;
                         container.append(h1);
                         cylCount++;
+                        totalSelected++;
                     }
                 });
+                
+                // Auto update received qty
+                if(totalSelected > 0) {
+                     var row = $('#itemsTable tbody tr').eq(index);
+                     row.find('.received-qty').val(totalSelected).trigger('input');
+                     row.find('.accepted-qty').val(totalSelected).trigger('input');
+                }
                 
                 bootstrap.Modal.getInstance(document.getElementById('cylindersModal')).hide();
             });

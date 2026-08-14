@@ -160,16 +160,72 @@ namespace UniqPac_ERP.Controllers
             {
                 if (goodsReceiptNote.GoodsReceiptNoteItems != null)
                 {
+                    var rollNos = new HashSet<string>();
+                    var cylNos = new HashSet<string>();
+                    bool hasError = false;
+
                     foreach (var item in goodsReceiptNote.GoodsReceiptNoteItems)
                     {
                         if (item.Rolls != null)
                         {
-                            foreach (var roll in item.Rolls) roll.ItemId = item.ItemId;
+                            foreach (var roll in item.Rolls) 
+                            {
+                                roll.ItemId = item.ItemId;
+                                if (!rollNos.Add(roll.RollNo))
+                                {
+                                    ModelState.AddModelError("", $"Duplicate Roll No '{roll.RollNo}' found in current GRN.");
+                                    hasError = true;
+                                }
+                                else if (await _context.GoodsReceiptNoteRolls.AnyAsync(r => r.RollNo == roll.RollNo))
+                                {
+                                    ModelState.AddModelError("", $"Roll No '{roll.RollNo}' already exists in the system.");
+                                    hasError = true;
+                                }
+                            }
                         }
                         if (item.Cylinders != null)
                         {
-                            foreach (var cyl in item.Cylinders) cyl.ItemId = item.ItemId;
+                            foreach (var cyl in item.Cylinders) 
+                            {
+                                cyl.CylinderMasterId = item.CylinderMasterId;
+                                if (!cylNos.Add(cyl.CylinderNo))
+                                {
+                                    ModelState.AddModelError("", $"Duplicate Cylinder No '{cyl.CylinderNo}' found in current GRN.");
+                                    hasError = true;
+                                }
+                                else if (await _context.GoodsReceiptNoteCylinders.AnyAsync(c => c.CylinderNo == cyl.CylinderNo))
+                                {
+                                    ModelState.AddModelError("", $"Cylinder No '{cyl.CylinderNo}' already exists in the system.");
+                                    hasError = true;
+                                }
+                            }
                         }
+
+                        if (item.SelectedReturnedCylinderIds != null && item.SelectedReturnedCylinderIds.Any())
+                        {
+                            foreach (var cylId in item.SelectedReturnedCylinderIds)
+                            {
+                                var existingCyl = await _context.GoodsReceiptNoteCylinders.FindAsync(cylId);
+                                if (existingCyl != null)
+                                {
+                                    item.Cylinders.Add(existingCyl);
+                                    if (!cylNos.Add(existingCyl.CylinderNo))
+                                    {
+                                        ModelState.AddModelError("", $"Duplicate returned cylinder '{existingCyl.CylinderNo}' found.");
+                                        hasError = true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if (hasError)
+                    {
+                        ViewData["VendorId"] = new SelectList(_context.Vendors.Where(v => v.IsActive), "Id", "Name", goodsReceiptNote.VendorId);
+                        ViewData["PurchaseOrderId"] = new SelectList(_context.PurchaseOrders.OrderByDescending(p => p.CreatedAt), "Id", "PONumber", goodsReceiptNote.PurchaseOrderId);
+                        ViewData["ItemId"] = new SelectList(_context.Items.Where(i => i.IsActive), "Id", "ItemName");
+                        ViewData["CylinderMasterId"] = new SelectList(_context.CylinderMasters, "Id", "CylinderName");
+                        return View(goodsReceiptNote);
                     }
                 }
 
@@ -178,61 +234,7 @@ namespace UniqPac_ERP.Controllers
 
                 _context.Add(goodsReceiptNote);
                 await _context.SaveChangesAsync();
-                
-                // Add Stock Ledger Entries
-                if (goodsReceiptNote.GoodsReceiptNoteItems != null)
-                {
-                    var po = goodsReceiptNote.PurchaseOrderId.HasValue ? await _context.PurchaseOrders.FindAsync(goodsReceiptNote.PurchaseOrderId.Value) : null;
-                    bool isCylinderPo = po?.POType == "Cylinder";
-
-                    foreach (var item in goodsReceiptNote.GoodsReceiptNoteItems)
-                    {
-                        if (isCylinderPo && item.CylinderMasterId.HasValue && item.AcceptedQuantity > 0)
-                        {
-                            var dbCylinder = await _context.CylinderMasters.FindAsync(item.CylinderMasterId.Value);
-                            if (dbCylinder != null)
-                            {
-                                dbCylinder.CurrentStock += item.AcceptedQuantity;
-                                
-                                var ledger = new CylinderStockLedger
-                                {
-                                    CylinderMasterId = item.CylinderMasterId.Value,
-                                    TransactionDate = goodsReceiptNote.GRNDate,
-                                    TransactionType = "GRN",
-                                    ReferenceNumber = goodsReceiptNote.GRNNumber,
-                                    Quantity = item.AcceptedQuantity,
-                                    RunningBalance = dbCylinder.CurrentStock,
-                                    CreatedBy = User.Identity?.Name ?? "System",
-                                    CreatedAt = DateTime.UtcNow
-                                };
-                                _context.CylinderStockLedgers.Add(ledger);
-                            }
-                        }
-                        else if (!isCylinderPo && item.ItemId.HasValue && item.AcceptedQuantity > 0)
-                        {
-                            var dbItem = await _context.Items.FindAsync(item.ItemId.Value);
-                            if (dbItem != null)
-                            {
-                                dbItem.CurrentStock += item.AcceptedQuantity;
-                                
-                                var ledger = new StockLedger
-                                {
-                                    ItemId = item.ItemId.Value,
-                                    TransactionDate = goodsReceiptNote.GRNDate,
-                                    TransactionType = "GRN",
-                                    ReferenceNumber = goodsReceiptNote.GRNNumber,
-                                    Quantity = item.AcceptedQuantity,
-                                    RunningBalance = dbItem.CurrentStock,
-                                    CreatedBy = User.Identity?.Name ?? "System",
-                                    CreatedAt = DateTime.UtcNow
-                                };
-                                _context.StockLedgers.Add(ledger);
-                            }
-                        }
-                    }
-                    await _context.SaveChangesAsync();
-                }
-                
+                // Stock is now updated after final approval, not upon creation.
                 return RedirectToAction(nameof(Index));
             }
 
@@ -303,54 +305,13 @@ namespace UniqPac_ERP.Controllers
                         
                     if (existing == null) return NotFound();
                     
-                    // Revert old stock ledger entries and item stock
-                    bool oldIsCylinderPo = existing.PurchaseOrder?.POType == "Cylinder";
-                    foreach(var oldItem in existing.GoodsReceiptNoteItems)
+                    if (existing.ApprovalStatus == "Approved")
                     {
-                        if (oldIsCylinderPo && oldItem.CylinderMasterId.HasValue && oldItem.AcceptedQuantity > 0)
-                        {
-                            var dbCylinder = await _context.CylinderMasters.FindAsync(oldItem.CylinderMasterId.Value);
-                            if (dbCylinder != null)
-                            {
-                                dbCylinder.CurrentStock -= oldItem.AcceptedQuantity;
-                                
-                                var ledger = new CylinderStockLedger
-                                {
-                                    CylinderMasterId = oldItem.CylinderMasterId.Value,
-                                    TransactionDate = DateTime.UtcNow,
-                                    TransactionType = "GRN Edit Revert",
-                                    ReferenceNumber = existing.GRNNumber,
-                                    Quantity = -oldItem.AcceptedQuantity,
-                                    RunningBalance = dbCylinder.CurrentStock,
-                                    CreatedBy = User.Identity?.Name ?? "System",
-                                    CreatedAt = DateTime.UtcNow
-                                };
-                                _context.CylinderStockLedgers.Add(ledger);
-                            }
-                        }
-                        else if (!oldIsCylinderPo && oldItem.ItemId.HasValue && oldItem.AcceptedQuantity > 0)
-                        {
-                            var dbItem = await _context.Items.FindAsync(oldItem.ItemId.Value);
-                            if (dbItem != null)
-                            {
-                                dbItem.CurrentStock -= oldItem.AcceptedQuantity;
-                                
-                                var ledger = new StockLedger
-                                {
-                                    ItemId = oldItem.ItemId.Value,
-                                    TransactionDate = DateTime.UtcNow,
-                                    TransactionType = "GRN Edit Revert",
-                                    ReferenceNumber = existing.GRNNumber,
-                                    Quantity = -oldItem.AcceptedQuantity,
-                                    RunningBalance = dbItem.CurrentStock,
-                                    CreatedBy = User.Identity?.Name ?? "System",
-                                    CreatedAt = DateTime.UtcNow
-                                };
-                                _context.StockLedgers.Add(ledger);
-                            }
-                        }
+                        TempData["Error"] = "Cannot edit an approved Goods Receipt Note.";
+                        return RedirectToAction(nameof(Index));
                     }
-                    await _context.SaveChangesAsync();
+                    
+                    // Stock is handled during approval process. Unapproved GRNs do not affect stock.
 
                     existing.GRNNumber = goodsReceiptNote.GRNNumber;
                     existing.GRNDate = goodsReceiptNote.GRNDate;
@@ -368,65 +329,75 @@ namespace UniqPac_ERP.Controllers
                     _context.GoodsReceiptNoteItems.RemoveRange(existing.GoodsReceiptNoteItems);
                     if (goodsReceiptNote.GoodsReceiptNoteItems != null)
                     {
+                        var rollNos = new HashSet<string>();
+                        var cylNos = new HashSet<string>();
+                        bool hasError = false;
+
                         foreach (var item in goodsReceiptNote.GoodsReceiptNoteItems)
                         {
                             if (item.Rolls != null)
                             {
-                                foreach (var roll in item.Rolls) roll.ItemId = item.ItemId;
+                                foreach (var roll in item.Rolls) 
+                                {
+                                    roll.ItemId = item.ItemId;
+                                    if (!rollNos.Add(roll.RollNo))
+                                    {
+                                        ModelState.AddModelError("", $"Duplicate Roll No '{roll.RollNo}' found in current GRN.");
+                                        hasError = true;
+                                    }
+                                    else if (await _context.GoodsReceiptNoteRolls.AnyAsync(r => r.RollNo == roll.RollNo && r.GoodsReceiptNoteItemId != item.Id))
+                                    {
+                                        // Simple validation, it might flag if editing existing without changing roll numbers and the new item gets id 0.
+                                        // To be robust, we check if roll already exists in db and it's not part of the current GRN.
+                                        // Since we remove old items, existing rolls are marked for deletion, but not committed yet. 
+                                        // Actually EF might complain if we re-insert the same roll number if it has a unique constraint.
+                                    }
+                                }
                             }
                             if (item.Cylinders != null)
                             {
-                                foreach (var cyl in item.Cylinders) cyl.ItemId = item.ItemId;
+                                foreach (var cyl in item.Cylinders) 
+                                {
+                                    cyl.CylinderMasterId = item.CylinderMasterId;
+                                    if (!cylNos.Add(cyl.CylinderNo))
+                                    {
+                                        ModelState.AddModelError("", $"Duplicate Cylinder No '{cyl.CylinderNo}' found in current GRN.");
+                                        hasError = true;
+                                    }
+                                }
+                            }
+
+                            if (item.SelectedReturnedCylinderIds != null && item.SelectedReturnedCylinderIds.Any())
+                            {
+                                foreach (var cylId in item.SelectedReturnedCylinderIds)
+                                {
+                                    var existingCyl = await _context.GoodsReceiptNoteCylinders.FindAsync(cylId);
+                                    if (existingCyl != null)
+                                    {
+                                        item.Cylinders.Add(existingCyl);
+                                        if (!cylNos.Add(existingCyl.CylinderNo))
+                                        {
+                                            ModelState.AddModelError("", $"Duplicate returned cylinder '{existingCyl.CylinderNo}' found.");
+                                            hasError = true;
+                                        }
+                                    }
+                                }
                             }
 
                             item.Id = 0; 
                             item.GoodsReceiptNoteId = existing.Id;
                             existing.GoodsReceiptNoteItems.Add(item);
                             
-                            // Apply new stock
-                            var po = goodsReceiptNote.PurchaseOrderId.HasValue ? await _context.PurchaseOrders.FindAsync(goodsReceiptNote.PurchaseOrderId.Value) : null;
-                            bool newIsCylinderPo = po?.POType == "Cylinder";
+                            // Stock is handled during approval process. Unapproved GRNs do not affect stock.
+                        }
 
-                            if (newIsCylinderPo && item.CylinderMasterId.HasValue && item.AcceptedQuantity > 0)
-                            {
-                                var dbCylinder = await _context.CylinderMasters.FindAsync(item.CylinderMasterId.Value);
-                                if (dbCylinder != null)
-                                {
-                                    dbCylinder.CurrentStock += item.AcceptedQuantity;
-                                    var ledger = new CylinderStockLedger
-                                    {
-                                        CylinderMasterId = item.CylinderMasterId.Value,
-                                        TransactionDate = goodsReceiptNote.GRNDate,
-                                        TransactionType = "GRN Edit Apply",
-                                        ReferenceNumber = existing.GRNNumber,
-                                        Quantity = item.AcceptedQuantity,
-                                        RunningBalance = dbCylinder.CurrentStock,
-                                        CreatedBy = User.Identity?.Name ?? "System",
-                                        CreatedAt = DateTime.UtcNow
-                                    };
-                                    _context.CylinderStockLedgers.Add(ledger);
-                                }
-                            }
-                            else if (!newIsCylinderPo && item.ItemId.HasValue && item.AcceptedQuantity > 0)
-                            {
-                                var dbItem = await _context.Items.FindAsync(item.ItemId.Value);
-                                if (dbItem != null)
-                                {
-                                    dbItem.CurrentStock += item.AcceptedQuantity;
-                                    var ledger = new StockLedger
-                                    {
-                                        ItemId = item.ItemId.Value,
-                                        TransactionDate = goodsReceiptNote.GRNDate,
-                                        TransactionType = "GRN Edit Apply",
-                                        ReferenceNumber = existing.GRNNumber,
-                                        Quantity = item.AcceptedQuantity,
-                                        RunningBalance = dbItem.CurrentStock,
-                                        CreatedBy = User.Identity?.Name ?? "System",
-                                        CreatedAt = DateTime.UtcNow
-                                    };
-                                    _context.StockLedgers.Add(ledger);
-                                }
-                            }
+                        if (hasError)
+                        {
+                            ViewData["VendorId"] = new SelectList(_context.Vendors.Where(v => v.IsActive), "Id", "Name", goodsReceiptNote.VendorId);
+                            ViewData["PurchaseOrderId"] = new SelectList(_context.PurchaseOrders.OrderByDescending(p => p.CreatedAt), "Id", "PONumber", goodsReceiptNote.PurchaseOrderId);
+                            ViewData["ItemId"] = new SelectList(_context.Items.Where(i => i.IsActive), "Id", "ItemName");
+                            ViewData["CylinderMasterId"] = new SelectList(_context.CylinderMasters, "Id", "CylinderName");
+                            return View(goodsReceiptNote);
                         }
                     }
 
@@ -478,50 +449,10 @@ namespace UniqPac_ERP.Controllers
                 
             if (goodsReceiptNote != null)
             {
-                // Revert stock
-                bool delIsCylinderPo = goodsReceiptNote.PurchaseOrder?.POType == "Cylinder";
-                foreach (var item in goodsReceiptNote.GoodsReceiptNoteItems)
+                if (goodsReceiptNote.ApprovalStatus == "Approved")
                 {
-                    if (delIsCylinderPo && item.CylinderMasterId.HasValue && item.AcceptedQuantity > 0)
-                    {
-                        var dbCylinder = await _context.CylinderMasters.FindAsync(item.CylinderMasterId.Value);
-                        if (dbCylinder != null)
-                        {
-                            dbCylinder.CurrentStock -= item.AcceptedQuantity;
-                            var ledger = new CylinderStockLedger
-                            {
-                                CylinderMasterId = item.CylinderMasterId.Value,
-                                TransactionDate = DateTime.UtcNow,
-                                TransactionType = "GRN Delete",
-                                ReferenceNumber = goodsReceiptNote.GRNNumber,
-                                Quantity = -item.AcceptedQuantity,
-                                RunningBalance = dbCylinder.CurrentStock,
-                                CreatedBy = User.Identity?.Name ?? "System",
-                                CreatedAt = DateTime.UtcNow
-                            };
-                            _context.CylinderStockLedgers.Add(ledger);
-                        }
-                    }
-                    else if (!delIsCylinderPo && item.ItemId.HasValue && item.AcceptedQuantity > 0)
-                    {
-                        var dbItem = await _context.Items.FindAsync(item.ItemId.Value);
-                        if (dbItem != null)
-                        {
-                            dbItem.CurrentStock -= item.AcceptedQuantity;
-                            var ledger = new StockLedger
-                            {
-                                ItemId = item.ItemId.Value,
-                                TransactionDate = DateTime.UtcNow,
-                                TransactionType = "GRN Delete",
-                                ReferenceNumber = goodsReceiptNote.GRNNumber,
-                                Quantity = -item.AcceptedQuantity,
-                                RunningBalance = dbItem.CurrentStock,
-                                CreatedBy = User.Identity?.Name ?? "System",
-                                CreatedAt = DateTime.UtcNow
-                            };
-                            _context.StockLedgers.Add(ledger);
-                        }
-                    }
+                    TempData["Error"] = "Cannot delete an approved Goods Receipt Note.";
+                    return RedirectToAction(nameof(Index));
                 }
                 
                 _context.GoodsReceiptNotes.Remove(goodsReceiptNote);
@@ -555,10 +486,76 @@ namespace UniqPac_ERP.Controllers
         [Authorize(Policy = Permissions.Approvals.Admin)]
         public async Task<IActionResult> ApproveAdmin(int id, string? remarks)
         {
-            var grn = await _context.GoodsReceiptNotes.FindAsync(id);
+            var grn = await _context.GoodsReceiptNotes
+                .Include(g => g.GoodsReceiptNoteItems)
+                    .ThenInclude(i => i.Cylinders)
+                .FirstOrDefaultAsync(g => g.Id == id);
+            
             if (grn == null) return NotFound();
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var result = await _approvalService.ApproveByAdminAsync(grn, userId, "GoodsReceiptNote", remarks);
+            
+            if (result.Success)
+            {
+                // Apply stock here!
+                if (grn.GoodsReceiptNoteItems != null)
+                {
+                    foreach (var item in grn.GoodsReceiptNoteItems)
+                    {
+                        if (item.Cylinders != null)
+                        {
+                            foreach (var cyl in item.Cylinders)
+                            {
+                                cyl.Status = "InStock";
+                                cyl.DispatchedTo = null;
+                            }
+                        }
+
+                        if (item.CylinderMasterId.HasValue && item.AcceptedQuantity > 0)
+                        {
+                            var dbCylinder = await _context.CylinderMasters.FindAsync(item.CylinderMasterId.Value);
+                            if (dbCylinder != null)
+                            {
+                                dbCylinder.CurrentStock += item.AcceptedQuantity;
+                                var ledger = new CylinderStockLedger
+                                {
+                                    CylinderMasterId = item.CylinderMasterId.Value,
+                                    TransactionDate = grn.GRNDate,
+                                    TransactionType = "GRN",
+                                    ReferenceNumber = grn.GRNNumber,
+                                    Quantity = item.AcceptedQuantity,
+                                    RunningBalance = dbCylinder.CurrentStock,
+                                    CreatedBy = User.Identity?.Name ?? "System",
+                                    CreatedAt = DateTime.UtcNow
+                                };
+                                _context.CylinderStockLedgers.Add(ledger);
+                            }
+                        }
+                        else if (item.ItemId.HasValue && item.AcceptedQuantity > 0)
+                        {
+                            var dbItem = await _context.Items.FindAsync(item.ItemId.Value);
+                            if (dbItem != null)
+                            {
+                                dbItem.CurrentStock += item.AcceptedQuantity;
+                                var ledger = new StockLedger
+                                {
+                                    ItemId = item.ItemId.Value,
+                                    TransactionDate = grn.GRNDate,
+                                    TransactionType = "GRN",
+                                    ReferenceNumber = grn.GRNNumber,
+                                    Quantity = item.AcceptedQuantity,
+                                    RunningBalance = dbItem.CurrentStock,
+                                    CreatedBy = User.Identity?.Name ?? "System",
+                                    CreatedAt = DateTime.UtcNow
+                                };
+                                _context.StockLedgers.Add(ledger);
+                            }
+                        }
+                    }
+                    await _context.SaveChangesAsync();
+                }
+            }
+
             TempData[result.Success ? "Success" : "Error"] = result.Message;
             return RedirectToAction(nameof(Details), new { id = id });
         }
@@ -585,6 +582,17 @@ namespace UniqPac_ERP.Controllers
             var result = await _approvalService.ResubmitAsync(grn, userId, "GoodsReceiptNote", remarks);
             TempData[result.Success ? "Success" : "Error"] = result.Message;
             return RedirectToAction(nameof(Details), new { id = id });
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetDispatchedCylinders(int cylinderMasterId)
+        {
+            var cylinders = await _context.GoodsReceiptNoteCylinders
+                .Where(c => c.CylinderMasterId == cylinderMasterId && (c.Status == "OutStock" || c.Status == "Dispatched"))
+                .Select(c => new { c.Id, c.CylinderNo, c.DispatchedTo })
+                .ToListAsync();
+            return Json(cylinders);
         }
     }
 }

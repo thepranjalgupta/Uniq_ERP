@@ -39,11 +39,43 @@
                         <span asp-validation-for="DispatchDate" class="text-danger"></span>
                     </div>
                     <div class="col-md-3">
-                        <label class="form-label fw-bold">Customer</label>
-                        <select asp-for="CustomerId" class="form-select bg-light" asp-items="ViewBag.CustomerId" disabled>
-                            <option value="">-- Auto-filled --</option>
+                        <label class="form-label fw-bold">Dispatch To</label>
+                        @if (Model.SalesOrderId > 0)
+                        {
+                            <select class="form-select bg-light" disabled>
+                                <option>Customer</option>
+                            </select>
+                            <input type="hidden" id="DispatchToType" value="Customer" />
+                        }
+                        else
+                        {
+                            <select id="DispatchToType" class="form-select">
+                                <option value="Customer">Customer</option>
+                                <option value="Vendor">Vendor</option>
+                            </select>
+                        }
+                    </div>
+                    <div class="col-md-3" id="customerContainer">
+                        <label class="form-label fw-bold">Customer <span class="text-danger">*</span></label>
+                        @if (Model.SalesOrderId > 0)
+                        {
+                            <select asp-for="CustomerId" class="form-select bg-light" asp-items="ViewBag.CustomerId" disabled>
+                                <option value="">-- Auto-filled --</option>
+                            </select>
+                            <input type="hidden" asp-for="CustomerId" />
+                        }
+                        else
+                        {
+                            <select asp-for="CustomerId" class="form-select" asp-items="ViewBag.CustomerId" required>
+                                <option value="">-- Select Customer --</option>
+                            </select>
+                        }
+                    </div>
+                    <div class="col-md-3 d-none" id="vendorContainer">
+                        <label class="form-label fw-bold">Vendor <span class="text-danger">*</span></label>
+                        <select asp-for="VendorId" class="form-select" asp-items="ViewBag.VendorId">
+                            <option value="">-- Select Vendor --</option>
                         </select>
-                        <input type="hidden" asp-for="CustomerId" />
                     </div>
                 </div>
 
@@ -87,10 +119,17 @@
                         <thead class="bg-light">
                             <tr>
                                 <th>Item / Job Name</th>
-                                <th style="width: 15%;">Ordered Qty</th>
-                                <th style="width: 15%;">Prev Dispatched</th>
-                                <th style="width: 15%;">Remaining</th>
+                                @if (Model.SalesOrderId > 0)
+                                {
+                                    <th style="width: 15%;">Ordered Qty</th>
+                                    <th style="width: 15%;">Prev Dispatched</th>
+                                    <th style="width: 15%;">Remaining</th>
+                                }
                                 <th style="width: 15%;">Dispatch Qty</th>
+                                @if (Model.SalesOrderId == 0)
+                                {
+                                    <th style="width: 5%;"></th>
+                                }
                             </tr>
                         </thead>
                         <tbody>
@@ -98,28 +137,62 @@
                             {
                                 for (int i = 0; i < Model.DispatchItems.Count; i++)
                                 {
-                                    var remaining = Model.DispatchItems[i].OrderedQuantity - Model.DispatchItems[i].PreviouslyDispatchedQuantity;
                                     <tr>
                                         <td>
-                                            <input type="hidden" asp-for="DispatchItems[i].SalesOrderItemId" />
-                                            <input type="hidden" asp-for="DispatchItems[i].ItemName" />
-                                            @Model.DispatchItems[i].ItemName
+                                            @if (Model.SalesOrderId > 0)
+                                            {
+                                                <input type="hidden" asp-for="DispatchItems[i].SalesOrderItemId" />
+                                                <input type="hidden" asp-for="DispatchItems[i].ItemName" />
+                                                @Model.DispatchItems[i].ItemName
+                                            }
+                                            else
+                                            {
+                                                <select class="form-select row-type-select mb-1">
+                                                    <option value="Material" selected="@(!Model.DispatchItems[i].CylinderMasterId.HasValue ? "selected" : null)">Material</option>
+                                                    <option value="Cylinder" selected="@(Model.DispatchItems[i].CylinderMasterId.HasValue ? "selected" : null)">Cylinder</option>
+                                                </select>
+                                                <select asp-for="DispatchItems[i].ItemId" class="form-select item-id-select @(Model.DispatchItems[i].CylinderMasterId.HasValue ? "d-none" : "")" asp-items="ViewBag.ItemId">
+                                                    <option value="">-- Select Item --</option>
+                                                </select>
+                                                <select asp-for="DispatchItems[i].CylinderMasterId" class="form-select cylinder-id-select @(Model.DispatchItems[i].CylinderMasterId.HasValue ? "" : "d-none")" asp-items="ViewBag.CylinderMasterId">
+                                                    <option value="">-- Select Cylinder --</option>
+                                                </select>
+                                                <input type="hidden" asp-for="DispatchItems[i].ItemName" class="hidden-item-name" />
+                                                <div class="rolls-container mt-2"></div>
+                                                <div class="cylinders-container mt-2"></div>
+                                            }
                                         </td>
-                                        <td class="text-end">
-                                            <input type="hidden" asp-for="DispatchItems[i].OrderedQuantity" />
-                                            @Model.DispatchItems[i].OrderedQuantity
-                                        </td>
-                                        <td class="text-end">
-                                            <input type="hidden" asp-for="DispatchItems[i].PreviouslyDispatchedQuantity" />
-                                            @Model.DispatchItems[i].PreviouslyDispatchedQuantity
-                                        </td>
-                                        <td class="text-end fw-bold">
-                                            @remaining
-                                        </td>
-                                        <td>
-                                            <input asp-for="DispatchItems[i].DispatchedQuantity" class="form-control text-end dispatch-qty" type="number" step="0.01" max="@remaining" required />
-                                            <span asp-validation-for="DispatchItems[i].DispatchedQuantity" class="text-danger d-block mt-1 small"></span>
-                                        </td>
+                                        @if (Model.SalesOrderId > 0)
+                                        {
+                                            var remaining = Model.DispatchItems[i].OrderedQuantity - Model.DispatchItems[i].PreviouslyDispatchedQuantity;
+                                            <td class="text-end">
+                                                <input type="hidden" asp-for="DispatchItems[i].OrderedQuantity" />
+                                                @Model.DispatchItems[i].OrderedQuantity
+                                            </td>
+                                            <td class="text-end">
+                                                <input type="hidden" asp-for="DispatchItems[i].PreviouslyDispatchedQuantity" />
+                                                @Model.DispatchItems[i].PreviouslyDispatchedQuantity
+                                            </td>
+                                            <td class="text-end fw-bold">
+                                                @remaining
+                                            </td>
+                                            <td>
+                                                <input asp-for="DispatchItems[i].DispatchedQuantity" class="form-control text-end dispatch-qty" type="number" step="0.01" max="@remaining" required />
+                                                <span asp-validation-for="DispatchItems[i].DispatchedQuantity" class="text-danger d-block mt-1 small"></span>
+                                            </td>
+                                        }
+                                        else
+                                        {
+                                            <td>
+                                                <input asp-for="DispatchItems[i].DispatchedQuantity" class="form-control text-end dispatch-qty" type="number" step="0.01" required />
+                                                <span asp-validation-for="DispatchItems[i].DispatchedQuantity" class="text-danger d-block mt-1 small"></span>
+                                            </td>
+                                            <td class="text-center align-middle">
+                                                <button type="button" class="btn btn-outline-danger btn-sm remove-item" tabindex="-1">
+                                                    <i class="bi bi-x-lg"></i>
+                                                </button>
+                                            </td>
+                                        }
                                     </tr>
                                 }
                             }
@@ -132,17 +205,17 @@
                                     </td>
                                 </tr>
                             }
-                            else
-                            {
-                                <tr>
-                                    <td colspan="5" class="text-center py-4 text-muted">
-                                        Please select a Sales Order to load items.
-                                    </td>
-                                </tr>
-                            }
                         </tbody>
                     </table>
                 </div>
+                @if(Model.SalesOrderId == 0)
+                {
+                    <div class="p-3 border-top bg-light">
+                        <button type="button" class="btn btn-outline-primary btn-sm bg-white" id="btnAddItem">
+                            <i class="bi bi-plus-lg"></i> Add Item
+                        </button>
+                    </div>
+                }
             </div>
         </div>
         
@@ -153,7 +226,7 @@
         </div>
 
         <div class="d-flex gap-2">
-            @if(Model.DispatchItems != null && Model.DispatchItems.Count > 0)
+            @if((Model.DispatchItems != null && Model.DispatchItems.Count > 0) || Model.SalesOrderId == 0)
             {
                 <button type="submit" class="btn btn-primary px-4 shadow-sm">Save & Generate DN</button>
             }
@@ -167,12 +240,221 @@
     
     <script>
         $(document).ready(function () {
+            function toggleDispatchTo() {
+                var type = $('#DispatchToType').val();
+                if (type === 'Customer') {
+                    $('#customerContainer').removeClass('d-none');
+                    $('#CustomerId').attr('required', true);
+                    $('#vendorContainer').addClass('d-none');
+                    $('#VendorId').removeAttr('required').val('');
+                } else {
+                    $('#vendorContainer').removeClass('d-none');
+                    $('#VendorId').attr('required', true);
+                    $('#customerContainer').addClass('d-none');
+                    $('#CustomerId').removeAttr('required').val('');
+                }
+            }
+
+            $('#DispatchToType').change(toggleDispatchTo);
+            toggleDispatchTo(); // Initial load
+
             $('#SalesOrderId').change(function() {
                 var soId = $(this).val();
-                if(soId) {
-                    window.location.href = '@Url.Action("Create")?salesOrderId=' + soId;
+                window.location.href = '@Url.Action("Create")?salesOrderId=' + (soId || '');
+            });
+
+            let itemIndex = $('#itemsTable tbody tr').length;
+
+            $('#btnAddItem').click(function () {
+                var newRow = `
+                    <tr>
+                        <td>
+                            <select class="form-select row-type-select mb-1">
+                                <option value="Material">Material</option>
+                                <option value="Cylinder">Cylinder</option>
+                            </select>
+                            <select name="DispatchItems[${itemIndex}].ItemId" class="form-select item-id-select" required>
+                                <option value="">-- Select Item --</option>
+                                @foreach(var item in (SelectList)ViewBag.ItemId)
+                                {
+                                    <option value="@item.Value">@item.Text</option>
+                                }
+                            </select>
+                            <select name="DispatchItems[${itemIndex}].CylinderMasterId" class="form-select cylinder-id-select d-none">
+                                <option value="">-- Select Cylinder --</option>
+                                @foreach(var item in (SelectList)ViewBag.CylinderMasterId)
+                                {
+                                    <option value="@item.Value">@item.Text</option>
+                                }
+                            </select>
+                            <input type="hidden" name="DispatchItems[${itemIndex}].ItemName" value="Item" class="hidden-item-name" />
+                            <div class="rolls-container mt-2"></div>
+                            <div class="cylinders-container mt-2"></div>
+                        </td>
+                        <td>
+                            <input name="DispatchItems[${itemIndex}].DispatchedQuantity" class="form-control text-end dispatch-qty" type="number" step="0.01" value="0.00" required />
+                        </td>
+                        <td class="text-center align-middle">
+                            <button type="button" class="btn btn-outline-danger btn-sm remove-item" tabindex="-1">
+                                <i class="bi bi-x-lg"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+                $('#itemsTable tbody').append(newRow);
+                itemIndex++;
+            });
+
+            $(document).on('click', '.remove-item', function () {
+                $(this).closest('tr').remove();
+                
+                // Re-index remaining rows
+                $('#itemsTable tbody tr').each(function(index) {
+                    $(this).find('input, select').each(function() {
+                        var name = $(this).attr('name');
+                        if (name) {
+                            var newName = name.replace(/\[\d+\]/, '[' + index + ']');
+                            $(this).attr('name', newName);
+                        }
+                    });
+                });
+                itemIndex = $('#itemsTable tbody tr').length;
+            });
+            
+            $(document).on('change', '.item-id-select', function() {
+                var selectedText = $(this).find("option:selected").text();
+                var td = $(this).closest('td');
+                td.find('.hidden-item-name').val(selectedText);
+                
+                var itemId = $(this).val();
+                var rollsContainer = td.find('.rolls-container');
+                rollsContainer.empty();
+                
+                var rowIndex = td.closest('tr').index();
+                // Because there might be hidden rows or the index might be off, let's derive it from the select's name attribute
+                var nameAttr = $(this).attr('name');
+                var match = nameAttr.match(/\[(\d+)\]/);
+                if(match) rowIndex = match[1];
+
+                if (itemId) {
+                    $.get('/Dispatches/GetRolls', { itemId: itemId }, function (data) {
+                        if (data && data.length > 0) {
+                            var html = '<div class="d-flex justify-content-between align-items-center mb-1"><div class="small fw-bold text-muted">Select Rolls:</div><div><input class="form-check-input select-all-rolls" type="checkbox" id="selectAllRolls_' + rowIndex + '"> <label class="small text-muted" for="selectAllRolls_' + rowIndex + '" style="cursor: pointer;">Select All</label></div></div><div class="border rounded p-2" style="max-height: 150px; overflow-y: auto;">';
+                            $.each(data, function(i, roll) {
+                                html += '<div class="form-check">';
+                                html += '<input class="form-check-input roll-checkbox" type="checkbox" name="DispatchItems[' + rowIndex + '].SelectedRollIds" value="' + roll.id + '" data-weight="' + roll.rollWeight + '" id="roll_' + rowIndex + '_' + roll.id + '">';
+                                html += '<label class="form-check-label" for="roll_' + rowIndex + '_' + roll.id + '">';
+                                html += roll.rollNo + ' (' + roll.rollWeight + ' kg)';
+                                html += '</label></div>';
+                            });
+                            html += '</div>';
+                            rollsContainer.html(html);
+                            td.closest('tr').find('.dispatch-qty').prop('readonly', true).val('0.00');
+                        } else {
+                            rollsContainer.html('<div class="text-muted small">No available rolls found. You can enter quantity manually.</div>');
+                            td.closest('tr').find('.dispatch-qty').prop('readonly', false);
+                        }
+                    });
                 }
             });
+
+            $(document).on('change', '.cylinder-id-select', function() {
+                var selectedText = $(this).find("option:selected").text();
+                var td = $(this).closest('td');
+                td.find('.hidden-item-name').val(selectedText);
+                
+                var cylMasterId = $(this).val();
+                var cylsContainer = td.find('.cylinders-container');
+                cylsContainer.empty();
+                
+                var nameAttr = $(this).attr('name');
+                var rowIndex = 0;
+                var match = nameAttr.match(/\[(\d+)\]/);
+                if(match) rowIndex = match[1];
+
+                if (cylMasterId) {
+                    $.get('/Dispatches/GetCylinders', { cylinderMasterId: cylMasterId }, function (data) {
+                        if (data && data.length > 0) {
+                            var html = '<div class="d-flex justify-content-between align-items-center mb-1"><div class="small fw-bold text-muted">Select Cylinders:</div><div><input class="form-check-input select-all-cylinders" type="checkbox" id="selectAllCyls_' + rowIndex + '"> <label class="small text-muted" for="selectAllCyls_' + rowIndex + '" style="cursor: pointer;">Select All</label></div></div><div class="border rounded p-2" style="max-height: 150px; overflow-y: auto;">';
+                            $.each(data, function(i, cyl) {
+                                html += '<div class="form-check">';
+                                html += '<input class="form-check-input cylinder-checkbox" type="checkbox" name="DispatchItems[' + rowIndex + '].SelectedCylinderIds" value="' + cyl.id + '" id="cyl_' + rowIndex + '_' + cyl.id + '">';
+                                html += '<label class="form-check-label" for="cyl_' + rowIndex + '_' + cyl.id + '">';
+                                html += cyl.cylinderNo;
+                                html += '</label></div>';
+                            });
+                            html += '</div>';
+                            cylsContainer.html(html);
+                            td.closest('tr').find('.dispatch-qty').prop('readonly', true).val('0.00');
+                        } else {
+                            cylsContainer.html('<div class="text-muted small">No available cylinders found. You can enter quantity manually.</div>');
+                            td.closest('tr').find('.dispatch-qty').prop('readonly', false);
+                        }
+                    });
+                }
+            });
+
+            // Auto-calculate dispatch quantity based on selected rolls/cylinders
+            $(document).on('change', '.roll-checkbox', function() {
+                var tr = $(this).closest('tr');
+                var totalWeight = 0;
+                tr.find('.roll-checkbox:checked').each(function() {
+                    totalWeight += parseFloat($(this).data('weight')) || 0;
+                });
+                var qtyInput = tr.find('.dispatch-qty');
+                // Only auto-update if the user is selecting rolls. 
+                qtyInput.val(totalWeight > 0 ? totalWeight.toFixed(2) : '0.00');
+            });
+            
+            $(document).on('change', '.cylinder-checkbox', function() {
+                var tr = $(this).closest('tr');
+                var totalCyls = tr.find('.cylinder-checkbox:checked').length;
+                var qtyInput = tr.find('.dispatch-qty');
+                qtyInput.val(totalCyls > 0 ? totalCyls.toFixed(2) : '0.00');
+            });
+            
+            // Select All logic
+            $(document).on('change', '.select-all-rolls', function() {
+                var isChecked = $(this).is(':checked');
+                var container = $(this).closest('td').find('.rolls-container');
+                container.find('.roll-checkbox').prop('checked', isChecked);
+                container.find('.roll-checkbox').first().trigger('change'); // trigger calculation
+            });
+
+            $(document).on('change', '.select-all-cylinders', function() {
+                var isChecked = $(this).is(':checked');
+                var container = $(this).closest('td').find('.cylinders-container');
+                container.find('.cylinder-checkbox').prop('checked', isChecked);
+                container.find('.cylinder-checkbox').first().trigger('change'); // trigger calculation
+            });
+
+            $(document).on('change', '.row-type-select', function() {
+                var type = $(this).val();
+                var row = $(this).closest('tr');
+                if (type === 'Material') {
+                    row.find('.item-id-select').removeClass('d-none').attr('required', true);
+                    row.find('.cylinder-id-select').addClass('d-none').removeAttr('required').val('');
+                    row.find('.cylinders-container').empty();
+                } else {
+                    row.find('.cylinder-id-select').removeClass('d-none').attr('required', true);
+                    row.find('.item-id-select').addClass('d-none').removeAttr('required').val('');
+                    row.find('.rolls-container').empty();
+                }
+                row.find('.hidden-item-name').val('');
+            });
+
+            // Trigger change for already selected items (e.g. after validation fail)
+            setTimeout(function() {
+                $('.row-type-select').each(function() {
+                    var type = $(this).val();
+                    var row = $(this).closest('tr');
+                    if (type === 'Material' && row.find('.item-id-select').val()) {
+                        row.find('.item-id-select').trigger('change');
+                    } else if (type === 'Cylinder' && row.find('.cylinder-id-select').val()) {
+                        row.find('.cylinder-id-select').trigger('change');
+                    }
+                });
+            }, 100);
         });
     </script>
 }

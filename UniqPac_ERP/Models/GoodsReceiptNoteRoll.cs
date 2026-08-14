@@ -31,5 +31,12 @@ namespace UniqPac_ERP.Models
         [Display(Name = "Roll Weight")]
         [Column(TypeName = "decimal(18,2)")]
         public decimal RollWeight { get; set; }
+
+        public bool IsDispatched { get; set; } = false;
+
+        [StringLength(200)]
+        public string? DispatchedTo { get; set; }
+
+        public ICollection<DispatchItemRoll> DispatchItemRolls { get; set; } = new List<DispatchItemRoll>();
     }
 }

@@ -17,19 +17,23 @@ namespace UniqPac_ERP.Models
         [Display(Name = "Dispatch Date")]
         public DateTime DispatchDate { get; set; }
 
-        [Required]
         [Display(Name = "Sales Order")]
-        public int SalesOrderId { get; set; }
+        public int? SalesOrderId { get; set; }
         
         [ForeignKey("SalesOrderId")]
         public SalesOrder? SalesOrder { get; set; }
 
-        [Required]
         [Display(Name = "Customer")]
-        public int CustomerId { get; set; }
+        public int? CustomerId { get; set; }
 
         [ForeignKey("CustomerId")]
         public Customer? Customer { get; set; }
+
+        [Display(Name = "Vendor")]
+        public int? VendorId { get; set; }
+
+        [ForeignKey("VendorId")]
+        public Vendor? Vendor { get; set; }
 
         [Display(Name = "Mode of Transport")]
         [StringLength(100)]

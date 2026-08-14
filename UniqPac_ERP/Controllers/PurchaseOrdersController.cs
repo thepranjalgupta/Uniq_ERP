@@ -367,5 +367,30 @@ namespace UniqPac_ERP.Controllers
             TempData[result.Success ? "Success" : "Error"] = result.Message;
             return RedirectToAction(nameof(Details), new { id = id });
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Policy = Permissions.PurchaseOrders.Edit)]
+        public async Task<IActionResult> UpdateStatus(int id, string statusDropdown, string? customStatus)
+        {
+            var po = await _context.PurchaseOrders.FindAsync(id);
+            if (po == null) return NotFound();
+
+            string newStatus = statusDropdown;
+            if (statusDropdown.Equals("other", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(customStatus))
+            {
+                newStatus = customStatus;
+            }
+
+            po.Status = newStatus;
+            po.UpdatedAt = DateTime.UtcNow;
+            po.UpdatedBy = User.Identity?.Name ?? "System";
+
+            _context.Update(po);
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "PO status updated successfully.";
+            return RedirectToAction(nameof(Details), new { id = id });
+        }
     }
 }

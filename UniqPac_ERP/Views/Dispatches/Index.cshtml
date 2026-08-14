@@ -17,7 +17,7 @@
         @if ((await AuthorizationService.AuthorizeAsync(User, Permissions.Dispatches.Create)).Succeeded)
         {
             <a asp-action="Create" class="btn btn-primary shadow-sm">
-                <i class="bi bi-plus-lg me-1"></i> Create Dispatch
+                <i class="ph ph-plus me-1"></i> Create Dispatch
             </a>
         }
     </div>
@@ -54,21 +54,21 @@
                                 <td class="text-end px-4">
                                     <div class="btn-group">
                                         <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info" title="View Details">
-                                            <i class="bi bi-eye"></i>
+                                            <i class="ph ph-eye"></i>
                                         </a>
                                         <a asp-action="Print" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary" target="_blank" title="Print DN">
-                                            <i class="bi bi-printer"></i>
+                                            <i class="ph ph-printer"></i>
                                         </a>
                                         @if ((await AuthorizationService.AuthorizeAsync(User, Permissions.Dispatches.Edit)).Succeeded)
                                         {
                                             <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary" title="Edit">
-                                                <i class="bi bi-pencil"></i>
+                                                <i class="ph ph-pencil-simple"></i>
                                             </a>
                                         }
                                         @if ((await AuthorizationService.AuthorizeAsync(User, Permissions.Dispatches.Delete)).Succeeded)
                                         {
                                             <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger" title="Delete">
-                                                <i class="bi bi-trash"></i>
+                                                <i class="ph ph-trash"></i>
                                             </a>
                                         }
                                     </div>
@@ -80,7 +80,7 @@
                         {
                             <tr>
                                 <td colspan="6" class="text-center py-5 text-muted">
-                                    <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+                                    <i class="ph ph-tray fs-2 d-block mb-2"></i>
                                     No dispatches found.
                                 </td>
                             </tr>

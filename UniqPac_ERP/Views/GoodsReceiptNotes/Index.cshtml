@@ -68,9 +68,12 @@
                                         <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-light border text-info" title="Details">
                                             <i class="ph ph-eye"></i>
                                         </a>
-                                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-light border text-danger" title="Delete">
-                                            <i class="ph ph-trash"></i>
-                                        </a>
+                                        @if (item.ApprovalStatus != "Approved")
+                                        {
+                                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-light border text-danger" title="Delete">
+                                                <i class="ph ph-trash"></i>
+                                            </a>
+                                        }
                                     </div>
                                 </td>
                             </tr>

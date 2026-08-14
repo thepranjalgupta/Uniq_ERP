@@ -694,7 +694,7 @@ namespace UniqPac_ERP.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<int>("CustomerId")
+                    b.Property<int?>("CustomerId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("DispatchDate")
@@ -717,7 +717,7 @@ namespace UniqPac_ERP.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.Property<int>("SalesOrderId")
+                    b.Property<int?>("SalesOrderId")
                         .HasColumnType("int");
 
                     b.Property<string>("TransportMode")
@@ -739,11 +739,16 @@ namespace UniqPac_ERP.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<int?>("VendorId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CustomerId");
 
                     b.HasIndex("SalesOrderId");
+
+                    b.HasIndex("VendorId");
 
                     b.ToTable("Dispatches");
                 });
@@ -756,11 +761,17 @@ namespace UniqPac_ERP.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int?>("CylinderMasterId")
+                        .HasColumnType("int");
+
                     b.Property<int>("DispatchId")
                         .HasColumnType("int");
 
                     b.Property<decimal>("DispatchedQuantity")
                         .HasColumnType("decimal(18, 2)");
+
+                    b.Property<int?>("ItemId")
+                        .HasColumnType("int");
 
                     b.Property<string>("ItemName")
                         .IsRequired()
@@ -773,16 +784,66 @@ namespace UniqPac_ERP.Migrations
                     b.Property<decimal>("PreviouslyDispatchedQuantity")
                         .HasColumnType("decimal(18, 2)");
 
-                    b.Property<int>("SalesOrderItemId")
+                    b.Property<int?>("SalesOrderItemId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CylinderMasterId");
+
                     b.HasIndex("DispatchId");
+
+                    b.HasIndex("ItemId");
 
                     b.HasIndex("SalesOrderItemId");
 
                     b.ToTable("DispatchItems");
+                });
+
+            modelBuilder.Entity("UniqPac_ERP.Models.DispatchItemCylinder", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("DispatchItemId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("GoodsReceiptNoteCylinderId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DispatchItemId");
+
+                    b.HasIndex("GoodsReceiptNoteCylinderId");
+
+                    b.ToTable("DispatchItemCylinders");
+                });
+
+            modelBuilder.Entity("UniqPac_ERP.Models.DispatchItemRoll", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("DispatchItemId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("GoodsReceiptNoteRollId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DispatchItemId");
+
+                    b.HasIndex("GoodsReceiptNoteRollId");
+
+                    b.ToTable("DispatchItemRolls");
                 });
 
             modelBuilder.Entity("UniqPac_ERP.Models.GoodsReceiptNote", b =>
@@ -875,22 +936,31 @@ namespace UniqPac_ERP.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int?>("CylinderMasterId")
+                        .HasColumnType("int");
+
                     b.Property<string>("CylinderNo")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<string>("DispatchedTo")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
                     b.Property<int>("GoodsReceiptNoteItemId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("ItemId")
-                        .HasColumnType("int");
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("GoodsReceiptNoteItemId");
+                    b.HasIndex("CylinderMasterId");
 
-                    b.HasIndex("ItemId");
+                    b.HasIndex("GoodsReceiptNoteItemId");
 
                     b.ToTable("GoodsReceiptNoteCylinders");
                 });
@@ -952,8 +1022,15 @@ namespace UniqPac_ERP.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("DispatchedTo")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
                     b.Property<int>("GoodsReceiptNoteItemId")
                         .HasColumnType("int");
+
+                    b.Property<bool>("IsDispatched")
+                        .HasColumnType("bit");
 
                     b.Property<int?>("ItemId")
                         .HasColumnType("int");
@@ -2017,37 +2094,90 @@ namespace UniqPac_ERP.Migrations
                     b.HasOne("UniqPac_ERP.Models.Customer", "Customer")
                         .WithMany()
                         .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("UniqPac_ERP.Models.SalesOrder", "SalesOrder")
                         .WithMany()
                         .HasForeignKey("SalesOrderId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("UniqPac_ERP.Models.Vendor", "Vendor")
+                        .WithMany()
+                        .HasForeignKey("VendorId");
 
                     b.Navigation("Customer");
 
                     b.Navigation("SalesOrder");
+
+                    b.Navigation("Vendor");
                 });
 
             modelBuilder.Entity("UniqPac_ERP.Models.DispatchItem", b =>
                 {
+                    b.HasOne("UniqPac_ERP.Models.CylinderMaster", "CylinderMaster")
+                        .WithMany()
+                        .HasForeignKey("CylinderMasterId");
+
                     b.HasOne("UniqPac_ERP.Models.Dispatch", "Dispatch")
                         .WithMany("DispatchItems")
                         .HasForeignKey("DispatchId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("UniqPac_ERP.Models.Item", "Item")
+                        .WithMany()
+                        .HasForeignKey("ItemId");
+
                     b.HasOne("UniqPac_ERP.Models.SalesOrderItem", "SalesOrderItem")
                         .WithMany()
                         .HasForeignKey("SalesOrderItemId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("CylinderMaster");
 
                     b.Navigation("Dispatch");
 
+                    b.Navigation("Item");
+
                     b.Navigation("SalesOrderItem");
+                });
+
+            modelBuilder.Entity("UniqPac_ERP.Models.DispatchItemCylinder", b =>
+                {
+                    b.HasOne("UniqPac_ERP.Models.DispatchItem", "DispatchItem")
+                        .WithMany("DispatchItemCylinders")
+                        .HasForeignKey("DispatchItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("UniqPac_ERP.Models.GoodsReceiptNoteCylinder", "GoodsReceiptNoteCylinder")
+                        .WithMany("DispatchItemCylinders")
+                        .HasForeignKey("GoodsReceiptNoteCylinderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("DispatchItem");
+
+                    b.Navigation("GoodsReceiptNoteCylinder");
+                });
+
+            modelBuilder.Entity("UniqPac_ERP.Models.DispatchItemRoll", b =>
+                {
+                    b.HasOne("UniqPac_ERP.Models.DispatchItem", "DispatchItem")
+                        .WithMany("DispatchItemRolls")
+                        .HasForeignKey("DispatchItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("UniqPac_ERP.Models.GoodsReceiptNoteRoll", "GoodsReceiptNoteRoll")
+                        .WithMany("DispatchItemRolls")
+                        .HasForeignKey("GoodsReceiptNoteRollId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("DispatchItem");
+
+                    b.Navigation("GoodsReceiptNoteRoll");
                 });
 
             modelBuilder.Entity("UniqPac_ERP.Models.GoodsReceiptNote", b =>
@@ -2070,19 +2200,19 @@ namespace UniqPac_ERP.Migrations
 
             modelBuilder.Entity("UniqPac_ERP.Models.GoodsReceiptNoteCylinder", b =>
                 {
+                    b.HasOne("UniqPac_ERP.Models.CylinderMaster", "CylinderMaster")
+                        .WithMany()
+                        .HasForeignKey("CylinderMasterId");
+
                     b.HasOne("UniqPac_ERP.Models.GoodsReceiptNoteItem", "GoodsReceiptNoteItem")
                         .WithMany("Cylinders")
                         .HasForeignKey("GoodsReceiptNoteItemId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("UniqPac_ERP.Models.Item", "Item")
-                        .WithMany()
-                        .HasForeignKey("ItemId");
+                    b.Navigation("CylinderMaster");
 
                     b.Navigation("GoodsReceiptNoteItem");
-
-                    b.Navigation("Item");
                 });
 
             modelBuilder.Entity("UniqPac_ERP.Models.GoodsReceiptNoteItem", b =>
@@ -2283,9 +2413,21 @@ namespace UniqPac_ERP.Migrations
                     b.Navigation("DispatchItems");
                 });
 
+            modelBuilder.Entity("UniqPac_ERP.Models.DispatchItem", b =>
+                {
+                    b.Navigation("DispatchItemCylinders");
+
+                    b.Navigation("DispatchItemRolls");
+                });
+
             modelBuilder.Entity("UniqPac_ERP.Models.GoodsReceiptNote", b =>
                 {
                     b.Navigation("GoodsReceiptNoteItems");
+                });
+
+            modelBuilder.Entity("UniqPac_ERP.Models.GoodsReceiptNoteCylinder", b =>
+                {
+                    b.Navigation("DispatchItemCylinders");
                 });
 
             modelBuilder.Entity("UniqPac_ERP.Models.GoodsReceiptNoteItem", b =>
@@ -2293,6 +2435,11 @@ namespace UniqPac_ERP.Migrations
                     b.Navigation("Cylinders");
 
                     b.Navigation("Rolls");
+                });
+
+            modelBuilder.Entity("UniqPac_ERP.Models.GoodsReceiptNoteRoll", b =>
+                {
+                    b.Navigation("DispatchItemRolls");
                 });
 
             modelBuilder.Entity("UniqPac_ERP.Models.ItemCategory", b =>

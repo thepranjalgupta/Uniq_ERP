@@ -16,15 +16,23 @@ namespace UniqPac_ERP.Models
         [ValidateNever]
         public GoodsReceiptNoteItem GoodsReceiptNoteItem { get; set; } = null!;
 
-        public int? ItemId { get; set; }
+        public int? CylinderMasterId { get; set; }
 
-        [ForeignKey("ItemId")]
+        [ForeignKey("CylinderMasterId")]
         [ValidateNever]
-        public Item? Item { get; set; }
+        public CylinderMaster? CylinderMaster { get; set; }
 
         [Required]
         [Display(Name = "Cylinder No")]
         [StringLength(100)]
         public string CylinderNo { get; set; } = string.Empty;
+
+        [StringLength(50)]
+        public string Status { get; set; } = "InStock";
+
+        [StringLength(200)]
+        public string? DispatchedTo { get; set; }
+
+        public ICollection<DispatchItemCylinder> DispatchItemCylinders { get; set; } = new List<DispatchItemCylinder>();
     }
 }

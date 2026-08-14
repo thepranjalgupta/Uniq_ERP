@@ -56,5 +56,8 @@ namespace UniqPac_ERP.Models
 
         public ICollection<GoodsReceiptNoteRoll> Rolls { get; set; } = new List<GoodsReceiptNoteRoll>();
         public ICollection<GoodsReceiptNoteCylinder> Cylinders { get; set; } = new List<GoodsReceiptNoteCylinder>();
+
+        [NotMapped]
+        public List<int> SelectedReturnedCylinderIds { get; set; } = new List<int>();
     }
 }

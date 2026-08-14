@@ -72,6 +72,14 @@ namespace UniqPac_ERP.Controllers
             var rolls = await _context.GoodsReceiptNoteRolls
                 .Include(r => r.GoodsReceiptNoteItem)
                 .ThenInclude(g => g.GoodsReceiptNote)
+                .Include(r => r.DispatchItemRolls)
+                    .ThenInclude(dr => dr.DispatchItem)
+                        .ThenInclude(di => di.Dispatch)
+                            .ThenInclude(d => d.Customer)
+                .Include(r => r.DispatchItemRolls)
+                    .ThenInclude(dr => dr.DispatchItem)
+                        .ThenInclude(di => di.Dispatch)
+                            .ThenInclude(d => d.Vendor)
                 .Where(r => r.ItemId == id)
                 .OrderByDescending(r => r.Id)
                 .ToListAsync();
@@ -175,7 +183,15 @@ namespace UniqPac_ERP.Controllers
                 .Include(c => c.GoodsReceiptNoteItem)
                     .ThenInclude(g => g.GoodsReceiptNote)
                         .ThenInclude(grn => grn.PurchaseOrder)
-                .Where(c => c.GoodsReceiptNoteItem.CylinderMasterId == id)
+                .Include(c => c.DispatchItemCylinders)
+                    .ThenInclude(dc => dc.DispatchItem)
+                        .ThenInclude(di => di.Dispatch)
+                            .ThenInclude(d => d.Customer)
+                .Include(c => c.DispatchItemCylinders)
+                    .ThenInclude(dc => dc.DispatchItem)
+                        .ThenInclude(di => di.Dispatch)
+                            .ThenInclude(d => d.Vendor)
+                .Where(c => c.CylinderMasterId == id || c.GoodsReceiptNoteItem.CylinderMasterId == id)
                 .OrderByDescending(c => c.Id)
                 .ToListAsync();
 

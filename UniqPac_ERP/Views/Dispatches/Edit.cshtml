@@ -39,8 +39,39 @@
                         <span asp-validation-for="DispatchDate" class="text-danger"></span>
                     </div>
                     <div class="col-md-3">
-                        <label class="form-label fw-bold">Customer</label>
-                        <select asp-for="CustomerId" class="form-select bg-light" asp-items="ViewBag.CustomerId" disabled></select>
+                        <label class="form-label fw-bold">Dispatch To</label>
+                        @if (Model.SalesOrderId > 0)
+                        {
+                            <select class="form-select bg-light" disabled>
+                                <option>Customer</option>
+                            </select>
+                            <input type="hidden" id="DispatchToType" value="Customer" />
+                        }
+                        else
+                        {
+                            <select id="DispatchToType" class="form-select">
+                                <option value="Customer" selected="@(Model.CustomerId.HasValue ? "selected" : null)">Customer</option>
+                                <option value="Vendor" selected="@(Model.VendorId.HasValue ? "selected" : null)">Vendor</option>
+                            </select>
+                        }
+                    </div>
+                    <div class="col-md-3" id="customerContainer">
+                        <label class="form-label fw-bold">Customer <span class="text-danger">*</span></label>
+                        @if (Model.SalesOrderId > 0)
+                        {
+                            <select asp-for="CustomerId" class="form-select bg-light" asp-items="ViewBag.CustomerId" disabled></select>
+                            <input type="hidden" asp-for="CustomerId" />
+                        }
+                        else
+                        {
+                            <select asp-for="CustomerId" class="form-select" asp-items="ViewBag.CustomerId"></select>
+                        }
+                    </div>
+                    <div class="col-md-3 d-none" id="vendorContainer">
+                        <label class="form-label fw-bold">Vendor <span class="text-danger">*</span></label>
+                        <select asp-for="VendorId" class="form-select" asp-items="ViewBag.VendorId">
+                            <option value="">-- Select Vendor --</option>
+                        </select>
                     </div>
                 </div>
 
@@ -84,9 +115,12 @@
                         <thead class="bg-light">
                             <tr>
                                 <th>Item / Job Name</th>
-                                <th style="width: 15%;">Ordered Qty</th>
-                                <th style="width: 15%;">Prev Dispatched</th>
-                                <th style="width: 15%;">Remaining</th>
+                                @if (Model.SalesOrderId > 0)
+                                {
+                                    <th style="width: 15%;">Ordered Qty</th>
+                                    <th style="width: 15%;">Prev Dispatched</th>
+                                    <th style="width: 15%;">Remaining</th>
+                                }
                                 <th style="width: 15%;">Dispatch Qty</th>
                             </tr>
                         </thead>
@@ -95,31 +129,43 @@
                             {
                                 for (int i = 0; i < Model.DispatchItems.Count; i++)
                                 {
-                                    var maxAllowed = Model.DispatchItems[i].OrderedQuantity - Model.DispatchItems[i].PreviouslyDispatchedQuantity + Model.DispatchItems[i].DispatchedQuantity;
-                                    var remainingBeforeThis = Model.DispatchItems[i].OrderedQuantity - Model.DispatchItems[i].PreviouslyDispatchedQuantity;
-                                    
                                     <tr>
                                         <td>
                                             <input type="hidden" asp-for="DispatchItems[i].Id" />
                                             <input type="hidden" asp-for="DispatchItems[i].SalesOrderItemId" />
+                                            <input type="hidden" asp-for="DispatchItems[i].ItemId" />
+                                            <input type="hidden" asp-for="DispatchItems[i].CylinderMasterId" />
                                             <input type="hidden" asp-for="DispatchItems[i].ItemName" />
                                             @Model.DispatchItems[i].ItemName
                                         </td>
-                                        <td class="text-end">
-                                            <input type="hidden" asp-for="DispatchItems[i].OrderedQuantity" />
-                                            @Model.DispatchItems[i].OrderedQuantity
-                                        </td>
-                                        <td class="text-end">
-                                            <input type="hidden" asp-for="DispatchItems[i].PreviouslyDispatchedQuantity" />
-                                            @Model.DispatchItems[i].PreviouslyDispatchedQuantity
-                                        </td>
-                                        <td class="text-end fw-bold">
-                                            @remainingBeforeThis
-                                        </td>
-                                        <td>
-                                            <input asp-for="DispatchItems[i].DispatchedQuantity" class="form-control text-end dispatch-qty" type="number" step="0.01" max="@maxAllowed" required />
-                                            <span asp-validation-for="DispatchItems[i].DispatchedQuantity" class="text-danger d-block mt-1 small"></span>
-                                        </td>
+                                        @if (Model.SalesOrderId > 0)
+                                        {
+                                            var maxAllowed = Model.DispatchItems[i].OrderedQuantity - Model.DispatchItems[i].PreviouslyDispatchedQuantity + Model.DispatchItems[i].DispatchedQuantity;
+                                            var remainingBeforeThis = Model.DispatchItems[i].OrderedQuantity - Model.DispatchItems[i].PreviouslyDispatchedQuantity;
+                                            
+                                            <td class="text-end">
+                                                <input type="hidden" asp-for="DispatchItems[i].OrderedQuantity" />
+                                                @Model.DispatchItems[i].OrderedQuantity
+                                            </td>
+                                            <td class="text-end">
+                                                <input type="hidden" asp-for="DispatchItems[i].PreviouslyDispatchedQuantity" />
+                                                @Model.DispatchItems[i].PreviouslyDispatchedQuantity
+                                            </td>
+                                            <td class="text-end fw-bold">
+                                                @remainingBeforeThis
+                                            </td>
+                                            <td>
+                                                <input asp-for="DispatchItems[i].DispatchedQuantity" class="form-control text-end dispatch-qty" type="number" step="0.01" max="@maxAllowed" required />
+                                                <span asp-validation-for="DispatchItems[i].DispatchedQuantity" class="text-danger d-block mt-1 small"></span>
+                                            </td>
+                                        }
+                                        else
+                                        {
+                                            <td>
+                                                <input asp-for="DispatchItems[i].DispatchedQuantity" class="form-control text-end dispatch-qty" type="number" step="0.01" required />
+                                                <span asp-validation-for="DispatchItems[i].DispatchedQuantity" class="text-danger d-block mt-1 small"></span>
+                                            </td>
+                                        }
                                     </tr>
                                 }
                             }
@@ -144,4 +190,25 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        $(document).ready(function () {
+            function toggleDispatchTo() {
+                var type = $('#DispatchToType').val();
+                if (type === 'Customer') {
+                    $('#customerContainer').removeClass('d-none');
+                    $('#CustomerId').attr('required', true);
+                    $('#vendorContainer').addClass('d-none');
+                    $('#VendorId').removeAttr('required').val('');
+                } else {
+                    $('#vendorContainer').removeClass('d-none');
+                    $('#VendorId').attr('required', true);
+                    $('#customerContainer').addClass('d-none');
+                    $('#CustomerId').removeAttr('required').val('');
+                }
+            }
+
+            $('#DispatchToType').change(toggleDispatchTo);
+            toggleDispatchTo(); // Initial load
+        });
+    </script>
 }

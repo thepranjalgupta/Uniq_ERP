@@ -67,6 +67,9 @@ namespace UniqPac_ERP.Controllers
         {
             ViewData["CustomerId"] = new SelectList(_context.Customers.Where(c => c.IsActive), "Id", "Name");
             ViewData["SalesOrderId"] = new SelectList(_context.SalesOrders.OrderByDescending(s => s.CreatedAt), "Id", "OrderNo", salesOrderId);
+            ViewData["VendorId"] = new SelectList(_context.Vendors.Where(v => v.IsActive), "Id", "Name");
+            ViewData["ItemId"] = new SelectList(_context.Items.Where(i => i.IsActive), "Id", "ItemName");
+            ViewData["CylinderMasterId"] = new SelectList(_context.CylinderMasters, "Id", "CylinderName");
 
             string newDnNo = "DN/26-27/0001";
             var lastDispatch = await _context.Dispatches.OrderByDescending(o => o.Id).FirstOrDefaultAsync();
@@ -141,10 +144,13 @@ namespace UniqPac_ERP.Controllers
                     
                     // Validation: Prevent over-dispatching
                     var item = dispatch.DispatchItems[i];
-                    var remaining = item.OrderedQuantity - item.PreviouslyDispatchedQuantity;
-                    if (item.DispatchedQuantity > remaining)
+                    if (item.SalesOrderItemId.HasValue)
                     {
-                        ModelState.AddModelError($"DispatchItems[{i}].DispatchedQuantity", $"Cannot dispatch more than remaining qty ({remaining}).");
+                        var remaining = item.OrderedQuantity - item.PreviouslyDispatchedQuantity;
+                        if (item.DispatchedQuantity > remaining)
+                        {
+                            ModelState.AddModelError($"DispatchItems[{i}].DispatchedQuantity", $"Cannot dispatch more than remaining qty ({remaining}).");
+                        }
                     }
                 }
             }
@@ -168,18 +174,63 @@ namespace UniqPac_ERP.Controllers
                     await _context.SaveChangesAsync();
                     
                     // Add Stock Ledger Entries
+                    string dispatchedToName = "";
+                    if (dispatch.CustomerId.HasValue)
+                    {
+                        var cust = await _context.Customers.FindAsync(dispatch.CustomerId.Value);
+                        dispatchedToName = cust?.Name ?? "";
+                    }
+                    else if (dispatch.VendorId.HasValue)
+                    {
+                        var vend = await _context.Vendors.FindAsync(dispatch.VendorId.Value);
+                        dispatchedToName = vend?.Name ?? "";
+                    }
+
                     foreach (var item in dispatch.DispatchItems)
                     {
-                        var soItem = await _context.SalesOrderItems.FindAsync(item.SalesOrderItemId);
-                        if (soItem != null && item.DispatchedQuantity > 0)
+                        if (item.SelectedRollIds != null && item.SelectedRollIds.Any())
                         {
-                            var dbItem = await _context.Items.FindAsync(soItem.ItemId);
+                            foreach (var rollId in item.SelectedRollIds)
+                            {
+                                var roll = await _context.GoodsReceiptNoteRolls.FindAsync(rollId);
+                                if (roll != null)
+                                {
+                                    roll.IsDispatched = true;
+                                    roll.DispatchedTo = dispatchedToName;
+                                    item.DispatchItemRolls.Add(new DispatchItemRoll { GoodsReceiptNoteRollId = rollId });
+                                }
+                            }
+                        }
+                        if (item.SelectedCylinderIds != null && item.SelectedCylinderIds.Any())
+                        {
+                            foreach (var cylId in item.SelectedCylinderIds)
+                            {
+                                var cyl = await _context.GoodsReceiptNoteCylinders.FindAsync(cylId);
+                                if (cyl != null)
+                                {
+                                    cyl.Status = "OutStock";
+                                    cyl.DispatchedTo = dispatchedToName;
+                                    item.DispatchItemCylinders.Add(new DispatchItemCylinder { GoodsReceiptNoteCylinderId = cylId });
+                                }
+                            }
+                        }
+
+                        int? targetItemId = item.ItemId;
+                        if (item.SalesOrderItemId.HasValue)
+                        {
+                            var soItem = await _context.SalesOrderItems.FindAsync(item.SalesOrderItemId.Value);
+                            if (soItem != null) targetItemId = soItem.ItemId;
+                        }
+
+                        if (targetItemId.HasValue && item.DispatchedQuantity > 0)
+                        {
+                            var dbItem = await _context.Items.FindAsync(targetItemId.Value);
                             if (dbItem != null)
                             {
                                 dbItem.CurrentStock -= item.DispatchedQuantity; // OUT
                                 var ledger = new StockLedger
                                 {
-                                    ItemId = soItem.ItemId,
+                                    ItemId = targetItemId.Value,
                                     TransactionDate = dispatch.DispatchDate,
                                     TransactionType = "Dispatch",
                                     ReferenceNumber = dispatch.DispatchNumber,
@@ -191,10 +242,22 @@ namespace UniqPac_ERP.Controllers
                                 _context.StockLedgers.Add(ledger);
                             }
                         }
+                        
+                        if (item.CylinderMasterId.HasValue && item.DispatchedQuantity > 0)
+                        {
+                            var cyl = await _context.CylinderMasters.FindAsync(item.CylinderMasterId.Value);
+                            if (cyl != null)
+                            {
+                                cyl.CurrentStock -= item.DispatchedQuantity;
+                            }
+                        }
                     }
                     await _context.SaveChangesAsync();
                     
-                    await UpdateSalesOrderStatus(dispatch.SalesOrderId);
+                    if (dispatch.SalesOrderId.HasValue)
+                    {
+                        await UpdateSalesOrderStatus(dispatch.SalesOrderId.Value);
+                    }
                     
                     await transaction.CommitAsync();
                     
@@ -204,6 +267,9 @@ namespace UniqPac_ERP.Controllers
 
             ViewData["CustomerId"] = new SelectList(_context.Customers.Where(c => c.IsActive), "Id", "Name", dispatch.CustomerId);
             ViewData["SalesOrderId"] = new SelectList(_context.SalesOrders.OrderByDescending(s => s.CreatedAt), "Id", "OrderNo", dispatch.SalesOrderId);
+            ViewData["VendorId"] = new SelectList(_context.Vendors.Where(v => v.IsActive), "Id", "Name", dispatch.VendorId);
+            ViewData["ItemId"] = new SelectList(_context.Items.Where(i => i.IsActive), "Id", "ItemName");
+            ViewData["CylinderMasterId"] = new SelectList(_context.CylinderMasters, "Id", "CylinderName");
             return View(dispatch);
         }
 
@@ -215,12 +281,20 @@ namespace UniqPac_ERP.Controllers
 
             var dispatch = await _context.Dispatches
                 .Include(d => d.DispatchItems)
+                    .ThenInclude(di => di.DispatchItemRolls)
+                        .ThenInclude(r => r.GoodsReceiptNoteRoll)
+                .Include(d => d.DispatchItems)
+                    .ThenInclude(di => di.DispatchItemCylinders)
+                        .ThenInclude(c => c.GoodsReceiptNoteCylinder)
                 .FirstOrDefaultAsync(d => d.Id == id);
                 
             if (dispatch == null) return NotFound();
             
             ViewData["CustomerId"] = new SelectList(_context.Customers.Where(c => c.IsActive), "Id", "Name", dispatch.CustomerId);
             ViewData["SalesOrderId"] = new SelectList(_context.SalesOrders.OrderByDescending(s => s.CreatedAt), "Id", "OrderNo", dispatch.SalesOrderId);
+            ViewData["VendorId"] = new SelectList(_context.Vendors.Where(v => v.IsActive), "Id", "Name", dispatch.VendorId);
+            ViewData["ItemId"] = new SelectList(_context.Items.Where(i => i.IsActive), "Id", "ItemName");
+            ViewData["CylinderMasterId"] = new SelectList(_context.CylinderMasters, "Id", "CylinderName");
             
             return View(dispatch);
         }
@@ -251,6 +325,11 @@ namespace UniqPac_ERP.Controllers
                 {
                     var existing = await _context.Dispatches
                         .Include(d => d.DispatchItems)
+                            .ThenInclude(di => di.DispatchItemRolls)
+                                .ThenInclude(r => r.GoodsReceiptNoteRoll)
+                        .Include(d => d.DispatchItems)
+                            .ThenInclude(di => di.DispatchItemCylinders)
+                                .ThenInclude(c => c.GoodsReceiptNoteCylinder)
                         .FirstOrDefaultAsync(x => x.Id == id);
                         
                     if (existing == null) return NotFound();
@@ -259,14 +338,17 @@ namespace UniqPac_ERP.Controllers
                     bool overDispatch = false;
                     foreach(var item in dispatch.DispatchItems)
                     {
-                         var oldItem = existing.DispatchItems.FirstOrDefault(di => di.SalesOrderItemId == item.SalesOrderItemId);
-                         var oldQty = oldItem?.DispatchedQuantity ?? 0;
-                         
-                         var remaining = item.OrderedQuantity - item.PreviouslyDispatchedQuantity + oldQty;
-                         if(item.DispatchedQuantity > remaining)
+                         if (item.SalesOrderItemId.HasValue)
                          {
-                             ModelState.AddModelError("", $"Cannot dispatch more than remaining qty for {item.ItemName}");
-                             overDispatch = true;
+                             var oldItem = existing.DispatchItems.FirstOrDefault(di => di.SalesOrderItemId == item.SalesOrderItemId);
+                             var oldQty = oldItem?.DispatchedQuantity ?? 0;
+                             
+                             var remaining = item.OrderedQuantity - item.PreviouslyDispatchedQuantity + oldQty;
+                             if(item.DispatchedQuantity > remaining)
+                             {
+                                 ModelState.AddModelError("", $"Cannot dispatch more than remaining qty for {item.ItemName}");
+                                 overDispatch = true;
+                             }
                          }
                     }
                     
@@ -274,22 +356,48 @@ namespace UniqPac_ERP.Controllers
                     {
                         ViewData["CustomerId"] = new SelectList(_context.Customers.Where(c => c.IsActive), "Id", "Name", dispatch.CustomerId);
                         ViewData["SalesOrderId"] = new SelectList(_context.SalesOrders.OrderByDescending(s => s.CreatedAt), "Id", "OrderNo", dispatch.SalesOrderId);
+                        ViewData["VendorId"] = new SelectList(_context.Vendors.Where(v => v.IsActive), "Id", "Name", dispatch.VendorId);
+                        ViewData["ItemId"] = new SelectList(_context.Items.Where(i => i.IsActive), "Id", "ItemName");
+                        ViewData["CylinderMasterId"] = new SelectList(_context.CylinderMasters, "Id", "CylinderName");
                         return View(dispatch);
                     }
 
                     // Revert old dispatch items stock
                     foreach(var oldItem in existing.DispatchItems)
                     {
-                        var soItem = await _context.SalesOrderItems.FindAsync(oldItem.SalesOrderItemId);
-                        if (soItem != null && oldItem.DispatchedQuantity > 0)
+                        foreach(var diRoll in oldItem.DispatchItemRolls)
                         {
-                            var dbItem = await _context.Items.FindAsync(soItem.ItemId);
+                            if (diRoll.GoodsReceiptNoteRoll != null)
+                            {
+                                diRoll.GoodsReceiptNoteRoll.IsDispatched = false;
+                                diRoll.GoodsReceiptNoteRoll.DispatchedTo = null;
+                            }
+                        }
+                        foreach(var diCyl in oldItem.DispatchItemCylinders)
+                        {
+                            if (diCyl.GoodsReceiptNoteCylinder != null)
+                            {
+                                diCyl.GoodsReceiptNoteCylinder.Status = "InStock";
+                                diCyl.GoodsReceiptNoteCylinder.DispatchedTo = null;
+                            }
+                        }
+
+                        int? targetItemId = oldItem.ItemId;
+                        if (oldItem.SalesOrderItemId.HasValue)
+                        {
+                            var soItem = await _context.SalesOrderItems.FindAsync(oldItem.SalesOrderItemId.Value);
+                            if (soItem != null) targetItemId = soItem.ItemId;
+                        }
+
+                        if (targetItemId.HasValue && oldItem.DispatchedQuantity > 0)
+                        {
+                            var dbItem = await _context.Items.FindAsync(targetItemId.Value);
                             if (dbItem != null)
                             {
-                                dbItem.CurrentStock += oldItem.DispatchedQuantity;
+                                dbItem.CurrentStock += oldItem.DispatchedQuantity; // Revert
                                 var ledger = new StockLedger
                                 {
-                                    ItemId = soItem.ItemId,
+                                    ItemId = targetItemId.Value,
                                     TransactionDate = DateTime.UtcNow,
                                     TransactionType = "Dispatch Edit Revert",
                                     ReferenceNumber = existing.DispatchNumber,
@@ -299,6 +407,15 @@ namespace UniqPac_ERP.Controllers
                                     CreatedAt = DateTime.UtcNow
                                 };
                                 _context.StockLedgers.Add(ledger);
+                            }
+                        }
+
+                        if (oldItem.CylinderMasterId.HasValue && oldItem.DispatchedQuantity > 0)
+                        {
+                            var cyl = await _context.CylinderMasters.FindAsync(oldItem.CylinderMasterId.Value);
+                            if (cyl != null)
+                            {
+                                cyl.CurrentStock += oldItem.DispatchedQuantity;
                             }
                         }
                     }
@@ -319,24 +436,70 @@ namespace UniqPac_ERP.Controllers
                     // Update Line Items
                     _context.DispatchItems.RemoveRange(existing.DispatchItems);
                     
+                    string dispatchedToName = "";
+                    if (dispatch.CustomerId.HasValue)
+                    {
+                        var cust = await _context.Customers.FindAsync(dispatch.CustomerId.Value);
+                        dispatchedToName = cust?.Name ?? "";
+                    }
+                    else if (dispatch.VendorId.HasValue)
+                    {
+                        var vend = await _context.Vendors.FindAsync(dispatch.VendorId.Value);
+                        dispatchedToName = vend?.Name ?? "";
+                    }
+
                     var validItems = dispatch.DispatchItems.Where(di => di.DispatchedQuantity > 0).ToList();
                     foreach (var item in validItems)
                     {
                         item.Id = 0; 
                         item.DispatchId = existing.Id;
+
+                        if (item.SelectedRollIds != null && item.SelectedRollIds.Any())
+                        {
+                            foreach (var rollId in item.SelectedRollIds)
+                            {
+                                var roll = await _context.GoodsReceiptNoteRolls.FindAsync(rollId);
+                                if (roll != null)
+                                {
+                                    roll.IsDispatched = true;
+                                    roll.DispatchedTo = dispatchedToName;
+                                    item.DispatchItemRolls.Add(new DispatchItemRoll { GoodsReceiptNoteRollId = rollId });
+                                }
+                            }
+                        }
+                        if (item.SelectedCylinderIds != null && item.SelectedCylinderIds.Any())
+                        {
+                            foreach (var cylId in item.SelectedCylinderIds)
+                            {
+                                var cyl = await _context.GoodsReceiptNoteCylinders.FindAsync(cylId);
+                                if (cyl != null)
+                                {
+                                    cyl.Status = "OutStock";
+                                    cyl.DispatchedTo = dispatchedToName;
+                                    item.DispatchItemCylinders.Add(new DispatchItemCylinder { GoodsReceiptNoteCylinderId = cylId });
+                                }
+                            }
+                        }
+
                         existing.DispatchItems.Add(item);
                         
                         // Apply new stock
-                        var soItem = await _context.SalesOrderItems.FindAsync(item.SalesOrderItemId);
-                        if (soItem != null)
+                        int? newTargetItemId = item.ItemId;
+                        if (item.SalesOrderItemId.HasValue)
                         {
-                            var dbItem = await _context.Items.FindAsync(soItem.ItemId);
+                            var soItem = await _context.SalesOrderItems.FindAsync(item.SalesOrderItemId.Value);
+                            if (soItem != null) newTargetItemId = soItem.ItemId;
+                        }
+
+                        if (newTargetItemId.HasValue && item.DispatchedQuantity > 0)
+                        {
+                            var dbItem = await _context.Items.FindAsync(newTargetItemId.Value);
                             if (dbItem != null)
                             {
                                 dbItem.CurrentStock -= item.DispatchedQuantity; // OUT
                                 var ledger = new StockLedger
                                 {
-                                    ItemId = soItem.ItemId,
+                                    ItemId = newTargetItemId.Value,
                                     TransactionDate = dispatch.DispatchDate,
                                     TransactionType = "Dispatch Edit Apply",
                                     ReferenceNumber = existing.DispatchNumber,
@@ -348,12 +511,24 @@ namespace UniqPac_ERP.Controllers
                                 _context.StockLedgers.Add(ledger);
                             }
                         }
+
+                        if (item.CylinderMasterId.HasValue && item.DispatchedQuantity > 0)
+                        {
+                            var cyl = await _context.CylinderMasters.FindAsync(item.CylinderMasterId.Value);
+                            if (cyl != null)
+                            {
+                                cyl.CurrentStock -= item.DispatchedQuantity;
+                            }
+                        }
                     }
 
                     _context.Update(existing);
                     await _context.SaveChangesAsync();
                     
-                    await UpdateSalesOrderStatus(existing.SalesOrderId);
+                    if (existing.SalesOrderId.HasValue)
+                    {
+                        await UpdateSalesOrderStatus(existing.SalesOrderId.Value);
+                    }
                     await transaction.CommitAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -366,6 +541,9 @@ namespace UniqPac_ERP.Controllers
             
             ViewData["CustomerId"] = new SelectList(_context.Customers.Where(c => c.IsActive), "Id", "Name", dispatch.CustomerId);
             ViewData["SalesOrderId"] = new SelectList(_context.SalesOrders.OrderByDescending(s => s.CreatedAt), "Id", "OrderNo", dispatch.SalesOrderId);
+            ViewData["VendorId"] = new SelectList(_context.Vendors.Where(v => v.IsActive), "Id", "Name", dispatch.VendorId);
+            ViewData["ItemId"] = new SelectList(_context.Items.Where(i => i.IsActive), "Id", "ItemName");
+            ViewData["CylinderMasterId"] = new SelectList(_context.CylinderMasters, "Id", "CylinderName");
             
             return View(dispatch);
         }
@@ -394,6 +572,11 @@ namespace UniqPac_ERP.Controllers
             using var transaction = await _context.Database.BeginTransactionAsync();
             var dispatch = await _context.Dispatches
                 .Include(d => d.DispatchItems)
+                    .ThenInclude(di => di.DispatchItemRolls)
+                        .ThenInclude(r => r.GoodsReceiptNoteRoll)
+                .Include(d => d.DispatchItems)
+                    .ThenInclude(di => di.DispatchItemCylinders)
+                        .ThenInclude(c => c.GoodsReceiptNoteCylinder)
                 .FirstOrDefaultAsync(d => d.Id == id);
                 
             if (dispatch != null)
@@ -401,33 +584,68 @@ namespace UniqPac_ERP.Controllers
                 // Revert stock
                 foreach (var item in dispatch.DispatchItems)
                 {
-                    var soItem = await _context.SalesOrderItems.FindAsync(item.SalesOrderItemId);
-                    if (soItem != null && item.DispatchedQuantity > 0)
+                    foreach(var diRoll in item.DispatchItemRolls)
                     {
-                        var dbItem = await _context.Items.FindAsync(soItem.ItemId);
-                        if (dbItem != null)
+                        if (diRoll.GoodsReceiptNoteRoll != null)
                         {
-                            dbItem.CurrentStock += item.DispatchedQuantity;
-                            var ledger = new StockLedger
-                            {
-                                ItemId = soItem.ItemId,
-                                TransactionDate = DateTime.UtcNow,
-                                TransactionType = "Dispatch Delete",
-                                ReferenceNumber = dispatch.DispatchNumber,
-                                Quantity = item.DispatchedQuantity,
-                                RunningBalance = dbItem.CurrentStock,
-                                CreatedBy = User.Identity?.Name ?? "System",
-                                CreatedAt = DateTime.UtcNow
-                            };
-                            _context.StockLedgers.Add(ledger);
+                            diRoll.GoodsReceiptNoteRoll.IsDispatched = false;
+                            diRoll.GoodsReceiptNoteRoll.DispatchedTo = null;
                         }
                     }
+                    foreach(var diCyl in item.DispatchItemCylinders)
+                    {
+                        if (diCyl.GoodsReceiptNoteCylinder != null)
+                        {
+                            diCyl.GoodsReceiptNoteCylinder.Status = "InStock";
+                            diCyl.GoodsReceiptNoteCylinder.DispatchedTo = null;
+                        }
+                    }
+
+                    int? targetItemId = item.ItemId;
+                        if (item.SalesOrderItemId.HasValue)
+                        {
+                            var soItem = await _context.SalesOrderItems.FindAsync(item.SalesOrderItemId.Value);
+                            if (soItem != null) targetItemId = soItem.ItemId;
+                        }
+
+                        if (targetItemId.HasValue && item.DispatchedQuantity > 0)
+                        {
+                            var dbItem = await _context.Items.FindAsync(targetItemId.Value);
+                            if (dbItem != null)
+                            {
+                                dbItem.CurrentStock += item.DispatchedQuantity; // Revert
+                                var ledger = new StockLedger
+                                {
+                                    ItemId = targetItemId.Value,
+                                    TransactionDate = DateTime.UtcNow,
+                                    TransactionType = "Dispatch Delete",
+                                    ReferenceNumber = dispatch.DispatchNumber,
+                                    Quantity = item.DispatchedQuantity,
+                                    RunningBalance = dbItem.CurrentStock,
+                                    CreatedBy = User.Identity?.Name ?? "System",
+                                    CreatedAt = DateTime.UtcNow
+                                };
+                                _context.StockLedgers.Add(ledger);
+                            }
+                        }
+
+                        if (item.CylinderMasterId.HasValue && item.DispatchedQuantity > 0)
+                        {
+                            var cyl = await _context.CylinderMasters.FindAsync(item.CylinderMasterId.Value);
+                            if (cyl != null)
+                            {
+                                cyl.CurrentStock += item.DispatchedQuantity;
+                            }
+                        }
                 }
             
-                int soId = dispatch.SalesOrderId;
+                int? soId = dispatch.SalesOrderId;
                 _context.Dispatches.Remove(dispatch);
                 await _context.SaveChangesAsync();
-                await UpdateSalesOrderStatus(soId);
+                if (soId.HasValue)
+                {
+                    await UpdateSalesOrderStatus(soId.Value);
+                }
                 await transaction.CommitAsync();
             }
             
@@ -488,6 +706,40 @@ namespace UniqPac_ERP.Controllers
 
             _context.Update(so);
             await _context.SaveChangesAsync();
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetRolls(int itemId)
+        {
+            var rolls = await _context.GoodsReceiptNoteRolls
+                .Include(r => r.GoodsReceiptNoteItem)
+                    .ThenInclude(i => i.GoodsReceiptNote)
+                .Where(r => r.ItemId == itemId 
+                            && !r.IsDispatched 
+                            && r.GoodsReceiptNoteItem != null 
+                            && r.GoodsReceiptNoteItem.GoodsReceiptNote != null 
+                            && r.GoodsReceiptNoteItem.GoodsReceiptNote.ApprovalStatus == "Approved")
+                .Select(r => new { r.Id, r.RollNo, r.RollWeight })
+                .ToListAsync();
+            return Json(rolls);
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetCylinders(int cylinderMasterId)
+        {
+            var cylinders = await _context.GoodsReceiptNoteCylinders
+                .Include(c => c.GoodsReceiptNoteItem)
+                    .ThenInclude(i => i.GoodsReceiptNote)
+                .Where(c => c.CylinderMasterId == cylinderMasterId 
+                            && c.Status != "OutStock" && c.Status != "Dispatched"
+                            && c.GoodsReceiptNoteItem != null 
+                            && c.GoodsReceiptNoteItem.GoodsReceiptNote != null 
+                            && c.GoodsReceiptNoteItem.GoodsReceiptNote.ApprovalStatus == "Approved")
+                .Select(c => new { c.Id, c.CylinderNo })
+                .ToListAsync();
+            return Json(cylinders);
         }
     }
 }

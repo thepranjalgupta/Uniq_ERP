@@ -129,10 +129,20 @@
         <div class="info-grid">
             <div class="info-box">
                 <h3>Consignee Details (Billed To)</h3>
-                <strong>@Model.Customer?.Name</strong><br/>
-                @if(!string.IsNullOrEmpty(Model.Customer?.BillingAddress)) { <span>@Model.Customer.BillingAddress<br/></span> }
-                @if(!string.IsNullOrEmpty(Model.Customer?.City)) { <span>@Model.Customer.City, @Model.Customer.State - @Model.Customer.ZipCode<br/></span> }
-                @if(!string.IsNullOrEmpty(Model.Customer?.GSTNo)) { <span>GSTIN: @Model.Customer.GSTNo<br/></span> }
+                @if (Model.CustomerId.HasValue)
+                {
+                    <strong>@Model.Customer?.Name (Customer)</strong><br/>
+                    @if(!string.IsNullOrEmpty(Model.Customer?.BillingAddress)) { <span>@Model.Customer.BillingAddress<br/></span> }
+                    @if(!string.IsNullOrEmpty(Model.Customer?.City)) { <span>@Model.Customer.City, @Model.Customer.State - @Model.Customer.ZipCode<br/></span> }
+                    @if(!string.IsNullOrEmpty(Model.Customer?.GSTNo)) { <span>GSTIN: @Model.Customer.GSTNo<br/></span> }
+                }
+                else
+                {
+                    <strong>@Model.Vendor?.Name (Vendor)</strong><br/>
+                    @if(!string.IsNullOrEmpty(Model.Vendor?.Address)) { <span>@Model.Vendor.Address<br/></span> }
+                    @if(!string.IsNullOrEmpty(Model.Vendor?.City)) { <span>@Model.Vendor.City, @Model.Vendor.State - @Model.Vendor.ZipCode<br/></span> }
+                    @if(!string.IsNullOrEmpty(Model.Vendor?.GSTNo)) { <span>GSTIN: @Model.Vendor.GSTNo<br/></span> }
+                }
             </div>
             
             <div class="info-box">
@@ -146,7 +156,7 @@
                 </div>
                 <div class="info-row">
                     <div class="info-label">Your Order Ref:</div>
-                    <div class="info-value">@Model.SalesOrder?.OrderNo</div>
+                    <div class="info-value">@(Model.SalesOrderId > 0 ? Model.SalesOrder?.OrderNo : "Ad-Hoc")</div>
                 </div>
                 <div class="info-row">
                     <div class="info-label">Transport Mode:</div>
@@ -172,7 +182,10 @@
                 <tr>
                     <th style="width: 5%; border-left: none;">S.No</th>
                     <th style="width: 65%;">Description of Goods / Job Name</th>
-                    <th style="width: 15%;">Order Qty</th>
+                    @if (Model.SalesOrderId > 0)
+                    {
+                        <th style="width: 15%;">Order Qty</th>
+                    }
                     <th style="width: 15%; border-right: none;">Dispatch Qty</th>
                 </tr>
             </thead>
@@ -183,7 +196,10 @@
                     <tr>
                         <td class="text-center" style="border-left: none;">@(sn++)</td>
                         <td>@item.ItemName</td>
-                        <td class="text-right">@item.OrderedQuantity</td>
+                        @if (Model.SalesOrderId > 0)
+                        {
+                            <td class="text-right">@item.OrderedQuantity</td>
+                        }
                         <td class="text-right fw-bold" style="border-right: none;"><strong>@item.DispatchedQuantity</strong></td>
                     </tr>
                 }

@@ -71,6 +71,8 @@
                             <th>Received On</th>
                             <th>GRN No</th>
                             <th>Purchase Order</th>
+                            <th>Status</th>
+                            <th>Dispatch To</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -99,6 +101,49 @@
                                         <a href="/PurchaseOrders/Details/@item.GoodsReceiptNoteItem.GoodsReceiptNote.PurchaseOrder.Id" class="text-decoration-none text-muted">
                                             @item.GoodsReceiptNoteItem.GoodsReceiptNote.PurchaseOrder.PONumber
                                         </a>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.Status == "Dispatched" || item.Status == "OutStock")
+                                    {
+                                        <span class="badge bg-warning text-dark">Dispatched</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-success">In Stock</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(item.DispatchedTo))
+                                    {
+                                        <span>@item.DispatchedTo</span>
+                                    }
+                                    else if ((item.Status == "Dispatched" || item.Status == "OutStock") && item.DispatchItemCylinders != null && item.DispatchItemCylinders.Any())
+                                    {
+                                        var lastDispatch = item.DispatchItemCylinders.OrderByDescending(d => d.Id).FirstOrDefault()?.DispatchItem?.Dispatch;
+                                        if (lastDispatch != null)
+                                        {
+                                            if (lastDispatch.CustomerId.HasValue)
+                                            {
+                                                <span>@lastDispatch.Customer?.Name</span>
+                                            }
+                                            else if (lastDispatch.VendorId.HasValue)
+                                            {
+                                                <span>@lastDispatch.Vendor?.Name</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">-</span>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
                                     }
                                     else
                                     {

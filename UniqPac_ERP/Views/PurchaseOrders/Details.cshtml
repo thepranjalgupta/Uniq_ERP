@@ -40,8 +40,14 @@
                 </div>
                 <div class="col-md-3">
                     <h6 class="text-muted text-uppercase mb-1" style="font-size: 0.8rem;">Status</h6>
-                    <p class="fw-bold">
+                    <p class="fw-bold d-flex align-items-center">
                         <span class="badge bg-primary">@Model.Status</span>
+                        @if ((await AuthorizationService.AuthorizeAsync(User, UniqPac_ERP.Constants.Permissions.PurchaseOrders.Edit)).Succeeded)
+                        {
+                            <a href="javascript:void(0)" class="text-primary ms-3 small text-decoration-none" data-bs-toggle="modal" data-bs-target="#updateStatusModal">
+                                <i class="ph ph-pencil-simple me-1"></i>Update
+                            </a>
+                        }
                     </p>
                 </div>
                 <div class="col-md-3">
@@ -210,3 +216,72 @@
         </div>
     </div>
 </div>
+
+<!-- Update Status Modal -->
+<div class="modal fade" id="updateStatusModal" tabindex="-1" aria-labelledby="updateStatusModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form asp-action="UpdateStatus" method="post">
+            <input type="hidden" name="id" value="@Model.Id" />
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="updateStatusModalLabel">Update PO Status</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Status</label>
+                        <select name="statusDropdown" id="statusDropdown" class="form-select" required onchange="toggleCustomStatus()">
+                            <option value="">-- Select Status --</option>
+                            <option value="Pending" selected="@(Model.Status == "Pending" ? "selected" : null)">Pending</option>
+                            <option value="In process" selected="@(Model.Status == "In process" ? "selected" : null)">In process</option>
+                            <option value="Blown Flim" selected="@(Model.Status == "Blown Flim" ? "selected" : null)">Blown Flim</option>
+                            <option value="Printing" selected="@(Model.Status == "Printing" ? "selected" : null)">Printing</option>
+                            <option value="Slitting" selected="@(Model.Status == "Slitting" ? "selected" : null)">Slitting</option>
+                            <option value="Pouching" selected="@(Model.Status == "Pouching" ? "selected" : null)">Pouching</option>
+                            <option value="Complete" selected="@(Model.Status == "Complete" ? "selected" : null)">Complete</option>
+                            <option value="other">Other (Custom)</option>
+                        </select>
+                    </div>
+                    <div class="mb-3 d-none" id="customStatusDiv">
+                        <label class="form-label">Custom Status</label>
+                        <input type="text" name="customStatus" id="customStatus" class="form-control" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Update Status</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function toggleCustomStatus() {
+    var val = document.getElementById('statusDropdown').value;
+    var customDiv = document.getElementById('customStatusDiv');
+    var customInput = document.getElementById('customStatus');
+    if (val === 'other') {
+        customDiv.classList.remove('d-none');
+        customInput.required = true;
+    } else {
+        customDiv.classList.add('d-none');
+        customInput.required = false;
+        customInput.value = '';
+    }
+}
+
+// Select 'other' and populate custom if current status isn't in dropdown on load
+document.addEventListener('DOMContentLoaded', function() {
+    var dropdown = document.getElementById('statusDropdown');
+    var currentStatus = "@Html.Raw(Model.Status)";
+    
+    // Check if currentStatus is in dropdown options
+    var options = Array.from(dropdown.options).map(o => o.value);
+    if(currentStatus && !options.includes(currentStatus) && currentStatus !== 'other') {
+        dropdown.value = 'other';
+        toggleCustomStatus();
+        document.getElementById('customStatus').value = currentStatus;
+    }
+});
+</script>

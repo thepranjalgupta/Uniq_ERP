@@ -4,16 +4,25 @@
     ViewData["Title"] = "Manage Vendors";
 }
 
-<div class="card">
-<div class="card-header d-flex justify-content-between align-items-center">
-<h4 class="mb-0">Records</h4>
-<a asp-action="Create" class="btn btn-primary"><i class="ph ph-plus"></i> Create New</a>
-</div>
-<div class="card-body p-0">
-<div class="table-responsive">
-<table class="table table-hover align-middle">
-    <thead>
-        <tr>
+<div class="container-fluid px-4 py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="h3 mb-0 text-gray-800">Vendors</h2>
+            <p class="text-muted mb-0">Manage and view all vendors.</p>
+        </div>
+        <div>
+            <a asp-action="Create" class="btn btn-primary shadow-sm">
+                <i class="ph ph-plus me-1"></i> Add Vendor
+            </a>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover table-striped align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
             <th>
                 @Html.DisplayNameFor(model => model.VendorCategory)
             </th>
@@ -63,15 +72,21 @@
                 @Html.DisplayFor(modelItem => item.LeadTimeDays)
             </td>
             <td class="text-nowrap text-end">
-                <a asp-action="Edit" class="btn btn-sm btn-light" asp-route-id="@item.Id">Edit</a>
-                <a asp-action="Details" class="btn btn-sm btn-light me-1" asp-route-id="@item.Id">Details</a>
-                <a asp-action="Delete" class="btn btn-sm btn-danger" asp-route-id="@item.Id">Delete</a>
+                <a asp-action="Edit" class="btn btn-sm btn-outline-primary shadow-sm" asp-route-id="@item.Id" title="Edit">
+                    <i class="ph ph-pencil-simple"></i>
+                </a>
+                <a asp-action="Details" class="btn btn-sm btn-outline-info shadow-sm" asp-route-id="@item.Id" title="Details">
+                    <i class="ph ph-eye"></i>
+                </a>
+                <a asp-action="Delete" class="btn btn-sm btn-outline-danger shadow-sm" asp-route-id="@item.Id" title="Delete">
+                    <i class="ph ph-trash"></i>
+                </a>
             </td>
         </tr>
 }
-    </tbody>
-</table>
-
-</div>
-</div>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>

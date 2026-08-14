@@ -30,6 +30,8 @@ namespace UniqPac_ERP.Data
         public DbSet<CylinderStockLedger> CylinderStockLedgers { get; set; }
         public DbSet<Dispatch> Dispatches { get; set; }
         public DbSet<DispatchItem> DispatchItems { get; set; }
+        public DbSet<DispatchItemRoll> DispatchItemRolls { get; set; }
+        public DbSet<DispatchItemCylinder> DispatchItemCylinders { get; set; }
         
         public DbSet<StockLedger> StockLedgers { get; set; }
         public DbSet<ApprovalHistory> ApprovalHistories { get; set; }
@@ -75,8 +77,9 @@ namespace UniqPac_ERP.Data
                     // Prevent these fields from being overwritten if they were not bound from the form
                     entry.Property(x => x.CreatedAt).IsModified = false;
                     entry.Property(x => x.CreatedBy).IsModified = false;
-                    entry.Property(x => x.IsActive).IsModified = false;
-                    entry.Property(x => x.IsDeleted).IsModified = false;
+                    // Allowing IsActive and IsDeleted to be modified so they can be toggled
+                    // entry.Property(x => x.IsActive).IsModified = false;
+                    // entry.Property(x => x.IsDeleted).IsModified = false;
                 }
             }
         }

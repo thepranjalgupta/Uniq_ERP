@@ -55,23 +55,70 @@
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table table-hover table-striped align-middle mb-0">
-                    <thead class="bg-light">
+                    <thead>
                         <tr>
-                            <th class="px-4 py-3">GRN No</th>
-                            <th class="py-3">Date Received</th>
-                            <th class="py-3">Roll No</th>
-                            <th class="py-3 text-end px-4">Roll Weight (Kg)</th>
+                            <th>GRN NO</th>
+                            <th>DATE RECEIVED</th>
+                            <th>ROLL NO</th>
+                            <th>ROLL WEIGHT (KG)</th>
+                            <th>STATUS</th>
+                            <th>DISPATCH TO</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var roll in Model)
+                        @foreach (var itemRow in Model)
                         {
                             <tr>
-                                <td class="px-4">@roll.GoodsReceiptNoteItem?.GoodsReceiptNote?.GRNNumber</td>
-                                <td>@roll.GoodsReceiptNoteItem?.GoodsReceiptNote?.GRNDate.ToString("dd MMM yyyy")</td>
-                                <td class="fw-bold">@roll.RollNo</td>
-                                <td class="text-end px-4 fw-bold">
-                                    @roll.RollWeight.ToString("N2")
+                                <td>
+                                    <a href="/GoodsReceiptNotes/Details/@itemRow.GoodsReceiptNoteItem?.GoodsReceiptNoteId" class="text-decoration-none fw-medium">
+                                        @(itemRow.GoodsReceiptNoteItem?.GoodsReceiptNote?.GRNNumber ?? "-")
+                                    </a>
+                                </td>
+                                <td>@(itemRow.GoodsReceiptNoteItem?.GoodsReceiptNote?.GRNDate.ToString("dd MMM yyyy") ?? "-")</td>
+                                <td class="fw-bold">@itemRow.RollNo</td>
+                                <td class="fw-bold">@itemRow.RollWeight.ToString("N2")</td>
+                                <td>
+                                    @if (itemRow.IsDispatched)
+                                    {
+                                        <span class="badge bg-warning text-dark">Dispatched</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-success">In Stock</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(itemRow.DispatchedTo))
+                                    {
+                                        <span>@itemRow.DispatchedTo</span>
+                                    }
+                                    else if (itemRow.IsDispatched && itemRow.DispatchItemRolls.Any())
+                                    {
+                                        var lastDispatch = itemRow.DispatchItemRolls.OrderByDescending(d => d.Id).FirstOrDefault()?.DispatchItem?.Dispatch;
+                                        if (lastDispatch != null)
+                                        {
+                                            if (lastDispatch.CustomerId.HasValue)
+                                            {
+                                                <span>@lastDispatch.Customer?.Name</span>
+                                            }
+                                            else if (lastDispatch.VendorId.HasValue)
+                                            {
+                                                <span>@lastDispatch.Vendor?.Name</span>
+                                            }
+                                            else
+                                            {
+                                                <span>-</span>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <span>-</span>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span>-</span>
+                                    }
                                 </td>
                             </tr>
                         }
@@ -79,7 +126,7 @@
                         @if (!Model.Any())
                         {
                             <tr>
-                                <td colspan="4" class="text-center py-5 text-muted">
+                                <td colspan="6" class="text-center py-5 text-muted">
                                     <i class="bi bi-vinyl fs-2 d-block mb-2"></i>
                                     No rolls found for this item.
                                 </td>

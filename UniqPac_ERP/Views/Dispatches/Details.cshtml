@@ -34,12 +34,19 @@
                 <div class="col-md-3">
                     <label class="form-label fw-bold text-muted mb-1">Sales Order</label>
                     <div>
-                        <span class="badge bg-secondary">@Model.SalesOrder?.OrderNo</span>
+                        @if (Model.SalesOrderId > 0)
+                        {
+                            <span class="badge bg-secondary">@Model.SalesOrder?.OrderNo</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-info">Ad-Hoc</span>
+                        }
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <label class="form-label fw-bold text-muted mb-1">Customer</label>
-                    <div>@Model.Customer?.Name</div>
+                    <label class="form-label fw-bold text-muted mb-1">Dispatch To (@(Model.CustomerId.HasValue ? "Customer" : "Vendor"))</label>
+                    <div>@(Model.CustomerId.HasValue ? Model.Customer?.Name : Model.Vendor?.Name)</div>
                 </div>
                 
                 <div class="col-12"><hr class="my-2" /></div>
@@ -77,7 +84,10 @@
                         <tr>
                             <th style="width: 5%;" class="text-center">S.No</th>
                             <th>Item / Job Name</th>
-                            <th style="width: 15%;" class="text-end">Ordered Qty</th>
+                            @if (Model.SalesOrderId > 0)
+                            {
+                                <th style="width: 15%;" class="text-end">Ordered Qty</th>
+                            }
                             <th style="width: 15%;" class="text-end">Dispatch Qty</th>
                         </tr>
                     </thead>
@@ -88,7 +98,10 @@
                             <tr>
                                 <td class="text-center">@(sn++)</td>
                                 <td>@item.ItemName</td>
-                                <td class="text-end">@item.OrderedQuantity</td>
+                                @if (Model.SalesOrderId > 0)
+                                {
+                                    <td class="text-end">@item.OrderedQuantity</td>
+                                }
                                 <td class="text-end fw-bold">@item.DispatchedQuantity</td>
                             </tr>
                         }
